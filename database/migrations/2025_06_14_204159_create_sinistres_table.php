@@ -13,24 +13,25 @@ return new class extends Migration
     {
         Schema::create('sinistres', function (Blueprint $table) {
             $table->id();
-            $table->string('numero_sinistre')->unique();
+            $table->string('numero_sinistre', 50)->unique();
 
-            $table->string('nom_assure')->nullable();
-            $table->string('email_assure')->nullable();
-            $table->string('telephone_assure')->nullable();
-            $table->string('numero_police')->nullable();
+            $table->string('nom_assure');
+            $table->string('email_assure');
+            $table->string('telephone_assure', 20);
+            $table->string('numero_police', 50);
 
-            $table->date('date_sinistre')->nullable();
-            $table->string('lieu_sinistre')->nullable();
-            $table->text('circonstances')->nullable();
-            $table->string('conducteur_nom')->nullable();
+            $table->date('date_sinistre');
+            $table->string('lieu_sinistre', 500);
+            $table->text('circonstances');
+            $table->string('conducteur_nom');
+
             $table->boolean('constat_autorite')->default(false);
             $table->string('officier_nom')->nullable();
             $table->string('commissariat')->nullable();
             $table->text('dommages_releves')->nullable();
 
             $table->enum('statut', [
-                'nouveau',
+                'en_attente',
                 'en_cours',
                 'expertise_requise',
                 'en_attente_documents',
@@ -38,15 +39,14 @@ return new class extends Migration
                 'regle',
                 'refuse',
                 'clos'
-            ])->default('nouveau');
+            ])->default('en_attente');
 
-            $table->foreignId('gestionnaire_id')->nullable()->constrained('users');
+            $table->foreignId('gestionnaire_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('date_affectation')->nullable();
             $table->timestamp('date_reglement')->nullable();
             $table->decimal('montant_estime', 12, 2)->nullable();
             $table->decimal('montant_regle', 12, 2)->nullable();
 
-            // Suivi temporel
             $table->integer('jours_en_cours')->default(0);
             $table->boolean('en_retard')->default(false);
             $table->timestamp('derniere_notification')->nullable();
@@ -55,6 +55,8 @@ return new class extends Migration
 
             $table->index(['statut', 'gestionnaire_id']);
             $table->index(['date_sinistre', 'statut']);
+            $table->index(['en_retard', 'statut']);
+            $table->index('numero_police');
         });
     }
 
