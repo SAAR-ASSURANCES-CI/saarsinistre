@@ -16,4 +16,7 @@ Route::prefix('declaration')->name('declaration.')->group(function () {
 
     // API pour vérifier le statut d'un sinistre
     Route::get('/statut/{numeroSinistre}', [DeclarationController::class, 'statut'])->name('statut');
+
+    Route::get('/{sinistre}/recu', [DeclarationController::class, 'downloadRecu'])
+        ->name('recu');
 });

@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulaire de Déclaration - SAAR Assurance</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -151,9 +152,9 @@
 
                         <div class="form-group">
                             <label class="block text-sm font-semibold text-gray-700 mb-3">
-                                Adresse email *
+                                Adresse email
                             </label>
-                            <input type="email" name="email_assure" required
+                            <input type="email" name="email_assure"
                                 class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-saar-blue focus:ring-4 focus:ring-blue-100 transition-all duration-300 text-gray-900"
                                 placeholder="votre@email.com">
                         </div>
@@ -169,7 +170,7 @@
 
                         <div class="form-group">
                             <label class="block text-sm font-semibold text-gray-700 mb-3">
-                                Numéro de police d'assurance *
+                                Numéro attestation d'assurance *
                             </label>
                             <input type="text" name="numero_police" required
                                 class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-saar-blue focus:ring-4 focus:ring-blue-100 transition-all duration-300 text-gray-900"
@@ -212,13 +213,23 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <label class="block text-sm font-semibold text-gray-700 mb-3">
-                                Nom du conducteur au moment du sinistre *
-                            </label>
-                            <input type="text" name="conducteur_nom" required
-                                class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-saar-blue focus:ring-4 focus:ring-blue-100 transition-all duration-300"
-                                placeholder="Nom du conducteur">
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="form-group">
+                                <label class="block text-sm font-semibold text-gray-700 mb-3">
+                                    Heure du sinistre *
+                                </label>
+                                <input type="time" name="heure_sinistre" required
+                                    class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-saar-blue focus:ring-4 focus:ring-blue-100 transition-all duration-300">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="block text-sm font-semibold text-gray-700 mb-3">
+                                    Nom du conducteur au moment du sinistre *
+                                </label>
+                                <input type="text" name="conducteur_nom" required
+                                    class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-saar-blue focus:ring-4 focus:ring-blue-100 transition-all duration-300"
+                                    placeholder="Nom du conducteur">
+                            </div>
                         </div>
 
                         <div class="form-group">
@@ -847,7 +858,7 @@
                 console.log(key + ':', value);
             }
 
-            const submitUrl = '/declaration/store'; 
+            const submitUrl = '/declaration/store';
 
             fetch(submitUrl, {
                     method: 'POST',
@@ -855,9 +866,7 @@
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
                         'Accept': 'application/json',
-                        ...(document.querySelector('meta[name="csrf-token"]') && {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                        })
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
                     }
                 })
                 .then(async response => {
@@ -868,7 +877,7 @@
                         console.error('Received HTML instead of JSON:', htmlText.substring(0, 500));
                         throw new Error(
                             'Le serveur a retourné du HTML au lieu de JSON. Vérifiez la route et le contrôleur.'
-                            );
+                        );
                     }
 
                     if (!response.ok) {
@@ -978,8 +987,6 @@
             });
         });
     </script>
-
-    <meta name="csrf-token" content="{{ csrf_token() }}">
 </body>
 
 </html>

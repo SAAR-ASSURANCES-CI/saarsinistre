@@ -15,15 +15,15 @@ return new class extends Migration
             $table->id();
             $table->string('numero_sinistre', 50)->unique();
 
-            $table->string('nom_assure');
-            $table->string('email_assure');
-            $table->string('telephone_assure', 20);
-            $table->string('numero_police', 50);
+            $table->string('nom_assure')->nullable();
+            $table->string('email_assure')->nullable();
+            $table->string('telephone_assure', 20)->nullable();
+            $table->string('numero_police', 50)->nullable();
 
-            $table->date('date_sinistre');
-            $table->string('lieu_sinistre', 500);
-            $table->text('circonstances');
-            $table->string('conducteur_nom');
+            $table->date('date_sinistre')->nullable();
+            $table->string('lieu_sinistre', 500)->nullable();
+            $table->text('circonstances')->nullable();
+            $table->string('conducteur_nom')->nullable();
 
             $table->boolean('constat_autorite')->default(false);
             $table->string('officier_nom')->nullable();

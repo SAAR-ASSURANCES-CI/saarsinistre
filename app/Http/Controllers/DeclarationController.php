@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use App\Models\Sinistre;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use App\Models\DocumentSinistre;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Http\JsonResponse;
-use Exception;
 
 class DeclarationController extends Controller
 {
@@ -51,7 +52,6 @@ class DeclarationController extends Controller
                 'numero_sinistre' => $sinistre->numero_sinistre,
                 'redirect_url' => route('declaration.confirmation', $sinistre->id)
             ]);
-
         } catch (Exception $e) {
             DB::rollback();
             Log::error('Erreur lors de la création du sinistre: ' . $e->getMessage());
@@ -72,12 +72,13 @@ class DeclarationController extends Controller
         return $request->validate([
             // Informations personnelles - TOUTES REQUISES
             'nom_assure' => 'required|string|max:255',
-            'email_assure' => 'required|email|max:255',
+            'email_assure' => 'nullable|email|max:255',
             'telephone_assure' => 'required|string|max:20',
             'numero_police' => 'required|string|max:50',
 
             // Détails du sinistre - TOUS REQUIS
             'date_sinistre' => 'required|date|before_or_equal:today',
+            'heure_sinistre' => 'nullable|date_format:H:i',
             'lieu_sinistre' => 'required|string|max:500',
             'circonstances' => 'required|string|max:2000',
             'conducteur_nom' => 'required|string|max:255',
@@ -91,14 +92,14 @@ class DeclarationController extends Controller
             // Documents obligatoires
             'carte_grise_recto' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'carte_grise_verso' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'visite_technique_recto' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'visite_technique_verso' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'attestation_assurance' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'permis_conduire' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'visite_technique_recto' => 'required|file|mimes:pdf,jpg,jpeg,png|max:1280',
+            'visite_technique_verso' => 'required|file|mimes:pdf,jpg,jpeg,png|max:1280',
+            'attestation_assurance' => 'required|file|mimes:pdf,jpg,jpeg,png|max:1280',
+            'permis_conduire' => 'required|file|mimes:pdf,jpg,jpeg,png|max:1280',
 
             // Photos (optionnelles)
-            'photos_vehicule' => 'nullable|array|max:10',
-            'photos_vehicule.*' => 'file|mimes:jpg,jpeg,png|max:5120',
+            'photos_vehicule' => 'nullable|array|max:100',
+            'photos_vehicule.*' => 'file|mimes:jpg,jpeg,png|max:1280',
         ], [
             // Messages d'erreur personnalisés en français
             'nom_assure.required' => 'Le nom complet est obligatoire.',
@@ -135,7 +136,7 @@ class DeclarationController extends Controller
             'permis_conduire.required' => 'Le permis de conduire est obligatoire.',
             '*.mimes' => 'Format de fichier non autorisé. Utilisez PDF, JPG, JPEG ou PNG.',
             '*.max' => 'La taille du fichier ne doit pas dépasser 5MB.',
-            'photos_vehicule.max' => 'Vous ne pouvez télécharger que 10 photos maximum.',
+            'photos_vehicule.max' => 'Vous ne pouvez télécharger que 100 photos maximum.',
         ]);
     }
 
@@ -145,9 +146,13 @@ class DeclarationController extends Controller
     private function creerSinistre(array $validated): Sinistre
     {
         $donneesSinistre = collect($validated)->except([
-            'carte_grise_recto', 'carte_grise_verso',
-            'visite_technique_recto', 'visite_technique_verso',
-            'attestation_assurance', 'permis_conduire', 'photos_vehicule'
+            'carte_grise_recto',
+            'carte_grise_verso',
+            'visite_technique_recto',
+            'visite_technique_verso',
+            'attestation_assurance',
+            'permis_conduire',
+            'photos_vehicule'
         ])->toArray();
 
         $donneesSinistre['constat_autorite'] = (bool)($donneesSinistre['constat_autorite'] ?? false);
@@ -207,6 +212,36 @@ class DeclarationController extends Controller
         ]);
     }
 
+    public function downloadRecu($sinistreId)
+    {
+        try {
+            $sinistre = Sinistre::with('documents')->findOrFail($sinistreId);
+
+            $data = [
+                'sinistre' => $sinistre,
+                'date_generation' => now()->format('d/m/Y H:i'),
+                'company' => [
+                    'name' => 'SAAR ASSURANCE',
+                    'phone' => '+225 20 30 30 30',
+                    'email' => 'contact@saar-assurance.ci',
+                    'address' => 'Abidjan, Côte d\'Ivoire'
+                ]
+            ];
+
+            $pdf = PDF::loadView('declaration.recu-pdf', $data);
+
+            $pdf->setPaper('A4', 'portrait');
+
+            $nomFichier = 'Recu_Declaration_' . $sinistre->numero_sinistre . '.pdf';
+
+            return $pdf->download($nomFichier);
+        } catch (Exception $e) {
+            Log::error('Erreur lors du téléchargement du reçu: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Impossible de générer le reçu. Veuillez réessayer.');
+        }
+    }
+
     /**
      * Déclencher les notifications (n8n + email direct)
      */
@@ -221,7 +256,6 @@ class DeclarationController extends Controller
                 'assure' => $sinistre->nom_assure,
                 'email' => $sinistre->email_assure
             ]);
-
         } catch (Exception $e) {
             Log::error('Erreur lors des notifications: ' . $e->getMessage());
         }
@@ -248,6 +282,8 @@ class DeclarationController extends Controller
                 'telephone_assure' => $sinistre->telephone_assure,
                 'numero_police' => $sinistre->numero_police,
                 'date_sinistre' => $sinistre->date_sinistre->format('Y-m-d'),
+                'heure_sinistre' => $sinistre->heure_sinistre ? $sinistre->heure_sinistre->format('H:i') : null,
+                'circonstances' => $sinistre->circonstances,
                 'lieu_sinistre' => $sinistre->lieu_sinistre,
                 'conducteur_nom' => $sinistre->conducteur_nom,
                 'constat_autorite' => $sinistre->constat_autorite,
@@ -261,7 +297,6 @@ class DeclarationController extends Controller
             } else {
                 Log::warning("Échec du webhook n8n: " . $response->status() . " - " . $response->body());
             }
-
         } catch (Exception $e) {
             Log::error('Erreur webhook n8n: ' . $e->getMessage());
         }
