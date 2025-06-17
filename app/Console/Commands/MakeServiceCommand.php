@@ -12,7 +12,7 @@ class MakeServiceCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'make:service {name: The name of the service}';
+    protected $signature = 'make:service {name : The name of the service}';
 
     /**
      * The console command description.
@@ -45,7 +45,7 @@ class MakeServiceCommand extends Command
         }
 
         // Create the service file
-        $serviceFile = $serviceDir . "/{$name}Service.php";
+        $serviceFile = $serviceDir . "/{$name}.php";
         if ($this->files->exists($serviceFile)) {
             $this->error("Service {$name} already exists!");
             return 1;
@@ -63,7 +63,7 @@ class MakeServiceCommand extends Command
 
 namespace App\Services;
 
-class {$name}Service
+class {$name}
 {
     public function handle()
     {

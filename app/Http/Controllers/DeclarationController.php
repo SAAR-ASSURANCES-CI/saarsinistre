@@ -249,7 +249,12 @@ class DeclarationController extends Controller
     private function declencherNotifications(Sinistre $sinistre): void
     {
         try {
+
+            //SEND EMAIL TO GESTIONNAIRES
             $this->sendEmail($sinistre);
+
+            //SEND SMS TO ASSURE
+            $this->sendSmsConfirmation($sinistre);
 
             // $this->declencherWorkflowN8n('nouveau_sinistre', $sinistre);
         } catch (Exception $e) {
@@ -287,6 +292,33 @@ class DeclarationController extends Controller
             Log::error('Erreur lors de l\'envoi des emails aux gestionnaires: ' . $e->getMessage(), [
                 'sinistre_id' => $sinistre->id,
                 'numero_sinistre' => $sinistre->numero_sinistre
+            ]);
+        }
+    }
+
+    private function sendSmsConfirmation(Sinistre $sinistre): void
+    {
+        try {
+            if (empty($sinistre->telephone_assure)) {
+                Log::warning('Numéro de téléphone manquant pour le sinistre', [
+                    'sinistre_id' => $sinistre->id,
+                    'numero_sinistre' => $sinistre->numero_sinistre
+                ]);
+                return;
+            }
+
+            $orangeService = app(\App\Services\OrangeService::class);
+
+            $orangeService->sendSmsConfirmationSinistre(
+                $sinistre->telephone_assure,
+                $sinistre->nom_assure,
+                $sinistre->numero_sinistre
+            );
+        } catch (Exception $e) {
+            Log::error('Erreur lors de l\'envoi du SMS de confirmation', [
+                'sinistre_id' => $sinistre->id,
+                'numero_sinistre' => $sinistre->numero_sinistre,
+                'error' => $e->getMessage()
             ]);
         }
     }
