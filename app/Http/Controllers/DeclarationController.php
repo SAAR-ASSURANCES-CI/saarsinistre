@@ -3,15 +3,16 @@
 namespace App\Http\Controllers;
 
 use Exception;
+use App\Models\User;
 use App\Models\Sinistre;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\DocumentSinistre;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
 
 class DeclarationController extends Controller
 {
@@ -248,16 +249,45 @@ class DeclarationController extends Controller
     private function declencherNotifications(Sinistre $sinistre): void
     {
         try {
-            $this->declencherWorkflowN8n('nouveau_sinistre', $sinistre);
+            $this->sendEmail($sinistre);
 
-            Log::info("Nouveau sinistre créé", [
-                'sinistre_id' => $sinistre->id,
-                'numero_sinistre' => $sinistre->numero_sinistre,
-                'assure' => $sinistre->nom_assure,
-                'email' => $sinistre->email_assure
-            ]);
+            // $this->declencherWorkflowN8n('nouveau_sinistre', $sinistre);
         } catch (Exception $e) {
             Log::error('Erreur lors des notifications: ' . $e->getMessage());
+        }
+    }
+
+    private function sendEmail(Sinistre $sinistre)
+    {
+        try {
+            $gestionnaires = User::where('role', 'gestionnaire')->get();
+
+            dispatch(function () use ($sinistre, $gestionnaires) {
+
+                $dataEmail = [
+                    'sinistre' => $sinistre,
+                    // 'url_sinistre' => route('gestionnaire.sinistre.show', $sinistre->id), // Ajustez selon votre routing
+                    'company' => [
+                        'name' => 'SAAR ASSURANCE',
+                        'phone' => '+225 20 30 30 30',
+                        'email' => 'contact@saar-assurance.ci',
+                        'address' => 'Abidjan, Côte d\'Ivoire'
+                    ]
+                ];
+
+                foreach ($gestionnaires as $gestionnaire) {
+                    Mail::send('emails.nouveau-sinistre', $dataEmail, function ($message) use ($gestionnaire, $sinistre) {
+                        $message->to($gestionnaire->email, $gestionnaire->name)
+                            ->subject('Nouveau sinistre déclaré - N° ' . $sinistre->numero_sinistre)
+                            ->from(config('mail.from.address'), config('mail.from.name'));
+                    });
+                }
+            })->delay(now()->addSeconds(5));
+        } catch (Exception $e) {
+            Log::error('Erreur lors de l\'envoi des emails aux gestionnaires: ' . $e->getMessage(), [
+                'sinistre_id' => $sinistre->id,
+                'numero_sinistre' => $sinistre->numero_sinistre
+            ]);
         }
     }
 
@@ -266,7 +296,7 @@ class DeclarationController extends Controller
      */
     private function declencherWorkflowN8n(string $webhook, Sinistre $sinistre): void
     {
-        $webhookUrl = config('n8n.webhook_url', env('N8N_WEBHOOK_URL'));
+        $webhookUrl = config('n8n.webhook_url', default: env('N8N_WEBHOOK_URL'));
 
         if (!$webhookUrl) {
             Log::warning('URL webhook n8n non configurée');
@@ -274,23 +304,28 @@ class DeclarationController extends Controller
         }
 
         try {
-            $response = Http::timeout(10)->post($webhookUrl . '/' . $webhook, [
+            $payload = [
                 'sinistre_id' => $sinistre->id,
                 'numero_sinistre' => $sinistre->numero_sinistre,
                 'nom_assure' => $sinistre->nom_assure,
-                'email_assure' => $sinistre->email_assure,
+                'email_assure' => $sinistre->email_assure ?? '',
                 'telephone_assure' => $sinistre->telephone_assure,
                 'numero_police' => $sinistre->numero_police,
-                'date_sinistre' => $sinistre->date_sinistre->format('Y-m-d'),
-                'heure_sinistre' => $sinistre->heure_sinistre ? $sinistre->heure_sinistre->format('H:i') : null,
-                'circonstances' => $sinistre->circonstances,
+                'date_sinistre' => $sinistre->date_sinistre->format('d/m/Y'),
+                'heure_sinistre' => $sinistre->heure_sinistre ? $sinistre->heure_sinistre->format('H:i') : 'Non précisée',
                 'lieu_sinistre' => $sinistre->lieu_sinistre,
+                'circonstances' => $sinistre->circonstances,
                 'conducteur_nom' => $sinistre->conducteur_nom,
                 'constat_autorite' => $sinistre->constat_autorite,
-                'statut' => $sinistre->statut,
-                'date_creation' => $sinistre->created_at->toISOString(),
-                'url_dossier' => route('admin.sinistres.show', $sinistre->id),
-            ]);
+                'statut' => ucfirst(str_replace('_', ' ', $sinistre->statut)),
+                'date_creation' => $sinistre->created_at->format('d/m/Y H:i'),
+
+                'officier_nom' => $sinistre->officier_nom ?? '',
+                'commissariat' => $sinistre->commissariat ?? '',
+                'dommages_releves' => $sinistre->dommages_releves ?? '',
+            ];
+
+            $response = Http::timeout(10)->post($webhookUrl . '/' . $webhook, $payload);
 
             if ($response->successful()) {
                 Log::info("Webhook n8n déclenché avec succès pour le sinistre {$sinistre->numero_sinistre}");
@@ -301,7 +336,6 @@ class DeclarationController extends Controller
             Log::error('Erreur webhook n8n: ' . $e->getMessage());
         }
     }
-
     /**
      * Page de confirmation après soumission
      */
