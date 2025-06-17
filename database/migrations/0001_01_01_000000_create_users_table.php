@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('role', ['admin', 'gestionnaire', 'assure'])->default('assure');
+            $table->enum('role', ['admin', 'gestionnaire'])->default('gestionnaire');
             $table->boolean('actif')->default(true);
             $table->integer('sinistres_en_cours')->default(0);
             $table->integer('limite_sinistres')->default(20);

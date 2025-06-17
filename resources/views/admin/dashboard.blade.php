@@ -1,3 +1,9 @@
+<form method="POST" action="{{ route('logout') }}">
+    @csrf
+    <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+        Déconnexion
+    </button>
+</form>
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -107,9 +113,20 @@
                                     d="M15 17h5l-3.405-3.405A2.032 2.032 0 0116 12V9a4.002 4.002 0 00-8 0v3c0 .601-.166 1.177-.595 1.595L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
                                 </path>
                             </svg>
-                            <span
-                                class="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white rounded-full text-xs flex items-center justify-center">3</span>
+                            <span id="notification-count"
+                                class="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hidden">0</span>
                         </button>
+
+                        <!-- Notifications Dropdown -->
+                        <div id="notifications-dropdown"
+                            class="hidden absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 z-50">
+                            <div class="p-4 border-b border-gray-200">
+                                <h3 class="text-lg font-semibold text-gray-900">Notifications</h3>
+                            </div>
+                            <div id="notifications-list" class="max-h-64 overflow-y-auto">
+                                <!-- Notifications chargées dynamiquement -->
+                            </div>
+                        </div>
                     </div>
 
                     <div class="relative">
@@ -117,9 +134,20 @@
                             class="flex items-center space-x-2 p-2 text-gray-600 hover:text-saar-blue transition-colors">
                             <div
                                 class="w-8 h-8 bg-gradient-to-r from-saar-blue to-blue-600 rounded-full flex items-center justify-center">
-                                <span class="text-white text-sm font-semibold">JD</span>
+                                @if (Auth::check() && Auth::user()->nom_complet)
+                                    <span
+                                        class="text-white text-sm font-semibold">{{ substr(Auth::user()->nom_complet, 0, 2) }}</span>
+                                @else
+                                    <span class="text-white text-sm font-semibold">??</span>
+                                @endif
                             </div>
-                            <span class="text-sm font-medium">John Doe</span>
+                            <span class="text-sm font-medium">
+                                @if (Auth::check() && Auth::user()->nom_complet)
+                                    {{ Auth::user()->nom_complet }}
+                                @else
+                                    Utilisateur
+                                @endif
+                            </span>
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 9l-7 7-7-7"></path>
@@ -135,8 +163,13 @@
                                 <a href="#"
                                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Paramètres</a>
                                 <hr class="my-1">
-                                <a href="#"
-                                    class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Déconnexion</a>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit"
+                                        class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                        Déconnexion
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -162,7 +195,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-600">Total Sinistres</p>
-                        <p class="text-2xl font-bold text-gray-900">156</p>
+                        <p id="stat-total" class="text-2xl font-bold text-gray-900">{{ $stats['total'] }}</p>
                     </div>
                 </div>
             </div>
@@ -178,7 +211,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-600">En Attente</p>
-                        <p class="text-2xl font-bold text-gray-900">23</p>
+                        <p id="stat-en-attente" class="text-2xl font-bold text-gray-900">{{ $stats['en_attente'] }}</p>
                     </div>
                 </div>
             </div>
@@ -187,14 +220,15 @@
                 class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300">
                 <div class="flex items-center">
                     <div class="p-3 rounded-xl bg-green-100">
-                        <svg class="w-6 h-6 text-saar-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-saar-green" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
                             </path>
                         </svg>
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-600">Traités</p>
-                        <p class="text-2xl font-bold text-gray-900">98</p>
+                        <p id="stat-traites" class="text-2xl font-bold text-gray-900">{{ $stats['traites'] }}</p>
                     </div>
                 </div>
             </div>
@@ -211,7 +245,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-600">En Retard</p>
-                        <p class="text-2xl font-bold text-gray-900">12</p>
+                        <p id="stat-en-retard" class="text-2xl font-bold text-gray-900">{{ $stats['en_retard'] }}</p>
                     </div>
                 </div>
             </div>
@@ -254,10 +288,10 @@
                     <select id="gestionnaire-filter"
                         class="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-saar-blue focus:ring-2 focus:ring-blue-100 transition-all">
                         <option value="">Tous les gestionnaires</option>
-                        <option value="1">Jean Dupont</option>
-                        <option value="2">Marie Martin</option>
-                        <option value="3">Paul Durand</option>
-                        <option value="">Non assigné</option>
+                        @foreach ($gestionnaires as $gestionnaire)
+                            <option value="{{ $gestionnaire->id }}">{{ $gestionnaire->nom_complet }}</option>
+                        @endforeach
+                        <option value="null">Non assigné</option>
                     </select>
 
                     <button onclick="resetFilters()"
@@ -324,61 +358,9 @@
             </div>
 
             <!-- Pagination -->
-            <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-                <div class="flex-1 flex justify-between sm:hidden">
-                    <button
-                        class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                        Précédent
-                    </button>
-                    <button
-                        class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                        Suivant
-                    </button>
-                </div>
-                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                    <div>
-                        <p class="text-sm text-gray-700">
-                            Affichage de <span class="font-medium">1</span> à <span class="font-medium">10</span> sur
-                            <span class="font-medium">97</span> résultats
-                        </p>
-                    </div>
-                    <div>
-                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                            <button
-                                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                <span class="sr-only">Précédent</span>
-                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                    fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                        d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </button>
-                            <button
-                                class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                                1
-                            </button>
-                            <button
-                                class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                                2
-                            </button>
-                            <button
-                                class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                                3
-                            </button>
-                            <button
-                                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                <span class="sr-only">Suivant</span>
-                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                    fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </button>
-                        </nav>
-                    </div>
-                </div>
+            <div id="pagination-container"
+                class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                <!-- Pagination dynamique -->
             </div>
         </div>
     </div>
@@ -409,9 +391,9 @@
                     <select id="assign-gestionnaire"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-saar-blue focus:ring-2 focus:ring-blue-100">
                         <option value="">Sélectionner un gestionnaire</option>
-                        <option value="1">Jean Dupont</option>
-                        <option value="2">Marie Martin</option>
-                        <option value="3">Paul Durand</option>
+                        @foreach ($gestionnaires as $gestionnaire)
+                            <option value="{{ $gestionnaire->id }}">{{ $gestionnaire->nom_complet }}</option>
+                        @endforeach
                         <option value="self">M'affecter ce sinistre</option>
                     </select>
                 </div>
@@ -515,311 +497,372 @@
     </div>
 
     <script>
-        // Données simulées des sinistres
-        const sinistresData = [{
-                id: 1,
-                numero_sinistre: 'SIN-2025-00001',
-                nom_assure: 'Jean Dupont',
-                email_assure: 'jean.dupont@email.com',
-                telephone_assure: '+225 01 02 03 04 05',
-                numero_police: 'POL-2024-789',
-                date_sinistre: '2025-06-15',
-                lieu_sinistre: 'Abidjan, Plateau',
-                statut: 'en_attente',
-                gestionnaire_id: null,
-                gestionnaire_nom: null,
-                jours_en_cours: 2,
-                en_retard: false,
-                montant_estime: 150000,
-                circonstances: 'Collision avec un autre véhicule au carrefour'
-            },
-            {
-                id: 2,
-                numero_sinistre: 'SIN-2025-00002',
-                nom_assure: 'Marie Koné',
-                email_assure: 'marie.kone@email.com',
-                telephone_assure: '+225 07 08 09 10 11',
-                numero_police: 'POL-2024-456',
-                date_sinistre: '2025-06-10',
-                lieu_sinistre: 'Bouaké, Centre-ville',
-                statut: 'en_cours',
-                gestionnaire_id: 1,
-                gestionnaire_nom: 'Jean Dupont',
-                jours_en_cours: 7,
-                en_retard: false,
-                montant_estime: 75000,
-                circonstances: 'Bris de glace par vandalisme'
-            },
-            {
-                id: 3,
-                numero_sinistre: 'SIN-2025-00003',
-                nom_assure: 'Kouadio Paul',
-                email_assure: 'paul.kouadio@email.com',
-                telephone_assure: '+225 05 06 07 08 09',
-                numero_police: 'POL-2024-123',
-                date_sinistre: '2025-05-25',
-                lieu_sinistre: 'Yamoussoukro, Autoroute',
-                statut: 'expertise_requise',
-                gestionnaire_id: 2,
-                gestionnaire_nom: 'Marie Martin',
-                jours_en_cours: 23,
-                en_retard: true,
-                montant_estime: 850000,
-                circonstances: 'Accident grave avec plusieurs véhicules'
-            },
-            {
-                id: 4,
-                numero_sinistre: 'SIN-2025-00004',
-                nom_assure: 'Fatou Traoré',
-                email_assure: 'fatou.traore@email.com',
-                telephone_assure: '+225 02 03 04 05 06',
-                numero_police: 'POL-2024-678',
-                date_sinistre: '2025-06-12',
-                lieu_sinistre: 'San Pedro, Port',
-                statut: 'regle',
-                gestionnaire_id: 3,
-                gestionnaire_nom: 'Paul Durand',
-                jours_en_cours: 5,
-                en_retard: false,
-                montant_estime: 45000,
-                circonstances: 'Rayure sur la carrosserie'
-            },
-            {
-                id: 5,
-                numero_sinistre: 'SIN-2025-00005',
-                nom_assure: 'Ibrahim Ouattara',
-                email_assure: 'ibrahim.ouattara@email.com',
-                telephone_assure: '+225 09 10 11 12 13',
-                numero_police: 'POL-2024-321',
-                date_sinistre: '2025-06-01',
-                lieu_sinistre: 'Daloa, Marché',
-                statut: 'en_attente_documents',
-                gestionnaire_id: 1,
-                gestionnaire_nom: 'Jean Dupont',
-                jours_en_cours: 16,
-                en_retard: true,
-                montant_estime: 120000,
-                circonstances: 'Vol avec effraction'
-            }
-        ];
-
-        let filteredData = [...sinistresData];
+        // Configuration globale
+        let currentPage = 1;
+        let currentPerPage = 10;
         let currentSinistreId = null;
+        let allGestionnaires = @json($gestionnaires);
+
+        // Configuration API
+        const API_BASE = '{{ url('/') }}';
+        const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
             loadSinistres();
+            loadNotifications();
             setupEventListeners();
+
+            // Actualiser les stats toutes les 5 minutes
+            setInterval(refreshStats, 300000);
         });
 
         function setupEventListeners() {
-            // Recherche
+            // Recherche avec debounce
             document.getElementById('search-input').addEventListener('input', debounce(handleSearch, 300));
 
             // Filtres
             document.getElementById('status-filter').addEventListener('change', handleFilter);
             document.getElementById('gestionnaire-filter').addEventListener('change', handleFilter);
 
-            // Clic en dehors des menus pour les fermer
+            // Fermer les menus en cliquant ailleurs
             document.addEventListener('click', function(event) {
                 if (!event.target.closest('[onclick*="toggleUserMenu"]')) {
                     document.getElementById('user-menu').classList.add('hidden');
                 }
+                if (!event.target.closest('[onclick*="toggleNotifications"]')) {
+                    document.getElementById('notifications-dropdown').classList.add('hidden');
+                }
             });
         }
 
-        function loadSinistres() {
-            const tbody = document.getElementById('sinistres-tbody');
-            tbody.innerHTML = '';
-
-            if (filteredData.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">
-                            <div class="flex flex-col items-center">
-                                <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                </svg>
-                                <p class="text-lg font-medium text-gray-900 mb-2">Aucun sinistre trouvé</p>
-                                <p class="text-gray-500">Essayez de modifier vos critères de recherche</p>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            filteredData.forEach(sinistre => {
-                const row = createSinistreRow(sinistre);
-                tbody.appendChild(row);
-            });
-        }
-
-        function createSinistreRow(sinistre) {
-            const tr = document.createElement('tr');
-            tr.className = 'hover:bg-gray-50 transition-colors';
-
-            const statusBadge = getStatusBadge(sinistre.statut);
-            const urgencyIndicator = sinistre.en_retard ?
-                '<span class="inline-block w-2 h-2 bg-red-500 rounded-full animate-pulse mr-2"></span>' :
-                (sinistre.jours_en_cours > 10 ?
-                    '<span class="inline-block w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>' : '');
-
-            tr.innerHTML = `
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="flex items-center">
-                        ${urgencyIndicator}
-                        <div>
-                            <div class="text-sm font-medium text-gray-900">${sinistre.numero_sinistre}</div>
-                            <div class="text-sm text-gray-500">${sinistre.numero_police}</div>
-                        </div>
-                    </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div>
-                        <div class="text-sm font-medium text-gray-900">${sinistre.nom_assure}</div>
-                        <div class="text-sm text-gray-500">${sinistre.telephone_assure}</div>
-                    </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">${formatDate(sinistre.date_sinistre)}</div>
-                    <div class="text-sm text-gray-500">${sinistre.jours_en_cours} jour(s)</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    ${statusBadge}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">
-                        ${sinistre.gestionnaire_nom || '<span class="text-gray-400 italic">Non assigné</span>'}
-                    </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div class="flex space-x-2">
-                        <button onclick="showDetails(${sinistre.id})"
-                                class="text-saar-blue hover:text-blue-800 transition-colors"
-                                title="Voir détails">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                            </svg>
-                        </button>
-
-                        <button onclick="showAssignModal(${sinistre.id})"
-                                class="text-purple-600 hover:text-purple-800 transition-colors"
-                                title="Affecter gestionnaire">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                            </svg>
-                        </button>
-
-                        <button onclick="showStatusModal(${sinistre.id})"
-                                class="text-saar-green hover:text-green-800 transition-colors"
-                                title="Changer statut">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </td>
-            `;
-
-            return tr;
-        }
-
-        function getStatusBadge(status) {
-            const statusConfig = {
-                'en_attente': {
-                    label: 'En attente',
-                    color: 'bg-yellow-100 text-yellow-800'
-                },
-                'en_cours': {
-                    label: 'En cours',
-                    color: 'bg-blue-100 text-blue-800'
-                },
-                'expertise_requise': {
-                    label: 'Expertise requise',
-                    color: 'bg-purple-100 text-purple-800'
-                },
-                'en_attente_documents': {
-                    label: 'Attente documents',
-                    color: 'bg-orange-100 text-orange-800'
-                },
-                'pret_reglement': {
-                    label: 'Prêt règlement',
-                    color: 'bg-indigo-100 text-indigo-800'
-                },
-                'regle': {
-                    label: 'Réglé',
-                    color: 'bg-green-100 text-green-800'
-                },
-                'refuse': {
-                    label: 'Refusé',
-                    color: 'bg-red-100 text-red-800'
-                },
-                'clos': {
-                    label: 'Clos',
-                    color: 'bg-gray-100 text-gray-800'
+        // Fonctions API
+        async function apiRequest(url, options = {}) {
+            const defaultOptions = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
+                    'Accept': 'application/json'
                 }
             };
 
-            const config = statusConfig[status] || {
-                label: status,
-                color: 'bg-gray-100 text-gray-800'
+            try {
+                const response = await fetch(url, {
+                    ...defaultOptions,
+                    ...options,
+                    headers: {
+                        ...defaultOptions.headers,
+                        ...options.headers
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('API Request failed:', error);
+                showErrorMessage('Erreur de communication avec le serveur');
+                throw error;
+            }
+        }
+
+        async function loadSinistres() {
+            showLoading(true);
+
+            try {
+                const params = new URLSearchParams({
+                    page: currentPage,
+                    per_page: currentPerPage,
+                    search: document.getElementById('search-input').value,
+                    statut: document.getElementById('status-filter').value,
+                    gestionnaire_id: document.getElementById('gestionnaire-filter').value
+                });
+
+                const data = await apiRequest(`${API_BASE}/dashboard/sinistres?${params}`);
+
+                displaySinistres(data.data);
+                updatePagination(data);
+
+            } catch (error) {
+                displayEmptyState();
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function refreshStats() {
+            try {
+                const data = await apiRequest(`${API_BASE}/dashboard/stats`);
+                updateStatsDisplay(data.stats);
+            } catch (error) {
+                console.error('Erreur lors du rafraîchissement des stats:', error);
+            }
+        }
+
+        async function loadNotifications() {
+            try {
+                const data = await apiRequest(`${API_BASE}/dashboard/notifications`);
+                displayNotifications(data.notifications, data.total_unread);
+            } catch (error) {
+                console.error('Erreur lors du chargement des notifications:', error);
+            }
+        }
+
+        function updateStatsDisplay(stats) {
+            document.getElementById('stat-total').textContent = stats.total;
+            document.getElementById('stat-en-attente').textContent = stats.en_attente;
+            document.getElementById('stat-traites').textContent = stats.traites;
+            document.getElementById('stat-en-retard').textContent = stats.en_retard;
+        }
+
+        function displayNotifications(notifications, totalUnread) {
+            const countElement = document.getElementById('notification-count');
+            const listElement = document.getElementById('notifications-list');
+
+            // Mettre à jour le compteur
+            if (totalUnread > 0) {
+                countElement.textContent = totalUnread;
+                countElement.classList.remove('hidden');
+            } else {
+                countElement.classList.add('hidden');
+            }
+
+            // Afficher les notifications
+            if (notifications.length === 0) {
+                listElement.innerHTML = '<div class="p-4 text-center text-gray-500">Aucune notification</div>';
+                return;
+            }
+
+            listElement.innerHTML = notifications.map(notification => `
+                <div class="p-4 border-b border-gray-100 hover:bg-gray-50">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            ${getNotificationIcon(notification.type)}
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <p class="text-sm font-medium text-gray-900">${notification.title}</p>
+                            <p class="text-sm text-gray-500">${notification.message}</p>
+                            <p class="text-xs text-gray-400 mt-1">${formatRelativeTime(notification.created_at)}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getNotificationIcon(type) {
+            const icons = {
+                'warning': '<div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center"><svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg></div>',
+                'info': '<div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center"><svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>',
+                'urgent': '<div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center"><svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg></div>'
             };
-            return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}">${config.label}</span>`;
+            return icons[type] || icons['info'];
         }
 
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('fr-FR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
+        function displaySinistres(sinistres) {
+            const tbody = document.getElementById('sinistres-tbody');
+
+            if (sinistres.length === 0) {
+                displayEmptyState();
+                return;
+            }
+
+            tbody.innerHTML = sinistres.map(sinistre => createSinistreRow(sinistre)).join('');
         }
 
-        function formatCurrency(amount) {
-            return new Intl.NumberFormat('fr-FR', {
-                style: 'currency',
-                currency: 'XOF',
-                minimumFractionDigits: 0
-            }).format(amount);
+        function createSinistreRow(sinistre) {
+            const statusBadge = getStatusBadge(sinistre.statut);
+            const urgencyIndicator = sinistre.en_retard ?
+                '<span class="inline-block w-2 h-2 bg-red-500 rounded-full animate-pulse mr-2" title="En retard"></span>' :
+                (sinistre.jours_en_cours > 10 ?
+                    '<span class="inline-block w-2 h-2 bg-yellow-500 rounded-full mr-2" title="Urgent"></span>' : '');
+
+            const dateHeure = sinistre.heure_sinistre ?
+                `${formatDate(sinistre.date_sinistre)} à ${formatTime(sinistre.heure_sinistre)}` :
+                formatDate(sinistre.date_sinistre);
+
+            return `
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            ${urgencyIndicator}
+                            <div>
+                                <div class="text-sm font-medium text-gray-900">${sinistre.numero_sinistre}</div>
+                                <div class="text-sm text-gray-500">${sinistre.numero_police}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div>
+                            <div class="text-sm font-medium text-gray-900">${sinistre.nom_assure}</div>
+                            <div class="text-sm text-gray-500">${sinistre.telephone_assure}</div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${dateHeure}</div>
+                        <div class="text-sm text-gray-500">${sinistre.jours_en_cours} jour(s)</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        ${statusBadge}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">
+                            ${sinistre.gestionnaire ? sinistre.gestionnaire.nom_complet : '<span class="text-gray-400 italic">Non assigné</span>'}
+                        </div>
+                        ${sinistre.date_affectation ? `<div class="text-xs text-gray-400">Affecté le ${formatDate(sinistre.date_affectation)}</div>` : ''}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div class="flex space-x-2">
+                            <button onclick="showDetails(${sinistre.id})"
+                                    class="text-saar-blue hover:text-blue-800 transition-colors"
+                                    title="Voir détails">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                            </button>
+
+                            <button onclick="showAssignModal(${sinistre.id})"
+                                    class="text-purple-600 hover:text-purple-800 transition-colors"
+                                    title="Affecter gestionnaire">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                                </svg>
+                            </button>
+
+                            <button onclick="showStatusModal(${sinistre.id})"
+                                    class="text-saar-green hover:text-green-800 transition-colors"
+                                    title="Changer statut">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function displayEmptyState() {
+            const tbody = document.getElementById('sinistres-tbody');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                        <div class="flex flex-col items-center">
+                            <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <p class="text-lg font-medium text-gray-900 mb-2">Aucun sinistre trouvé</p>
+                            <p class="text-gray-500">Essayez de modifier vos critères de recherche</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function updatePagination(data) {
+            const container = document.getElementById('pagination-container');
+            const {
+                current_page,
+                last_page,
+                per_page,
+                total,
+                from,
+                to
+            } = data;
+
+            if (total === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const startItem = from || 0;
+            const endItem = to || 0;
+
+            container.innerHTML = `
+                <div class="flex-1 flex justify-between sm:hidden">
+                    <button onclick="changePage(${current_page - 1})"
+                            ${current_page <= 1 ? 'disabled' : ''}
+                            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                        Précédent
+                    </button>
+                    <button onclick="changePage(${current_page + 1})"
+                            ${current_page >= last_page ? 'disabled' : ''}
+                            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                        Suivant
+                    </button>
+                </div>
+                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm text-gray-700">
+                            Affichage de <span class="font-medium">${startItem}</span> à <span class="font-medium">${endItem}</span> sur
+                            <span class="font-medium">${total}</span> résultats
+                        </p>
+                    </div>
+                    <div>
+                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                            <button onclick="changePage(${current_page - 1})"
+                                    ${current_page <= 1 ? 'disabled' : ''}
+                                    class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                            ${generatePageNumbers(current_page, last_page)}
+                            <button onclick="changePage(${current_page + 1})"
+                                    ${current_page >= last_page ? 'disabled' : ''}
+                                    class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </nav>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generatePageNumbers(current, last) {
+            let pages = '';
+            const maxVisible = 5;
+            let start = Math.max(1, current - Math.floor(maxVisible / 2));
+            let end = Math.min(last, start + maxVisible - 1);
+
+            if (end - start + 1 < maxVisible) {
+                start = Math.max(1, end - maxVisible + 1);
+            }
+
+            for (let i = start; i <= end; i++) {
+                const isActive = i === current;
+                pages += `
+                    <button onclick="changePage(${i})"
+                            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium ${
+                                isActive
+                                    ? 'bg-saar-blue text-white border-saar-blue'
+                                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                            }">
+                        ${i}
+                    </button>
+                `;
+            }
+            return pages;
+        }
+
+        function changePage(page) {
+            if (page < 1) return;
+            currentPage = page;
+            loadSinistres();
         }
 
         // Fonctions de recherche et filtrage
         function handleSearch(event) {
-            const searchTerm = event.target.value.toLowerCase().trim();
-            applyFilters();
+            currentPage = 1;
+            loadSinistres();
         }
 
         function handleFilter() {
-            applyFilters();
-        }
-
-        function applyFilters() {
-            const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
-            const statusFilter = document.getElementById('status-filter').value;
-            const gestionnaireFilter = document.getElementById('gestionnaire-filter').value;
-
-            filteredData = sinistresData.filter(sinistre => {
-                // Recherche textuelle
-                const matchesSearch = !searchTerm ||
-                    sinistre.numero_sinistre.toLowerCase().includes(searchTerm) ||
-                    sinistre.nom_assure.toLowerCase().includes(searchTerm) ||
-                    sinistre.telephone_assure.includes(searchTerm) ||
-                    sinistre.numero_police.toLowerCase().includes(searchTerm);
-
-                // Filtre par statut
-                const matchesStatus = !statusFilter || sinistre.statut === statusFilter;
-
-                // Filtre par gestionnaire
-                const matchesGestionnaire = !gestionnaireFilter ||
-                    (gestionnaireFilter === '' && !sinistre.gestionnaire_id) ||
-                    sinistre.gestionnaire_id == gestionnaireFilter;
-
-                return matchesSearch && matchesStatus && matchesGestionnaire;
-            });
-
+            currentPage = 1;
             loadSinistres();
         }
 
@@ -827,25 +870,198 @@
             document.getElementById('search-input').value = '';
             document.getElementById('status-filter').value = '';
             document.getElementById('gestionnaire-filter').value = '';
-            filteredData = [...sinistresData];
+            currentPage = 1;
             loadSinistres();
         }
 
         // Fonctions des modals
-        function showAssignModal(sinistreId) {
-            const sinistre = sinistresData.find(s => s.id === sinistreId);
-            if (!sinistre) return;
+        async function showDetails(sinistreId) {
+            try {
+                const data = await apiRequest(`${API_BASE}/dashboard/sinistres/${sinistreId}/details`);
+                const sinistre = data.sinistre;
+                const stats = data.stats;
+
+                const detailsContent = document.getElementById('sinistre-details-content');
+                detailsContent.innerHTML = `
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h4 class="font-semibold text-gray-900 mb-3">Informations Générales</h4>
+                                <div class="space-y-2 text-sm">
+                                    <p><span class="font-medium">Numéro:</span> ${sinistre.numero_sinistre}</p>
+                                    <p><span class="font-medium">Police:</span> ${sinistre.numero_police}</p>
+                                    <p><span class="font-medium">Date:</span> ${formatDate(sinistre.date_sinistre)}</p>
+                                    ${sinistre.heure_sinistre ? `<p><span class="font-medium">Heure:</span> ${formatTime(sinistre.heure_sinistre)}</p>` : ''}
+                                    <p><span class="font-medium">Lieu:</span> ${sinistre.lieu_sinistre}</p>
+                                    <p><span class="font-medium">Statut:</span> ${getStatusBadge(sinistre.statut)}</p>
+                                </div>
+                            </div>
+
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <h4 class="font-semibold text-gray-900 mb-3">Assuré</h4>
+                                <div class="space-y-2 text-sm">
+                                    <p><span class="font-medium">Nom:</span> ${sinistre.nom_assure}</p>
+                                    <p><span class="font-medium">Email:</span> ${sinistre.email_assure}</p>
+                                    <p><span class="font-medium">Téléphone:</span> ${sinistre.telephone_assure}</p>
+                                </div>
+                            </div>
+
+                            ${sinistre.conducteur_nom ? `
+                                <div class="bg-orange-50 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-gray-900 mb-3">Conducteur</h4>
+                                    <div class="space-y-2 text-sm">
+                                        <p><span class="font-medium">Nom:</span> ${sinistre.conducteur_nom}</p>
+                                        ${sinistre.constat_autorite ? `<p><span class="font-medium">Constat autorité:</span> ${sinistre.constat_autorite ? 'Oui' : 'Non'}</p>` : ''}
+                                        ${sinistre.officier_nom ? `<p><span class="font-medium">Officier:</span> ${sinistre.officier_nom}</p>` : ''}
+                                        ${sinistre.commissariat ? `<p><span class="font-medium">Commissariat:</span> ${sinistre.commissariat}</p>` : ''}
+                                    </div>
+                                </div>
+                                ` : ''}
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="bg-green-50 p-4 rounded-lg">
+                                <h4 class="font-semibold text-gray-900 mb-3">Gestion</h4>
+                                <div class="space-y-2 text-sm">
+                                    <p><span class="font-medium">Gestionnaire:</span> ${sinistre.gestionnaire ? sinistre.gestionnaire.nom_complet : 'Non assigné'}</p>
+                                    ${sinistre.date_affectation ? `<p><span class="font-medium">Date affectation:</span> ${formatDate(sinistre.date_affectation)}</p>` : ''}
+                                    <p><span class="font-medium">Jours en cours:</span> ${sinistre.jours_en_cours}</p>
+                                    <p><span class="font-medium">En retard:</span> ${sinistre.en_retard ? '⚠️ Oui' : '✅ Non'}</p>
+                                    <p><span class="font-medium">Montant estimé:</span> ${formatCurrency(sinistre.montant_estime)}</p>
+                                    ${sinistre.montant_regle ? `<p><span class="font-medium">Montant réglé:</span> ${formatCurrency(sinistre.montant_regle)}</p>` : ''}
+                                    ${sinistre.date_reglement ? `<p><span class="font-medium">Date règlement:</span> ${formatDate(sinistre.date_reglement)}</p>` : ''}
+                                    ${stats.est_urgent ? '<p class="text-yellow-600 font-medium">⚡ Sinistre urgent</p>' : ''}
+                                    <p><span class="font-medium">Date limite:</span> ${formatDate(stats.date_limite)}</p>
+                                </div>
+                            </div>
+
+                            ${sinistre.circonstances || sinistre.dommages_releves ? `
+                                <div class="bg-yellow-50 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-gray-900 mb-3">Détails du Sinistre</h4>
+                                    ${sinistre.circonstances ? `
+                                    <div class="mb-3">
+                                        <p class="font-medium text-sm mb-1">Circonstances:</p>
+                                        <p class="text-sm text-gray-700">${sinistre.circonstances}</p>
+                                    </div>
+                                ` : ''}
+                                    ${sinistre.dommages_releves ? `
+                                    <div>
+                                        <p class="font-medium text-sm mb-1">Dommages relevés:</p>
+                                        <p class="text-sm text-gray-700">${sinistre.dommages_releves}</p>
+                                    </div>
+                                ` : ''}
+                                </div>
+                                ` : ''}
+
+                            ${stats.pourcentage_documents_verifies > 0 ? `
+                                <div class="bg-indigo-50 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-gray-900 mb-3">Documents</h4>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex items-center justify-between">
+                                            <span>Progression:</span>
+                                            <span class="font-medium">${stats.pourcentage_documents_verifies}%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                            <div class="bg-indigo-600 h-2 rounded-full" style="width: ${stats.pourcentage_documents_verifies}%"></div>
+                                        </div>
+                                        <p class="text-xs ${stats.tous_documents_verifies ? 'text-green-600' : 'text-orange-600'}">
+                                            ${stats.tous_documents_verifies ? '✅ Tous les documents sont vérifiés' : '📄 Documents en cours de vérification'}
+                                        </p>
+                                    </div>
+                                </div>
+                                ` : ''}
+                        </div>
+                    </div>
+
+                    <div class="mt-6 bg-purple-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-gray-900 mb-3">Actions Rapides</h4>
+                        <div class="flex flex-wrap gap-3">
+                            ${stats.peut_etre_modifie ? `
+                                    <button onclick="showAssignModal(${sinistre.id}); closeModal('details-modal');"
+                                            class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                                        Affecter Gestionnaire
+                                    </button>
+                                    <button onclick="showStatusModal(${sinistre.id}); closeModal('details-modal');"
+                                            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                        Changer Statut
+                                    </button>
+                                ` : `
+                                    <div class="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg">
+                                        <span class="text-sm">✅ Sinistre ${sinistre.statut === 'regle' ? 'réglé' : sinistre.statut === 'refuse' ? 'refusé' : 'clos'}</span>
+                                    </div>
+                                `}
+                            <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                Voir Documents
+                            </button>
+                            <button class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors">
+                                Historique
+                            </button>
+                        </div>
+                    </div>
+                `;
+                3 ">Circonstances</h4> <
+                    p class = "text-sm text-gray-700" > $ {
+                        sinistre.circonstances || 'Aucune description disponible'
+                    } < /p> <
+                    /div> <
+                    /div> <
+                    /div>
+
+                    <
+                    div class = "mt-6 bg-purple-50 p-4 rounded-lg" >
+                    <
+                    h4 class = "font-semibold text-gray-900 mb-3" > Actions Rapides < /h4> <
+                    div class = "flex flex-wrap gap-3" >
+                    <
+                    button onclick = "showAssignModal(${sinistre.id}); closeModal('details-modal');"
+                class = "px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors" >
+                Affecter Gestionnaire
+                    <
+                    /button> <
+                    button onclick = "showStatusModal(${sinistre.id}); closeModal('details-modal');"
+                class = "px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors" >
+                Changer Statut
+                    <
+                    /button> <
+                    button class = "px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors" >
+                    Voir Documents <
+                    /button> <
+                    /div> <
+                    /div>
+                `;
+
+                document.getElementById('details-modal').classList.remove('hidden');
+            } catch (error) {
+                showErrorMessage('Erreur lors du chargement des détails');
+            }
+        }
+
+        async function showAssignModal(sinistreId) {
+            try {
+                const data = await apiRequest(`
+                $ {
+                    API_BASE
+                }
+                /dashboard/sinistres / $ {
+                    sinistreId
+                }
+                /details`);
+            const sinistre = data.sinistre;
 
             currentSinistreId = sinistreId;
             document.getElementById('assign-sinistre-info').textContent =
                 `${sinistre.numero_sinistre} - ${sinistre.nom_assure}`;
             document.getElementById('assign-gestionnaire').value = sinistre.gestionnaire_id || '';
             document.getElementById('assign-modal').classList.remove('hidden');
+        } catch (error) {
+            showErrorMessage('Erreur lors du chargement des informations du sinistre');
         }
+    }
 
-        function showStatusModal(sinistreId) {
-            const sinistre = sinistresData.find(s => s.id === sinistreId);
-            if (!sinistre) return;
+    async function showStatusModal(sinistreId) {
+        try {
+            const data = await apiRequest(`${API_BASE}/dashboard/sinistres/${sinistreId}/details`);
+            const sinistre = data.sinistre;
 
             currentSinistreId = sinistreId;
             document.getElementById('status-sinistre-info').textContent =
@@ -853,167 +1069,250 @@
             document.getElementById('new-status').value = sinistre.statut;
             document.getElementById('status-comment').value = '';
             document.getElementById('status-modal').classList.remove('hidden');
+        } catch (error) {
+            showErrorMessage('Erreur lors du chargement des informations du sinistre');
+        }
+    }
+
+    async function confirmAssignment() {
+        const gestionnaireId = document.getElementById('assign-gestionnaire').value;
+        if (!gestionnaireId || !currentSinistreId) {
+            showErrorMessage('Veuillez sélectionner un gestionnaire');
+            return;
         }
 
-        function showDetails(sinistreId) {
-            const sinistre = sinistresData.find(s => s.id === sinistreId);
-            if (!sinistre) return;
-
-            const detailsContent = document.getElementById('sinistre-details-content');
-            detailsContent.innerHTML = `
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div class="space-y-4">
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <h4 class="font-semibold text-gray-900 mb-3">Informations Générales</h4>
-                            <div class="space-y-2 text-sm">
-                                <p><span class="font-medium">Numéro:</span> ${sinistre.numero_sinistre}</p>
-                                <p><span class="font-medium">Police:</span> ${sinistre.numero_police}</p>
-                                <p><span class="font-medium">Date:</span> ${formatDate(sinistre.date_sinistre)}</p>
-                                <p><span class="font-medium">Lieu:</span> ${sinistre.lieu_sinistre}</p>
-                                <p><span class="font-medium">Statut:</span> ${getStatusBadge(sinistre.statut)}</p>
-                            </div>
-                        </div>
-
-                        <div class="bg-blue-50 p-4 rounded-lg">
-                            <h4 class="font-semibold text-gray-900 mb-3">Assuré</h4>
-                            <div class="space-y-2 text-sm">
-                                <p><span class="font-medium">Nom:</span> ${sinistre.nom_assure}</p>
-                                <p><span class="font-medium">Email:</span> ${sinistre.email_assure}</p>
-                                <p><span class="font-medium">Téléphone:</span> ${sinistre.telephone_assure}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-4">
-                        <div class="bg-green-50 p-4 rounded-lg">
-                            <h4 class="font-semibold text-gray-900 mb-3">Gestion</h4>
-                            <div class="space-y-2 text-sm">
-                                <p><span class="font-medium">Gestionnaire:</span> ${sinistre.gestionnaire_nom || 'Non assigné'}</p>
-                                <p><span class="font-medium">Jours en cours:</span> ${sinistre.jours_en_cours}</p>
-                                <p><span class="font-medium">En retard:</span> ${sinistre.en_retard ? '⚠️ Oui' : '✅ Non'}</p>
-                                <p><span class="font-medium">Montant estimé:</span> ${formatCurrency(sinistre.montant_estime)}</p>
-                            </div>
-                        </div>
-
-                        <div class="bg-yellow-50 p-4 rounded-lg">
-                            <h4 class="font-semibold text-gray-900 mb-3">Circonstances</h4>
-                            <p class="text-sm text-gray-700">${sinistre.circonstances}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-6 bg-purple-50 p-4 rounded-lg">
-                    <h4 class="font-semibold text-gray-900 mb-3">Actions Rapides</h4>
-                    <div class="flex flex-wrap gap-3">
-                        <button onclick="showAssignModal(${sinistre.id}); closeModal('details-modal');"
-                                class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-                            Affecter Gestionnaire
-                        </button>
-                        <button onclick="showStatusModal(${sinistre.id}); closeModal('details-modal');"
-                                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                            Changer Statut
-                        </button>
-                        <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                            Voir Documents
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('details-modal').classList.remove('hidden');
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-            currentSinistreId = null;
-        }
-
-        function confirmAssignment() {
-            const gestionnaireId = document.getElementById('assign-gestionnaire').value;
-            if (!gestionnaireId || !currentSinistreId) return;
-
-            // Simuler l'affectation
-            const sinistre = sinistresData.find(s => s.id === currentSinistreId);
-            if (sinistre) {
-                if (gestionnaireId === 'self') {
-                    sinistre.gestionnaire_id = 'current_user_id'; // ID de l'utilisateur connecté
-                    sinistre.gestionnaire_nom = 'Moi-même';
-                } else {
-                    sinistre.gestionnaire_id = parseInt(gestionnaireId);
-                    const gestionnaires = {
-                        1: 'Jean Dupont',
-                        2: 'Marie Martin',
-                        3: 'Paul Durand'
-                    };
-                    sinistre.gestionnaire_nom = gestionnaires[gestionnaireId];
-                }
-
-                if (sinistre.statut === 'en_attente') {
-                    sinistre.statut = 'en_cours';
-                }
-            }
+        try {
+            await apiRequest(`${API_BASE}/dashboard/sinistres/${currentSinistreId}/assign`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    gestionnaire_id: gestionnaireId
+                })
+            });
 
             showSuccessMessage('Gestionnaire affecté avec succès');
             closeModal('assign-modal');
-            applyFilters();
+            loadSinistres();
+            refreshStats();
+        } catch (error) {
+            showErrorMessage('Erreur lors de l\'affectation du gestionnaire');
+        }
+    }
+
+    async function confirmStatusChange() {
+        const newStatus = document.getElementById('new-status').value;
+        const comment = document.getElementById('status-comment').value;
+
+        if (!newStatus || !currentSinistreId) {
+            showErrorMessage('Veuillez sélectionner un statut');
+            return;
         }
 
-        function confirmStatusChange() {
-            const newStatus = document.getElementById('new-status').value;
-            const comment = document.getElementById('status-comment').value;
-
-            if (!newStatus || !currentSinistreId) return;
-
-            // Simuler le changement de statut
-            const sinistre = sinistresData.find(s => s.id === currentSinistreId);
-            if (sinistre) {
-                sinistre.statut = newStatus;
-                // Ici vous pourriez aussi enregistrer le commentaire dans l'historique
-            }
+        try {
+            await apiRequest(`${API_BASE}/dashboard/sinistres/${currentSinistreId}/status`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    statut: newStatus,
+                    commentaire: comment
+                })
+            });
 
             showSuccessMessage('Statut modifié avec succès');
             closeModal('status-modal');
-            applyFilters();
+            loadSinistres();
+            refreshStats();
+        } catch (error) {
+            showErrorMessage('Erreur lors du changement de statut');
+        }
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.add('hidden');
+        currentSinistreId = null;
+    }
+
+    // Fonctions utilitaires
+    function getStatusBadge(status) {
+        const statusConfig = {
+            'en_attente': {
+                label: 'En attente',
+                color: 'bg-yellow-100 text-yellow-800'
+            },
+            'en_cours': {
+                label: 'En cours',
+                color: 'bg-blue-100 text-blue-800'
+            },
+            'expertise_requise': {
+                label: 'Expertise requise',
+                color: 'bg-purple-100 text-purple-800'
+            },
+            'en_attente_documents': {
+                label: 'Attente documents',
+                color: 'bg-orange-100 text-orange-800'
+            },
+            'pret_reglement': {
+                label: 'Prêt règlement',
+                color: 'bg-indigo-100 text-indigo-800'
+            },
+            'regle': {
+                label: 'Réglé',
+                color: 'bg-green-100 text-green-800'
+            },
+            'refuse': {
+                label: 'Refusé',
+                color: 'bg-red-100 text-red-800'
+            },
+            'clos': {
+                label: 'Clos',
+                color: 'bg-gray-100 text-gray-800'
+            }
+        };
+
+        const config = statusConfig[status] || {
+            label: status,
+            color: 'bg-gray-100 text-gray-800'
+        };
+        return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}">${config.label}</span>`;
+    }
+
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('fr-FR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+    }
+
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('fr-FR', {
+            style: 'currency',
+            currency: 'XOF',
+            minimumFractionDigits: 0
+        }).format(amount);
+    }
+
+    function formatTime(timeString) {
+        if (!timeString) return '';
+
+        // Si c'est déjà au format HH:MM, on le retourne tel quel
+        if (timeString.match(/^\d{2}:\d{2}$/)) {
+            return timeString;
         }
 
-        // Fonctions utilitaires
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
+        // Si c'est un datetime, extraire l'heure
+        const date = new Date(timeString);
+        return date.toLocaleTimeString('fr-FR', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    function formatRelativeTime(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInSeconds = Math.floor((now - date) / 1000);
+
+        if (diffInSeconds < 60) return 'À l\'instant';
+        if (diffInSeconds < 3600) return `Il y a ${Math.floor(diffInSeconds / 60)} min`;
+        if (diffInSeconds < 86400) return `Il y a ${Math.floor(diffInSeconds / 3600)} h`;
+        return `Il y a ${Math.floor(diffInSeconds / 86400)} j`;
+    }
+
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
                 clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
+                func(...args);
             };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    function showLoading(show) {
+        const loadingState = document.getElementById('loading-state');
+        const tbody = document.getElementById('sinistres-tbody');
+
+        if (show) {
+            loadingState.classList.remove('hidden');
+            tbody.style.opacity = '0.5';
+        } else {
+            loadingState.classList.add('hidden');
+            tbody.style.opacity = '1';
         }
+    }
 
-        function showSuccessMessage(message) {
-            const notification = document.createElement('div');
-            notification.className =
-                'fixed top-4 right-4 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 animate-slide-in';
-            notification.innerHTML = `
-                <div class="flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>${message}</span>
-                </div>
-            `;
+    function showSuccessMessage(message) {
+        showNotification(message, 'success');
+    }
 
-            document.body.appendChild(notification);
+    function showErrorMessage(message) {
+        showNotification(message, 'error');
+    }
 
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+
+        notification.className =
+            `fixed top-4 right-4 ${bgColor} text-white px-6 py-4 rounded-lg shadow-lg z-50 animate-slide-in`;
+        notification.innerHTML = `
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            ${type === 'success'
+                                ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>'
+                                : type === 'error'
+                                ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>'
+                                : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
+                            }
+                        </svg>
+                        <span>${message}</span>
+                        <button onclick="this.parentElement.parentElement.remove()" class="ml-4">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 5000);
+    }
+
+    function toggleUserMenu() {
+        const menu = document.getElementById('user-menu');
+        menu.classList.toggle('hidden');
+    }
+
+    function toggleNotifications() {
+        const dropdown = document.getElementById('notifications-dropdown');
+        dropdown.classList.toggle('hidden');
+
+        if (!dropdown.classList.contains('hidden')) {
+            // Marquer les notifications comme lues
             setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 3000);
+                markNotificationsAsRead();
+            }, 1000);
         }
+    }
 
-        function toggleUserMenu() {
-            const menu = document.getElementById('user-menu');
-            menu.classList.toggle('hidden');
+    async function markNotificationsAsRead() {
+        try {
+            await apiRequest(`${API_BASE}/dashboard/notifications/mark-read`, {
+                    method: 'POST'
+                });
+
+                // Mettre à jour le compteur
+                document.getElementById('notification-count').classList.add('hidden');
+            } catch (error) {
+                console.error('Erreur lors du marquage des notifications:', error);
+            }
         }
     </script>
 </body>
