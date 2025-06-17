@@ -889,7 +889,7 @@
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Success response:', data);
+                    console.log('Success response:');
 
                     if (data.success) {
                         showSuccessPage(data);

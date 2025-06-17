@@ -12,7 +12,7 @@ return [
     |
     */
 
-    'webhook_url' => env('N8N_WEBHOOK_URL', 'https://your-n8n-instance.com/webhook'),
+    'webhook_url' => env('N8N_WEBHOOK_URL', 'https://localhost/webhook'),
 
     'endpoints' => [
         'nouveau_sinistre' => 'nouveau_sinistre',
