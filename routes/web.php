@@ -20,3 +20,9 @@ Route::prefix('declaration')->name('declaration.')->group(function () {
     Route::get('/{sinistre}/recu', [DeclarationController::class, 'downloadRecu'])
         ->name('recu');
 });
+
+Route::prefix('administrateur')->name('administrateur.')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('dashboard');
+});
