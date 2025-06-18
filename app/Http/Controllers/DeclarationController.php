@@ -265,7 +265,7 @@ class DeclarationController extends Controller
     private function sendEmail(Sinistre $sinistre)
     {
         try {
-            $gestionnaires = User::where('role', 'gestionnaire')->get();
+            $gestionnaires = User::whereIn('role', ['gestionnaire', 'admin'])->get();
 
             dispatch(function () use ($sinistre, $gestionnaires) {
 
@@ -282,7 +282,7 @@ class DeclarationController extends Controller
 
                 foreach ($gestionnaires as $gestionnaire) {
                     Mail::send('emails.nouveau-sinistre', $dataEmail, function ($message) use ($gestionnaire, $sinistre) {
-                        $message->to($gestionnaire->email, $gestionnaire->name)
+                        $message->to($gestionnaire->email, $gestionnaire->nom_complet)
                             ->subject('Nouveau sinistre déclaré - N° ' . $sinistre->numero_sinistre)
                             ->from(config('mail.from.address'), config('mail.from.name'));
                     });
@@ -399,7 +399,7 @@ class DeclarationController extends Controller
                 'statut' => $sinistre->statut,
                 'date_sinistre' => $sinistre->date_sinistre->format('d/m/Y'),
                 'assure' => $sinistre->nom_assure,
-                'gestionnaire' => $sinistre->gestionnaire->name ?? 'Non assigné',
+                'gestionnaire' => $sinistre->gestionnaire->nom_complet ?? 'Non assigné',
                 'derniere_maj' => $sinistre->updated_at->format('d/m/Y H:i')
             ]
         ]);

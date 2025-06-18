@@ -1,9 +1,3 @@
-<form method="POST" action="{{ route('logout') }}">
-    @csrf
-    <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-        Déconnexion
-    </button>
-</form>
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -497,7 +491,7 @@
     </div>
 
     <script>
-        // Configuration globale
+
         let currentPage = 1;
         let currentPerPage = 10;
         let currentSinistreId = null;
@@ -509,23 +503,23 @@
 
         // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('Initialisation du dashboard...');
             loadSinistres();
             loadNotifications();
             setupEventListeners();
 
-            // Actualiser les stats toutes les 5 minutes
+            // update stats after 5 minutes
             setInterval(refreshStats, 300000);
         });
 
         function setupEventListeners() {
-            // Recherche avec debounce
+            //search
             document.getElementById('search-input').addEventListener('input', debounce(handleSearch, 300));
 
-            // Filtres
+            //filters
             document.getElementById('status-filter').addEventListener('change', handleFilter);
             document.getElementById('gestionnaire-filter').addEventListener('change', handleFilter);
 
-            // Fermer les menus en cliquant ailleurs
             document.addEventListener('click', function(event) {
                 if (!event.target.closest('[onclick*="toggleUserMenu"]')) {
                     document.getElementById('user-menu').classList.add('hidden');
@@ -536,7 +530,7 @@
             });
         }
 
-        // Fonctions API
+        //API function
         async function apiRequest(url, options = {}) {
             const defaultOptions = {
                 headers: {
@@ -570,22 +564,25 @@
 
         async function loadSinistres() {
             showLoading(true);
+            console.log('Chargement des sinistres...');
 
             try {
                 const params = new URLSearchParams({
                     page: currentPage,
                     per_page: currentPerPage,
-                    search: document.getElementById('search-input').value,
-                    statut: document.getElementById('status-filter').value,
-                    gestionnaire_id: document.getElementById('gestionnaire-filter').value
+                    search: document.getElementById('search-input').value || '',
+                    statut: document.getElementById('status-filter').value || '',
+                    gestionnaire_id: document.getElementById('gestionnaire-filter').value || ''
                 });
 
                 const data = await apiRequest(`${API_BASE}/dashboard/sinistres?${params}`);
+                console.log('Données reçues:', data);
 
                 displaySinistres(data.data);
                 updatePagination(data);
 
             } catch (error) {
+                console.error('Erreur lors du chargement des sinistres:', error);
                 displayEmptyState();
             } finally {
                 showLoading(false);
@@ -621,7 +618,7 @@
             const countElement = document.getElementById('notification-count');
             const listElement = document.getElementById('notifications-list');
 
-            // Mettre à jour le compteur
+            //update count
             if (totalUnread > 0) {
                 countElement.textContent = totalUnread;
                 countElement.classList.remove('hidden');
@@ -629,7 +626,7 @@
                 countElement.classList.add('hidden');
             }
 
-            // Afficher les notifications
+            //display notification
             if (notifications.length === 0) {
                 listElement.innerHTML = '<div class="p-4 text-center text-gray-500">Aucune notification</div>';
                 return;
@@ -683,65 +680,65 @@
                 formatDate(sinistre.date_sinistre);
 
             return `
-                <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center">
-                            ${urgencyIndicator}
-                            <div>
-                                <div class="text-sm font-medium text-gray-900">${sinistre.numero_sinistre}</div>
-                                <div class="text-sm text-gray-500">${sinistre.numero_police}</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div>
-                            <div class="text-sm font-medium text-gray-900">${sinistre.nom_assure}</div>
-                            <div class="text-sm text-gray-500">${sinistre.telephone_assure}</div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-900">${dateHeure}</div>
-                        <div class="text-sm text-gray-500">${sinistre.jours_en_cours} jour(s)</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        ${statusBadge}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-900">
-                            ${sinistre.gestionnaire ? sinistre.gestionnaire.nom_complet : '<span class="text-gray-400 italic">Non assigné</span>'}
-                        </div>
-                        ${sinistre.date_affectation ? `<div class="text-xs text-gray-400">Affecté le ${formatDate(sinistre.date_affectation)}</div>` : ''}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div class="flex space-x-2">
-                            <button onclick="showDetails(${sinistre.id})"
-                                    class="text-saar-blue hover:text-blue-800 transition-colors"
-                                    title="Voir détails">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                </svg>
-                            </button>
+        <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                    ${urgencyIndicator}
+                    <div>
+                        <div class="text-sm font-medium text-gray-900">${sinistre.numero_sinistre}</div>
+                        <div class="text-sm text-gray-500">${sinistre.numero_police}</div>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div>
+                    <div class="text-sm font-medium text-gray-900">${sinistre.nom_assure}</div>
+                    <div class="text-sm text-gray-500">${sinistre.telephone_assure}</div>
+                </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">${dateHeure}</div>
+                <div class="text-sm text-gray-500">${sinistre.jours_en_cours} jour(s)</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                ${statusBadge}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">
+                    ${sinistre.gestionnaire ? sinistre.gestionnaire.nom_complet : '<span class="text-gray-400 italic">Non assigné</span>'}
+                </div>
+                ${sinistre.date_affectation ? `<div class="text-xs text-gray-400">Affecté le ${formatDate(sinistre.date_affectation)}</div>` : ''}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <div class="flex space-x-2">
+                    <button onclick="showDetails(${sinistre.id})"
+                            class="text-saar-blue hover:text-blue-800 transition-colors"
+                            title="Voir détails">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                    </button>
 
-                            <button onclick="showAssignModal(${sinistre.id})"
-                                    class="text-purple-600 hover:text-purple-800 transition-colors"
-                                    title="Affecter gestionnaire">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                                </svg>
-                            </button>
+                    <button onclick="showAssignModal(${sinistre.id})"
+                            class="text-purple-600 hover:text-purple-800 transition-colors"
+                            title="Affecter gestionnaire">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                        </svg>
+                    </button>
 
-                            <button onclick="showStatusModal(${sinistre.id})"
-                                    class="text-saar-green hover:text-green-800 transition-colors"
-                                    title="Changer statut">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `;
+                    <button onclick="showStatusModal(${sinistre.id})"
+                            class="text-saar-green hover:text-green-800 transition-colors"
+                            title="Changer statut">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `;
         }
 
         function displayEmptyState() {
@@ -874,7 +871,7 @@
             loadSinistres();
         }
 
-        // Fonctions des modals
+        // modals fucntion
         async function showDetails(sinistreId) {
             try {
                 const data = await apiRequest(`${API_BASE}/dashboard/sinistres/${sinistreId}/details`);
@@ -883,152 +880,67 @@
 
                 const detailsContent = document.getElementById('sinistre-details-content');
                 detailsContent.innerHTML = `
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div class="space-y-4">
-                            <div class="bg-gray-50 p-4 rounded-lg">
-                                <h4 class="font-semibold text-gray-900 mb-3">Informations Générales</h4>
-                                <div class="space-y-2 text-sm">
-                                    <p><span class="font-medium">Numéro:</span> ${sinistre.numero_sinistre}</p>
-                                    <p><span class="font-medium">Police:</span> ${sinistre.numero_police}</p>
-                                    <p><span class="font-medium">Date:</span> ${formatDate(sinistre.date_sinistre)}</p>
-                                    ${sinistre.heure_sinistre ? `<p><span class="font-medium">Heure:</span> ${formatTime(sinistre.heure_sinistre)}</p>` : ''}
-                                    <p><span class="font-medium">Lieu:</span> ${sinistre.lieu_sinistre}</p>
-                                    <p><span class="font-medium">Statut:</span> ${getStatusBadge(sinistre.statut)}</p>
-                                </div>
-                            </div>
-
-                            <div class="bg-blue-50 p-4 rounded-lg">
-                                <h4 class="font-semibold text-gray-900 mb-3">Assuré</h4>
-                                <div class="space-y-2 text-sm">
-                                    <p><span class="font-medium">Nom:</span> ${sinistre.nom_assure}</p>
-                                    <p><span class="font-medium">Email:</span> ${sinistre.email_assure}</p>
-                                    <p><span class="font-medium">Téléphone:</span> ${sinistre.telephone_assure}</p>
-                                </div>
-                            </div>
-
-                            ${sinistre.conducteur_nom ? `
-                                <div class="bg-orange-50 p-4 rounded-lg">
-                                    <h4 class="font-semibold text-gray-900 mb-3">Conducteur</h4>
-                                    <div class="space-y-2 text-sm">
-                                        <p><span class="font-medium">Nom:</span> ${sinistre.conducteur_nom}</p>
-                                        ${sinistre.constat_autorite ? `<p><span class="font-medium">Constat autorité:</span> ${sinistre.constat_autorite ? 'Oui' : 'Non'}</p>` : ''}
-                                        ${sinistre.officier_nom ? `<p><span class="font-medium">Officier:</span> ${sinistre.officier_nom}</p>` : ''}
-                                        ${sinistre.commissariat ? `<p><span class="font-medium">Commissariat:</span> ${sinistre.commissariat}</p>` : ''}
-                                    </div>
-                                </div>
-                                ` : ''}
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-gray-900 mb-3">Informations Générales</h4>
+                        <div class="space-y-2 text-sm">
+                            <p><span class="font-medium">Numéro:</span> ${sinistre.numero_sinistre}</p>
+                            <p><span class="font-medium">Police:</span> ${sinistre.numero_police}</p>
+                            <p><span class="font-medium">Date:</span> ${formatDate(sinistre.date_sinistre)}</p>
+                            ${sinistre.heure_sinistre ? `<p><span class="font-medium">Heure:</span> ${formatTime(sinistre.heure_sinistre)}</p>` : ''}
+                            <p><span class="font-medium">Lieu:</span> ${sinistre.lieu_sinistre}</p>
+                            <p><span class="font-medium">Statut:</span> ${getStatusBadge(sinistre.statut)}</p>
                         </div>
+                    </div>
 
-                        <div class="space-y-4">
-                            <div class="bg-green-50 p-4 rounded-lg">
-                                <h4 class="font-semibold text-gray-900 mb-3">Gestion</h4>
-                                <div class="space-y-2 text-sm">
-                                    <p><span class="font-medium">Gestionnaire:</span> ${sinistre.gestionnaire ? sinistre.gestionnaire.nom_complet : 'Non assigné'}</p>
-                                    ${sinistre.date_affectation ? `<p><span class="font-medium">Date affectation:</span> ${formatDate(sinistre.date_affectation)}</p>` : ''}
-                                    <p><span class="font-medium">Jours en cours:</span> ${sinistre.jours_en_cours}</p>
-                                    <p><span class="font-medium">En retard:</span> ${sinistre.en_retard ? '⚠️ Oui' : '✅ Non'}</p>
-                                    <p><span class="font-medium">Montant estimé:</span> ${formatCurrency(sinistre.montant_estime)}</p>
-                                    ${sinistre.montant_regle ? `<p><span class="font-medium">Montant réglé:</span> ${formatCurrency(sinistre.montant_regle)}</p>` : ''}
-                                    ${sinistre.date_reglement ? `<p><span class="font-medium">Date règlement:</span> ${formatDate(sinistre.date_reglement)}</p>` : ''}
-                                    ${stats.est_urgent ? '<p class="text-yellow-600 font-medium">⚡ Sinistre urgent</p>' : ''}
-                                    <p><span class="font-medium">Date limite:</span> ${formatDate(stats.date_limite)}</p>
-                                </div>
-                            </div>
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-gray-900 mb-3">Assuré</h4>
+                        <div class="space-y-2 text-sm">
+                            <p><span class="font-medium">Nom:</span> ${sinistre.nom_assure}</p>
+                            <p><span class="font-medium">Email:</span> ${sinistre.email_assure}</p>
+                            <p><span class="font-medium">Téléphone:</span> ${sinistre.telephone_assure}</p>
+                        </div>
+                    </div>
+                </div>
 
-                            ${sinistre.circonstances || sinistre.dommages_releves ? `
+                <div class="space-y-4">
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-gray-900 mb-3">Gestion</h4>
+                        <div class="space-y-2 text-sm">
+                            <p><span class="font-medium">Gestionnaire:</span> ${sinistre.gestionnaire ? sinistre.gestionnaire.nom_complet : 'Non assigné'}</p>
+                            ${sinistre.date_affectation ? `<p><span class="font-medium">Date affectation:</span> ${formatDate(sinistre.date_affectation)}</p>` : ''}
+                            <p><span class="font-medium">Jours en cours:</span> ${sinistre.jours_en_cours}</p>
+                            <p><span class="font-medium">En retard:</span> ${sinistre.en_retard ? '⚠️ Oui' : '✅ Non'}</p>
+                            <p><span class="font-medium">Montant estimé:</span> ${formatCurrency(sinistre.montant_estime)}</p>
+                            ${sinistre.montant_regle ? `<p><span class="font-medium">Montant réglé:</span> ${formatCurrency(sinistre.montant_regle)}</p>` : ''}
+                            ${sinistre.date_reglement ? `<p><span class="font-medium">Date règlement:</span> ${formatDate(sinistre.date_reglement)}</p>` : ''}
+                        </div>
+                    </div>
+
+                    ${sinistre.circonstances ? `
                                 <div class="bg-yellow-50 p-4 rounded-lg">
-                                    <h4 class="font-semibold text-gray-900 mb-3">Détails du Sinistre</h4>
-                                    ${sinistre.circonstances ? `
-                                    <div class="mb-3">
-                                        <p class="font-medium text-sm mb-1">Circonstances:</p>
-                                        <p class="text-sm text-gray-700">${sinistre.circonstances}</p>
-                                    </div>
-                                ` : ''}
-                                    ${sinistre.dommages_releves ? `
-                                    <div>
-                                        <p class="font-medium text-sm mb-1">Dommages relevés:</p>
-                                        <p class="text-sm text-gray-700">${sinistre.dommages_releves}</p>
-                                    </div>
-                                ` : ''}
+                                    <h4 class="font-semibold text-gray-900 mb-3">Circonstances</h4>
+                                    <p class="text-sm text-gray-700">${sinistre.circonstances}</p>
                                 </div>
-                                ` : ''}
+                            ` : ''}
+                </div>
+            </div>
 
-                            ${stats.pourcentage_documents_verifies > 0 ? `
-                                <div class="bg-indigo-50 p-4 rounded-lg">
-                                    <h4 class="font-semibold text-gray-900 mb-3">Documents</h4>
-                                    <div class="space-y-2 text-sm">
-                                        <div class="flex items-center justify-between">
-                                            <span>Progression:</span>
-                                            <span class="font-medium">${stats.pourcentage_documents_verifies}%</span>
-                                        </div>
-                                        <div class="w-full bg-gray-200 rounded-full h-2">
-                                            <div class="bg-indigo-600 h-2 rounded-full" style="width: ${stats.pourcentage_documents_verifies}%"></div>
-                                        </div>
-                                        <p class="text-xs ${stats.tous_documents_verifies ? 'text-green-600' : 'text-orange-600'}">
-                                            ${stats.tous_documents_verifies ? '✅ Tous les documents sont vérifiés' : '📄 Documents en cours de vérification'}
-                                        </p>
-                                    </div>
-                                </div>
-                                ` : ''}
-                        </div>
-                    </div>
-
-                    <div class="mt-6 bg-purple-50 p-4 rounded-lg">
-                        <h4 class="font-semibold text-gray-900 mb-3">Actions Rapides</h4>
-                        <div class="flex flex-wrap gap-3">
-                            ${stats.peut_etre_modifie ? `
-                                    <button onclick="showAssignModal(${sinistre.id}); closeModal('details-modal');"
-                                            class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-                                        Affecter Gestionnaire
-                                    </button>
-                                    <button onclick="showStatusModal(${sinistre.id}); closeModal('details-modal');"
-                                            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                                        Changer Statut
-                                    </button>
-                                ` : `
-                                    <div class="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg">
-                                        <span class="text-sm">✅ Sinistre ${sinistre.statut === 'regle' ? 'réglé' : sinistre.statut === 'refuse' ? 'refusé' : 'clos'}</span>
-                                    </div>
-                                `}
-                            <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                                Voir Documents
-                            </button>
-                            <button class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors">
-                                Historique
-                            </button>
-                        </div>
-                    </div>
-                `;
-                3 ">Circonstances</h4> <
-                    p class = "text-sm text-gray-700" > $ {
-                        sinistre.circonstances || 'Aucune description disponible'
-                    } < /p> <
-                    /div> <
-                    /div> <
-                    /div>
-
-                    <
-                    div class = "mt-6 bg-purple-50 p-4 rounded-lg" >
-                    <
-                    h4 class = "font-semibold text-gray-900 mb-3" > Actions Rapides < /h4> <
-                    div class = "flex flex-wrap gap-3" >
-                    <
-                    button onclick = "showAssignModal(${sinistre.id}); closeModal('details-modal');"
-                class = "px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors" >
-                Affecter Gestionnaire
-                    <
-                    /button> <
-                    button onclick = "showStatusModal(${sinistre.id}); closeModal('details-modal');"
-                class = "px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors" >
-                Changer Statut
-                    <
-                    /button> <
-                    button class = "px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors" >
-                    Voir Documents <
-                    /button> <
-                    /div> <
-                    /div>
-                `;
+            <div class="mt-6 bg-purple-50 p-4 rounded-lg">
+                <h4 class="font-semibold text-gray-900 mb-3">Actions Rapides</h4>
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="showAssignModal(${sinistre.id}); closeModal('details-modal');"
+                            class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                        Affecter Gestionnaire
+                    </button>
+                    <button onclick="showStatusModal(${sinistre.id}); closeModal('details-modal');"
+                            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                        Changer Statut
+                    </button>
+                </div>
+            </div>
+        `;
 
                 document.getElementById('details-modal').classList.remove('hidden');
             } catch (error) {
@@ -1038,277 +950,262 @@
 
         async function showAssignModal(sinistreId) {
             try {
-                const data = await apiRequest(`
-                $ {
-                    API_BASE
-                }
-                /dashboard/sinistres / $ {
-                    sinistreId
-                }
-                /details`);
-            const sinistre = data.sinistre;
+                const data = await apiRequest(`${API_BASE}/dashboard/sinistres/${sinistreId}/details`);
+                const sinistre = data.sinistre;
 
-            currentSinistreId = sinistreId;
-            document.getElementById('assign-sinistre-info').textContent =
-                `${sinistre.numero_sinistre} - ${sinistre.nom_assure}`;
-            document.getElementById('assign-gestionnaire').value = sinistre.gestionnaire_id || '';
-            document.getElementById('assign-modal').classList.remove('hidden');
-        } catch (error) {
-            showErrorMessage('Erreur lors du chargement des informations du sinistre');
-        }
-    }
-
-    async function showStatusModal(sinistreId) {
-        try {
-            const data = await apiRequest(`${API_BASE}/dashboard/sinistres/${sinistreId}/details`);
-            const sinistre = data.sinistre;
-
-            currentSinistreId = sinistreId;
-            document.getElementById('status-sinistre-info').textContent =
-                `${sinistre.numero_sinistre} - ${sinistre.nom_assure}`;
-            document.getElementById('new-status').value = sinistre.statut;
-            document.getElementById('status-comment').value = '';
-            document.getElementById('status-modal').classList.remove('hidden');
-        } catch (error) {
-            showErrorMessage('Erreur lors du chargement des informations du sinistre');
-        }
-    }
-
-    async function confirmAssignment() {
-        const gestionnaireId = document.getElementById('assign-gestionnaire').value;
-        if (!gestionnaireId || !currentSinistreId) {
-            showErrorMessage('Veuillez sélectionner un gestionnaire');
-            return;
-        }
-
-        try {
-            await apiRequest(`${API_BASE}/dashboard/sinistres/${currentSinistreId}/assign`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    gestionnaire_id: gestionnaireId
-                })
-            });
-
-            showSuccessMessage('Gestionnaire affecté avec succès');
-            closeModal('assign-modal');
-            loadSinistres();
-            refreshStats();
-        } catch (error) {
-            showErrorMessage('Erreur lors de l\'affectation du gestionnaire');
-        }
-    }
-
-    async function confirmStatusChange() {
-        const newStatus = document.getElementById('new-status').value;
-        const comment = document.getElementById('status-comment').value;
-
-        if (!newStatus || !currentSinistreId) {
-            showErrorMessage('Veuillez sélectionner un statut');
-            return;
-        }
-
-        try {
-            await apiRequest(`${API_BASE}/dashboard/sinistres/${currentSinistreId}/status`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    statut: newStatus,
-                    commentaire: comment
-                })
-            });
-
-            showSuccessMessage('Statut modifié avec succès');
-            closeModal('status-modal');
-            loadSinistres();
-            refreshStats();
-        } catch (error) {
-            showErrorMessage('Erreur lors du changement de statut');
-        }
-    }
-
-    function closeModal(modalId) {
-        document.getElementById(modalId).classList.add('hidden');
-        currentSinistreId = null;
-    }
-
-    // Fonctions utilitaires
-    function getStatusBadge(status) {
-        const statusConfig = {
-            'en_attente': {
-                label: 'En attente',
-                color: 'bg-yellow-100 text-yellow-800'
-            },
-            'en_cours': {
-                label: 'En cours',
-                color: 'bg-blue-100 text-blue-800'
-            },
-            'expertise_requise': {
-                label: 'Expertise requise',
-                color: 'bg-purple-100 text-purple-800'
-            },
-            'en_attente_documents': {
-                label: 'Attente documents',
-                color: 'bg-orange-100 text-orange-800'
-            },
-            'pret_reglement': {
-                label: 'Prêt règlement',
-                color: 'bg-indigo-100 text-indigo-800'
-            },
-            'regle': {
-                label: 'Réglé',
-                color: 'bg-green-100 text-green-800'
-            },
-            'refuse': {
-                label: 'Refusé',
-                color: 'bg-red-100 text-red-800'
-            },
-            'clos': {
-                label: 'Clos',
-                color: 'bg-gray-100 text-gray-800'
+                currentSinistreId = sinistreId;
+                document.getElementById('assign-sinistre-info').textContent =
+                    `${sinistre.numero_sinistre} - ${sinistre.nom_assure}`;
+                document.getElementById('assign-gestionnaire').value = sinistre.gestionnaire_id || '';
+                document.getElementById('assign-modal').classList.remove('hidden');
+            } catch (error) {
+                showErrorMessage('Erreur lors du chargement des informations du sinistre');
             }
-        };
-
-        const config = statusConfig[status] || {
-            label: status,
-            color: 'bg-gray-100 text-gray-800'
-        };
-        return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}">${config.label}</span>`;
-    }
-
-    function formatDate(dateString) {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('fr-FR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
-    }
-
-    function formatCurrency(amount) {
-        return new Intl.NumberFormat('fr-FR', {
-            style: 'currency',
-            currency: 'XOF',
-            minimumFractionDigits: 0
-        }).format(amount);
-    }
-
-    function formatTime(timeString) {
-        if (!timeString) return '';
-
-        // Si c'est déjà au format HH:MM, on le retourne tel quel
-        if (timeString.match(/^\d{2}:\d{2}$/)) {
-            return timeString;
         }
 
-        // Si c'est un datetime, extraire l'heure
-        const date = new Date(timeString);
-        return date.toLocaleTimeString('fr-FR', {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    }
+        async function showStatusModal(sinistreId) {
+            try {
+                const data = await apiRequest(`${API_BASE}/dashboard/sinistres/${sinistreId}/details`);
+                const sinistre = data.sinistre;
 
-    function formatRelativeTime(dateString) {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffInSeconds = Math.floor((now - date) / 1000);
+                currentSinistreId = sinistreId;
+                document.getElementById('status-sinistre-info').textContent =
+                    `${sinistre.numero_sinistre} - ${sinistre.nom_assure}`;
+                document.getElementById('new-status').value = sinistre.statut;
+                document.getElementById('status-comment').value = '';
+                document.getElementById('status-modal').classList.remove('hidden');
+            } catch (error) {
+                showErrorMessage('Erreur lors du chargement des informations du sinistre');
+            }
+        }
 
-        if (diffInSeconds < 60) return 'À l\'instant';
-        if (diffInSeconds < 3600) return `Il y a ${Math.floor(diffInSeconds / 60)} min`;
-        if (diffInSeconds < 86400) return `Il y a ${Math.floor(diffInSeconds / 3600)} h`;
-        return `Il y a ${Math.floor(diffInSeconds / 86400)} j`;
-    }
+        async function confirmAssignment() {
+            const gestionnaireId = document.getElementById('assign-gestionnaire').value;
+            if (!gestionnaireId || !currentSinistreId) {
+                showErrorMessage('Veuillez sélectionner un gestionnaire');
+                return;
+            }
 
-    function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
+            try {
+                await apiRequest(`${API_BASE}/dashboard/sinistres/${currentSinistreId}/assign`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        gestionnaire_id: gestionnaireId
+                    })
+                });
+
+                showSuccessMessage('Gestionnaire affecté avec succès');
+                closeModal('assign-modal');
+                loadSinistres();
+                refreshStats();
+            } catch (error) {
+                showErrorMessage('Erreur lors de l\'affectation du gestionnaire');
+            }
+        }
+
+        async function confirmStatusChange() {
+            const newStatus = document.getElementById('new-status').value;
+            const comment = document.getElementById('status-comment').value;
+
+            if (!newStatus || !currentSinistreId) {
+                showErrorMessage('Veuillez sélectionner un statut');
+                return;
+            }
+
+            try {
+                await apiRequest(`${API_BASE}/dashboard/sinistres/${currentSinistreId}/status`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        statut: newStatus,
+                        commentaire: comment
+                    })
+                });
+
+                showSuccessMessage('Statut modifié avec succès');
+                closeModal('status-modal');
+                loadSinistres();
+                refreshStats();
+            } catch (error) {
+                showErrorMessage('Erreur lors du changement de statut');
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            currentSinistreId = null;
+        }
+
+        //Utility function
+        function getStatusBadge(status) {
+            const statusConfig = {
+                'en_attente': {
+                    label: 'En attente',
+                    color: 'bg-yellow-100 text-yellow-800'
+                },
+                'en_cours': {
+                    label: 'En cours',
+                    color: 'bg-blue-100 text-blue-800'
+                },
+                'expertise_requise': {
+                    label: 'Expertise requise',
+                    color: 'bg-purple-100 text-purple-800'
+                },
+                'en_attente_documents': {
+                    label: 'Attente documents',
+                    color: 'bg-orange-100 text-orange-800'
+                },
+                'pret_reglement': {
+                    label: 'Prêt règlement',
+                    color: 'bg-indigo-100 text-indigo-800'
+                },
+                'regle': {
+                    label: 'Réglé',
+                    color: 'bg-green-100 text-green-800'
+                },
+                'refuse': {
+                    label: 'Refusé',
+                    color: 'bg-red-100 text-red-800'
+                },
+                'clos': {
+                    label: 'Clos',
+                    color: 'bg-gray-100 text-gray-800'
+                }
             };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
 
-    function showLoading(show) {
-        const loadingState = document.getElementById('loading-state');
-        const tbody = document.getElementById('sinistres-tbody');
-
-        if (show) {
-            loadingState.classList.remove('hidden');
-            tbody.style.opacity = '0.5';
-        } else {
-            loadingState.classList.add('hidden');
-            tbody.style.opacity = '1';
+            const config = statusConfig[status] || {
+                label: status,
+                color: 'bg-gray-100 text-gray-800'
+            };
+            return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}">${config.label}</span>`;
         }
-    }
 
-    function showSuccessMessage(message) {
-        showNotification(message, 'success');
-    }
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR');
+        }
 
-    function showErrorMessage(message) {
-        showNotification(message, 'error');
-    }
+        function formatCurrency(amount) {
+            if (!amount) return '0 FCFA';
+            return new Intl.NumberFormat('fr-FR', {
+                style: 'currency',
+                currency: 'XOF',
+                minimumFractionDigits: 0
+            }).format(amount);
+        }
 
-    function showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+        function formatTime(timeString) {
+            if (!timeString) return '';
+            if (timeString.match(/^\d{2}:\d{2}$/)) return timeString;
+            const date = new Date(timeString);
+            return date.toLocaleTimeString('fr-FR', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
 
-        notification.className =
-            `fixed top-4 right-4 ${bgColor} text-white px-6 py-4 rounded-lg shadow-lg z-50 animate-slide-in`;
-        notification.innerHTML = `
-                    <div class="flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            ${type === 'success'
-                                ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>'
-                                : type === 'error'
-                                ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>'
-                                : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
-                            }
-                        </svg>
-                        <span>${message}</span>
-                        <button onclick="this.parentElement.parentElement.remove()" class="ml-4">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
-                    </div>
-                `;
+        function formatRelativeTime(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000);
 
-        document.body.appendChild(notification);
+            if (diffInSeconds < 60) return 'À l\'instant';
+            if (diffInSeconds < 3600) return `Il y a ${Math.floor(diffInSeconds / 60)} min`;
+            if (diffInSeconds < 86400) return `Il y a ${Math.floor(diffInSeconds / 3600)} h`;
+            return `Il y a ${Math.floor(diffInSeconds / 86400)} j`;
+        }
 
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function showLoading(show) {
+            const loadingState = document.getElementById('loading-state');
+            const tbody = document.getElementById('sinistres-tbody');
+
+            if (show) {
+                loadingState.classList.remove('hidden');
+                tbody.style.opacity = '0.5';
+            } else {
+                loadingState.classList.add('hidden');
+                tbody.style.opacity = '1';
             }
-        }, 5000);
-    }
-
-    function toggleUserMenu() {
-        const menu = document.getElementById('user-menu');
-        menu.classList.toggle('hidden');
-    }
-
-    function toggleNotifications() {
-        const dropdown = document.getElementById('notifications-dropdown');
-        dropdown.classList.toggle('hidden');
-
-        if (!dropdown.classList.contains('hidden')) {
-            // Marquer les notifications comme lues
-            setTimeout(() => {
-                markNotificationsAsRead();
-            }, 1000);
         }
-    }
 
-    async function markNotificationsAsRead() {
-        try {
-            await apiRequest(`${API_BASE}/dashboard/notifications/mark-read`, {
+        function showSuccessMessage(message) {
+            showNotification(message, 'success');
+        }
+
+        function showErrorMessage(message) {
+            showNotification(message, 'error');
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+
+            notification.className =
+                `fixed top-4 right-4 ${bgColor} text-white px-6 py-4 rounded-lg shadow-lg z-50 animate-slide-in`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        ${type === 'success'
+                            ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>'
+                            : type === 'error'
+                            ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>'
+                            : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
+                        }
+                    </svg>
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 5000);
+        }
+
+        function toggleUserMenu() {
+            const menu = document.getElementById('user-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notifications-dropdown');
+            dropdown.classList.toggle('hidden');
+
+            if (!dropdown.classList.contains('hidden')) {
+                //mark notifications as read
+                setTimeout(() => {
+                    markNotificationsAsRead();
+                }, 1000);
+            }
+        }
+
+        async function markNotificationsAsRead() {
+            try {
+                await apiRequest(`${API_BASE}/dashboard/notifications/mark-read`, {
                     method: 'POST'
                 });
 
-                // Mettre à jour le compteur
+                //update count
                 document.getElementById('notification-count').classList.add('hidden');
             } catch (error) {
                 console.error('Erreur lors du marquage des notifications:', error);

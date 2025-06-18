@@ -9,9 +9,6 @@ use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
-    /**
-     * Afficher le dashboard principal
-     */
     public function index()
     {
         // Statistiques générales
@@ -22,7 +19,6 @@ class DashboardController extends Controller
             'en_retard' => Sinistre::where('en_retard', true)->count(),
         ];
 
-        // Liste des gestionnaires pour les filtres
         $gestionnaires = User::select('id', 'nom_complet')
             ->whereHas('sinistres')
             ->orWhere('id', Auth::id())
@@ -32,12 +28,9 @@ class DashboardController extends Controller
         return view('admin.dashboard', compact('stats', 'gestionnaires'));
     }
 
-    /**
-     * API pour récupérer les sinistres avec filtres et recherche
-     */
     public function getSinistres(Request $request)
     {
-        $query = Sinistre::with(['gestionnaire:id,name'])
+        $query = Sinistre::with(['gestionnaire:id,nom_complet'])
             ->select([
                 'id',
                 'numero_sinistre',
@@ -60,7 +53,6 @@ class DashboardController extends Controller
                 'created_at'
             ]);
 
-        // Recherche textuelle
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -71,12 +63,10 @@ class DashboardController extends Controller
             });
         }
 
-        // Filtre par statut
         if ($request->filled('statut')) {
             $query->where('statut', $request->statut);
         }
 
-        // Filtre par gestionnaire
         if ($request->filled('gestionnaire_id')) {
             if ($request->gestionnaire_id === 'null') {
                 $query->whereNull('gestionnaire_id');
@@ -85,14 +75,11 @@ class DashboardController extends Controller
             }
         }
 
-        // Tri par défaut (plus récents en premier)
         $query->orderBy('created_at', 'desc');
 
-        // Pagination
         $perPage = $request->get('per_page', 10);
         $sinistres = $query->paginate($perPage);
 
-        // Mettre à jour les jours en cours pour tous les sinistres récupérés
         $sinistres->getCollection()->each(function ($sinistre) {
             $sinistre->calculerJoursEnCours();
         });
@@ -100,9 +87,6 @@ class DashboardController extends Controller
         return response()->json($sinistres);
     }
 
-    /**
-     * Affecter un gestionnaire à un sinistre
-     */
     public function assignerGestionnaire(Request $request, Sinistre $sinistre)
     {
         $request->validate([
@@ -111,24 +95,20 @@ class DashboardController extends Controller
 
         $gestionnaireId = $request->gestionnaire_id;
 
-        // Si c'est "self", utiliser l'ID de l'utilisateur connecté
         if ($request->gestionnaire_id === 'self') {
             $gestionnaireId = Auth::id();
         }
 
-        // Utiliser la méthode du modèle
         $sinistre->assignerGestionnaire($gestionnaireId);
 
         return response()->json([
             'success' => true,
             'message' => 'Gestionnaire affecté avec succès',
-            'sinistre' => $sinistre->fresh()->load('gestionnaire:id,name')
+            'sinistre' => $sinistre->fresh()->load('gestionnaire:id,nom_complet')
         ]);
     }
 
-    /**
-     * Changer le statut d'un sinistre
-     */
+
     public function changerStatut(Request $request, Sinistre $sinistre)
     {
         $request->validate([
@@ -141,29 +121,24 @@ class DashboardController extends Controller
             'statut' => $request->statut
         ]);
 
-        // Si le statut devient "réglé", on peut demander le montant
         if ($request->statut === 'regle' && $request->filled('montant_regle')) {
             $sinistre->reglerSinistre($request->montant_regle);
         }
 
-        // Ici vous pourriez enregistrer l'historique des changements
-        // $this->enregistrerHistorique($sinistre, $ancienStatut, $request->statut, $request->commentaire);
+        //TODO: send sms after status (en cours) change
+        //TODOD: save history of status change
 
         return response()->json([
             'success' => true,
             'message' => 'Statut modifié avec succès',
-            'sinistre' => $sinistre->fresh()->load('gestionnaire:id,name')
+            'sinistre' => $sinistre->fresh()->load('gestionnaire:id,nom_complet')
         ]);
     }
 
-    /**
-     * Obtenir les détails complets d'un sinistre
-     */
     public function getDetails(Sinistre $sinistre)
     {
-        $sinistre->load(['gestionnaire:id,name', 'documents']);
+        $sinistre->load(['gestionnaire:id,nom_complet', 'documents']);
 
-        // Calculer les informations supplémentaires en utilisant les attributs du modèle
         $stats = [
             'pourcentage_documents_verifies' => $sinistre->pourcentage_documents_verifies,
             'tous_documents_verifies' => $sinistre->tous_documents_verifies,
@@ -181,9 +156,6 @@ class DashboardController extends Controller
         ]);
     }
 
-    /**
-     * Mettre à jour les statistiques du dashboard
-     */
     public function getStats()
     {
         $stats = [
@@ -196,11 +168,10 @@ class DashboardController extends Controller
             'en_attente_documents' => Sinistre::where('statut', 'en_attente_documents')->count(),
         ];
 
-        // Statistiques par gestionnaire
         $statsByGestionnaire = Sinistre::select('gestionnaire_id')
             ->selectRaw('COUNT(*) as total')
             ->selectRaw('SUM(CASE WHEN en_retard = 1 THEN 1 ELSE 0 END) as en_retard')
-            ->with('gestionnaire:id,name')
+            ->with('gestionnaire:id,nom_complet')
             ->whereNotNull('gestionnaire_id')
             ->groupBy('gestionnaire_id')
             ->get();
@@ -211,9 +182,6 @@ class DashboardController extends Controller
         ]);
     }
 
-    /**
-     * Recherche rapide de sinistres
-     */
     public function searchSinistres(Request $request)
     {
         $request->validate([
@@ -226,40 +194,26 @@ class DashboardController extends Controller
             ->orWhere('nom_assure', 'LIKE', "%{$query}%")
             ->orWhere('telephone_assure', 'LIKE', "%{$query}%")
             ->orWhere('numero_police', 'LIKE', "%{$query}%")
-            ->with('gestionnaire:id,name')
+            ->with('gestionnaire:id,nom_complet')
             ->limit(10)
             ->get(['id', 'numero_sinistre', 'nom_assure', 'telephone_assure', 'statut']);
 
         return response()->json($sinistres);
     }
 
-    /**
-     * Obtenir les sinistres en retard
-     */
     public function getSinistresEnRetard()
     {
         $sinistres = Sinistre::where('en_retard', true)
-            ->with('gestionnaire:id,name')
+            ->with('gestionnaire:id,nom_complet')
             ->orderBy('jours_en_cours', 'desc')
             ->get();
 
         return response()->json($sinistres);
     }
 
-    /**
-     * Marquer les notifications comme lues
-     */
     public function markNotificationsAsRead(Request $request)
     {
-        // Ici vous pouvez implémenter la logique pour marquer les notifications comme lues
-        // Par exemple, mettre à jour une table notifications ou un champ dans la table users
-
-        // Exemple : si vous avez une table notifications
-        /*
-        \App\Models\Notification::where('user_id', Auth::id())
-            ->whereNull('read_at')
-            ->update(['read_at' => now()]);
-        */
+        //TODO: mark notifications as read
 
         return response()->json([
             'success' => true,
@@ -267,15 +221,10 @@ class DashboardController extends Controller
         ]);
     }
 
-    /**
-     * Obtenir les notifications non lues
-     */
     public function getNotifications()
     {
-        // Exemple de notifications basées sur les sinistres
         $notifications = [];
 
-        // Sinistres en retard
         $sinistresEnRetard = Sinistre::where('en_retard', true)->count();
         if ($sinistresEnRetard > 0) {
             $notifications[] = [
@@ -287,7 +236,6 @@ class DashboardController extends Controller
             ];
         }
 
-        // Nouveaux sinistres non assignés
         $sinistresNonAssignes = Sinistre::whereNull('gestionnaire_id')
             ->where('statut', 'en_attente')
             ->count();
@@ -301,7 +249,6 @@ class DashboardController extends Controller
             ];
         }
 
-        // Sinistres nécessitant une expertise
         $sinistresExpertise = Sinistre::where('statut', 'expertise_requise')->count();
         if ($sinistresExpertise > 0) {
             $notifications[] = [
@@ -313,7 +260,6 @@ class DashboardController extends Controller
             ];
         }
 
-        // Sinistres prêts pour règlement
         $sinistresReglement = Sinistre::where('statut', 'pret_reglement')->count();
         if ($sinistresReglement > 0) {
             $notifications[] = [
