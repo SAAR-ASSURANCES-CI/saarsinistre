@@ -70,6 +70,13 @@
             }
         }
     </script>
+
+    <style>
+        .menu-item.active {
+            background: rgba(255, 255, 255, 0.15);
+            border-bottom-color: white !important;
+        }
+    </style>
 </head>
 
 <body class="bg-gradient-to-br from-red-50 via-white to-green-50 min-h-screen">
@@ -172,6 +179,49 @@
         </div>
     </nav>
 
+    <!-- Navbar Horizontale -->
+    <nav class="bg-gradient-to-r from-saar-red to-red-600 shadow-md">
+        <div class="container mx-auto px-4">
+            <div class="flex space-x-0">
+                <!-- Tableau de bord -->
+                <a href="{{ route('dashboard') }}" onclick="setActiveMenu(this)"
+                    class="menu-item active flex items-center space-x-2 px-6 py-4 text-white hover:bg-white/10 transition-all duration-200 border-b-3 border-transparent hover:border-white/50">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"></path>
+                    </svg>
+                    <span class="font-medium">Tableau de bord</span>
+                </a>
+
+                <!-- Utilisateurs -->
+                <a href="#" onclick="setActiveMenu(this)"
+                    class="menu-item flex items-center space-x-2 px-6 py-4 text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200 border-b-3 border-transparent hover:border-white/50">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z">
+                        </path>
+                    </svg>
+                    <span class="font-medium">Utilisateurs</span>
+                </a>
+
+                <!-- Média -->
+                <a href="#" onclick="setActiveMenu(this)"
+                    class="menu-item flex items-center space-x-2 px-6 py-4 text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200 border-b-3 border-transparent hover:border-white/50">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2h4a1 1 0 011 1v14a2 2 0 01-2 2H4a2 2 0 01-2-2V5a1 1 0 011-1h4z">
+                        </path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 8h10M7 12h4m-4 4h4"></path>
+                    </svg>
+                    <span class="font-medium">Média</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
     <!-- Main Content -->
     <div class="container mx-auto px-4 py-8">
 
@@ -181,7 +231,8 @@
                 class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300">
                 <div class="flex items-center">
                     <div class="p-3 rounded-xl bg-blue-100">
-                        <svg class="w-6 h-6 text-saar-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-saar-blue" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
                             </path>
@@ -198,14 +249,16 @@
                 class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300">
                 <div class="flex items-center">
                     <div class="p-3 rounded-xl bg-yellow-100">
-                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-600">En Attente</p>
-                        <p id="stat-en-attente" class="text-2xl font-bold text-gray-900">{{ $stats['en_attente'] }}</p>
+                        <p id="stat-en-attente" class="text-2xl font-bold text-gray-900">{{ $stats['en_attente'] }}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -491,7 +544,6 @@
     </div>
 
     <script>
-
         let currentPage = 1;
         let currentPerPage = 10;
         let currentSinistreId = null;
@@ -919,11 +971,11 @@
                     </div>
 
                     ${sinistre.circonstances ? `
-                                <div class="bg-yellow-50 p-4 rounded-lg">
-                                    <h4 class="font-semibold text-gray-900 mb-3">Circonstances</h4>
-                                    <p class="text-sm text-gray-700">${sinistre.circonstances}</p>
-                                </div>
-                            ` : ''}
+                                        <div class="bg-yellow-50 p-4 rounded-lg">
+                                            <h4 class="font-semibold text-gray-900 mb-3">Circonstances</h4>
+                                            <p class="text-sm text-gray-700">${sinistre.circonstances}</p>
+                                        </div>
+                                    ` : ''}
                 </div>
             </div>
 
@@ -1197,6 +1249,20 @@
                     markNotificationsAsRead();
                 }, 1000);
             }
+        }
+
+        function setActiveMenu(element) {
+            // Remove active class from all menu items
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+                item.classList.remove('border-white');
+                item.classList.add('text-white/80', 'border-transparent');
+            });
+
+            // Add active class to clicked item
+            element.classList.add('active');
+            element.classList.remove('text-white/80', 'border-transparent');
+            element.classList.add('text-white', 'border-white');
         }
 
         async function markNotificationsAsRead() {
