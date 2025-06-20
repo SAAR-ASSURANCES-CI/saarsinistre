@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeclarationController;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -51,5 +52,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/search', [DashboardController::class, 'searchSinistres'])->name('search');
 
         Route::get('/sinistres-en-retard', [DashboardController::class, 'getSinistresEnRetard'])->name('sinistres.retard');
+
+        //ROUTE USERS
+        Route::controller(UserController::class)->group(function () {
+            Route::get('/users', 'index')->name('users');
+        });
     });
 });
