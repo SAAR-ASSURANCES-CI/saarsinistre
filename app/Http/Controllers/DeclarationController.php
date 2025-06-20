@@ -16,33 +16,24 @@ use Illuminate\Support\Facades\Mail;
 
 class DeclarationController extends Controller
 {
-    /**
-     * Afficher le formulaire de déclaration
-     */
+
     public function create()
     {
         return view('declaration.formulaire');
     }
 
-    /**
-     * Traiter la soumission du formulaire
-     */
     public function store(Request $request): JsonResponse
     {
         try {
-            // Validation des données
+
             $validated = $this->validateRequest($request);
 
             DB::beginTransaction();
 
-            // Créer le sinistre
             $sinistre = $this->creerSinistre($validated);
 
-            // Gérer les documents
             $this->gererDocuments($request, $sinistre);
 
-
-            // Déclencher les notifications
             $this->declencherNotifications($sinistre);
 
             DB::commit();
@@ -65,32 +56,26 @@ class DeclarationController extends Controller
         }
     }
 
-    /**
-     * Validation des données du formulaire
-     */
+
     private function validateRequest(Request $request): array
     {
         return $request->validate([
-            // Informations personnelles - TOUTES REQUISES
             'nom_assure' => 'required|string|max:255',
             'email_assure' => 'nullable|email|max:255',
             'telephone_assure' => 'required|string|max:20',
             'numero_police' => 'required|string|max:50',
 
-            // Détails du sinistre - TOUS REQUIS
             'date_sinistre' => 'required|date|before_or_equal:today',
             'heure_sinistre' => 'nullable|date_format:H:i',
             'lieu_sinistre' => 'required|string|max:500',
             'circonstances' => 'required|string|max:2000',
             'conducteur_nom' => 'required|string|max:255',
 
-            // Constat d'autorité - OPTIONNEL
             'constat_autorite' => 'boolean',
             'officier_nom' => 'nullable|required_if:constat_autorite,true|string|max:255',
             'commissariat' => 'nullable|required_if:constat_autorite,true|string|max:255',
             'dommages_releves' => 'nullable|string|max:1000',
 
-            // Documents obligatoires
             'carte_grise_recto' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'carte_grise_verso' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'visite_technique_recto' => 'required|file|mimes:pdf,jpg,jpeg,png|max:1280',
@@ -98,11 +83,9 @@ class DeclarationController extends Controller
             'attestation_assurance' => 'required|file|mimes:pdf,jpg,jpeg,png|max:1280',
             'permis_conduire' => 'required|file|mimes:pdf,jpg,jpeg,png|max:1280',
 
-            // Photos (optionnelles)
             'photos_vehicule' => 'nullable|array|max:100',
             'photos_vehicule.*' => 'file|mimes:jpg,jpeg,png|max:1280',
         ], [
-            // Messages d'erreur personnalisés en français
             'nom_assure.required' => 'Le nom complet est obligatoire.',
             'nom_assure.max' => 'Le nom ne doit pas dépasser 255 caractères.',
             'email_assure.required' => 'L\'adresse email est obligatoire.',
@@ -128,7 +111,6 @@ class DeclarationController extends Controller
             'commissariat.max' => 'Le nom du commissariat ne doit pas dépasser 255 caractères.',
             'dommages_releves.max' => 'La description des dommages ne doit pas dépasser 1000 caractères.',
 
-            // Messages pour les fichiers
             'carte_grise_recto.required' => 'La carte grise (recto) est obligatoire.',
             'carte_grise_verso.required' => 'La carte grise (verso) est obligatoire.',
             'visite_technique_recto.required' => 'La visite technique (recto) est obligatoire.',
@@ -141,9 +123,6 @@ class DeclarationController extends Controller
         ]);
     }
 
-    /**
-     * Créer un nouveau sinistre
-     */
     private function creerSinistre(array $validated): Sinistre
     {
         $donneesSinistre = collect($validated)->except([
@@ -163,9 +142,6 @@ class DeclarationController extends Controller
         return Sinistre::create($donneesSinistre);
     }
 
-    /**
-     * Gérer l'upload et l'enregistrement des documents
-     */
     private function gererDocuments(Request $request, Sinistre $sinistre): void
     {
         $typesDocuments = [
@@ -191,9 +167,6 @@ class DeclarationController extends Controller
         }
     }
 
-    /**
-     * Stocker un document individuel
-     */
     private function stockerDocument($file, Sinistre $sinistre, string $type, string $libelle): void
     {
         $extension = $file->getClientOriginalExtension();
@@ -243,9 +216,6 @@ class DeclarationController extends Controller
         }
     }
 
-    /**
-     * Déclencher les notifications (n8n + email direct)
-     */
     private function declencherNotifications(Sinistre $sinistre): void
     {
         try {
@@ -271,7 +241,7 @@ class DeclarationController extends Controller
 
                 $dataEmail = [
                     'sinistre' => $sinistre,
-                    // 'url_sinistre' => route('gestionnaire.sinistre.show', $sinistre->id), // Ajustez selon votre routing
+                    'url_sinistre' => route('dashboard'),
                     'company' => [
                         'name' => 'SAAR ASSURANCE',
                         'phone' => '+225 20 30 30 30',
@@ -368,9 +338,7 @@ class DeclarationController extends Controller
             Log::error('Erreur webhook n8n: ' . $e->getMessage());
         }
     }
-    /**
-     * Page de confirmation après soumission
-     */
+
     public function confirmation($sinistreId)
     {
         $sinistre = Sinistre::with('documents')->findOrFail($sinistreId);
@@ -378,9 +346,6 @@ class DeclarationController extends Controller
         return view('declaration.confirmation', compact('sinistre'));
     }
 
-    /**
-     * API pour vérifier le statut d'un sinistre
-     */
     public function statut($numeroSinistre): JsonResponse
     {
         $sinistre = Sinistre::where('numero_sinistre', $numeroSinistre)->first();

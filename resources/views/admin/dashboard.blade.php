@@ -96,10 +96,12 @@
                         </svg>
                     </div>
                     <div>
-                        <h1
-                            class="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-saar-red to-saar-green">
-                            SAAR ASSURANCE
-                        </h1>
+                        <a href="/">
+                            <h1
+                                class="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-saar-red to-saar-red">
+                                SAAR ASSURANCE
+                            </h1>
+                        </a>
                         <p class="text-xs text-gray-600">Dashboard de Gestion</p>
                     </div>
                 </div>
@@ -971,11 +973,11 @@
                     </div>
 
                     ${sinistre.circonstances ? `
-                                        <div class="bg-yellow-50 p-4 rounded-lg">
-                                            <h4 class="font-semibold text-gray-900 mb-3">Circonstances</h4>
-                                            <p class="text-sm text-gray-700">${sinistre.circonstances}</p>
-                                        </div>
-                                    ` : ''}
+                                            <div class="bg-yellow-50 p-4 rounded-lg">
+                                                <h4 class="font-semibold text-gray-900 mb-3">Circonstances</h4>
+                                                <p class="text-sm text-gray-700">${sinistre.circonstances}</p>
+                                            </div>
+                                        ` : ''}
                 </div>
             </div>
 
