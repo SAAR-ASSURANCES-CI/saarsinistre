@@ -251,11 +251,11 @@
                 </div>
             @endif
 
-            {{-- <div style="text-align: center; margin: 30px 0;">
+            <div style="text-align: center; margin: 30px 0;">
                 <a href="{{ $url_sinistre }}" class="action-button">
                     📋 Consulter le Dossier Complet
                 </a>
-            </div> --}}
+            </div>
 
             <div style="background-color: #e9ecef; padding: 15px; border-radius: 5px; margin-top: 20px;">
                 <p style="margin: 0; font-size: 14px; color: #666;">
