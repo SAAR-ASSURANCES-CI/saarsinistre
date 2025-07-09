@@ -11,7 +11,6 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Statistiques générales
         $stats = [
             'total' => Sinistre::count(),
             'en_attente' => Sinistre::where('statut', 'en_attente')->count(),
