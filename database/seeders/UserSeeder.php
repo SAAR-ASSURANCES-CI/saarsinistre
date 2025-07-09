@@ -24,7 +24,7 @@ class UserSeeder extends Seeder
         ]);
 
         User::firstOrCreate([
-            'email' => 'EKOUAKOU@saar-assurances.com'
+            'email' => 'k.kompissi@saarvie.ci'
         ], [
             'nom_complet' => 'Gestionnaire Principal',
             'password' => Hash::make('password'),

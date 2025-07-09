@@ -40,7 +40,10 @@ class OrangeService
     private function fetchNewToken()
     {
         try {
-            $response = $this->client->post(env('ORANGE_SMS_API_TOKEN'), [
+            $client = new Client([
+                'verify' => false,
+            ]);
+            $response = $client->post(env('ORANGE_SMS_API_TOKEN'), [
                 'headers' => [
                     'Authorization' => 'Basic ' . env('ORANGE_SMS_API_AUTHORIZATION'),
                     'Content-Type'  => 'application/x-www-form-urlencoded',

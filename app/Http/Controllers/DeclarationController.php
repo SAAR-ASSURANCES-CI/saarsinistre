@@ -11,6 +11,7 @@ use App\Models\DocumentSinistre;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 
@@ -30,6 +31,11 @@ class DeclarationController extends Controller
 
             DB::beginTransaction();
 
+            $user = $this->creerCompteAssure($validated);
+
+            $this->envoyerSMSConnexion($user, $validated['telephone_assure']);
+
+            $validated['assure_id'] = $user->id;
             $sinistre = $this->creerSinistre($validated);
 
             $this->gererDocuments($request, $sinistre);
@@ -232,6 +238,63 @@ class DeclarationController extends Controller
         }
     }
 
+    private function genererNumeroAssure(): string
+    {
+        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $randdomString = '';
+        $prefix = 'SAAR-';
+
+        for ($i = 0; $i < 4; $i++) {
+            $randdomString .= $characters[rand(0, strlen($characters) - 1)];
+        }
+
+        return $prefix . $randdomString;
+    }
+
+    private function genererMotDePasseTemporaire(): string
+    {
+        return str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+    }
+
+    private function creerCompteAssure(array $data): User
+    {
+        $numeroAssure = $this->genererNumeroAssure();
+        $motDePasseTemporaire = $this->genererMotDePasseTemporaire();
+
+        $user = User::create([
+            'numero_assure' => $numeroAssure,
+            'nom_complet' => $data['nom_assure'],
+            'email' => $data['email_assure'] ?? null,
+            'password' => Hash::make($motDePasseTemporaire),
+            'password_temp' => $motDePasseTemporaire,
+            'password_expires_at' => now()->addHours(48),
+            'role' => 'assure',
+        ]);
+
+        return $user;
+    }
+
+    private function envoyerSMSConnexion(User $user, string $telephone): void
+    {
+        try {
+            $orangeService = app(\App\Services\OrangeService::class);
+
+            $message = "SAAR ASSURANCE\n";
+            $message .= "Votre espace client est prêt:\n";
+            $message .= "Identifiant: {$user->numero_assure}\n";
+            $message .= "Code: {$user->password_temp}\n";
+            $message .= "Valable 48h\n";
+
+            $orangeService->sendSmsConfirmationSinistre(
+                $telephone,
+                $user->nom_complet,
+                "COMPTE-{$user->numero_assure}"
+            );
+        } catch (Exception $e) {
+            Log::error('Erreur lors de l\'envoi du SMS de connexion: ' . $e->getMessage());
+        }
+    }
+
     private function sendEmail(Sinistre $sinistre)
     {
         try {
@@ -313,7 +376,7 @@ class DeclarationController extends Controller
                 'email_assure' => $sinistre->email_assure ?? '',
                 'telephone_assure' => $sinistre->telephone_assure,
                 'numero_police' => $sinistre->numero_police,
-                'date_sinistre' => $sinistre->date_sinistre->format('d/m/Y'),
+                'date_sinistre' => $sinistre->date_sinistre,
                 'heure_sinistre' => $sinistre->heure_sinistre ? $sinistre->heure_sinistre->format('H:i') : 'Non précisée',
                 'lieu_sinistre' => $sinistre->lieu_sinistre,
                 'circonstances' => $sinistre->circonstances,
@@ -362,7 +425,7 @@ class DeclarationController extends Controller
             'sinistre' => [
                 'numero_sinistre' => $sinistre->numero_sinistre,
                 'statut' => $sinistre->statut,
-                'date_sinistre' => $sinistre->date_sinistre->format('d/m/Y'),
+                'date_sinistre' => $sinistre->date_sinistre,
                 'assure' => $sinistre->nom_assure,
                 'gestionnaire' => $sinistre->gestionnaire->nom_complet ?? 'Non assigné',
                 'derniere_maj' => $sinistre->updated_at->format('d/m/Y H:i')
