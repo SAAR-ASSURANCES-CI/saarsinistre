@@ -16,6 +16,8 @@ class Sinistre extends Model
         'telephone_assure',
         'numero_police',
 
+        'assure_id',
+
 
         'date_sinistre',
         'heure_sinistre',
@@ -56,6 +58,15 @@ class Sinistre extends Model
     public function gestionnaire(): BelongsTo
     {
         return $this->belongsTo(User::class, 'gestionnaire_id');
+    }
+
+    /**
+     * 
+     * @return BelongsTo<User, Sinistre>
+     */
+    public function assure(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assure_id');
     }
 
     /**

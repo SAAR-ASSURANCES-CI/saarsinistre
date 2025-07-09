@@ -26,6 +26,9 @@ class User extends Authenticatable
         'sinistres_en_cours',
         'limite_sinistres',
         'password',
+        'numero_assure',
+        'password_temp',
+        'password_expire_at',
     ];
 
     /**
@@ -35,6 +38,7 @@ class User extends Authenticatable
      */
     protected $hidden = [
         'password',
+        'password_temp',
         'remember_token',
     ];
 
@@ -47,6 +51,8 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'password_expire_at' => 'datetime',
+            'password_temp' => 'string',
             'password' => 'hashed',
         ];
     }
@@ -101,5 +107,10 @@ class User extends Authenticatable
     public function scopeGestionnaires($query)
     {
         return $query->whereIn('role', ['gestionnaire', 'admin']);
+    }
+
+    public function isTempPasswordExpired(): bool
+    {
+        return $this->password_expire_at && now()->gt($this->password_expire_at);
     }
 }

@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('sinistres', function (Blueprint $table) {
             $table->id();
             $table->string('numero_sinistre', 50)->unique();
+            $table->foreignId('assure_id')->constrained('users')->onDelete('cascade');
 
             $table->string('nom_assure')->nullable();
             $table->string('email_assure')->nullable();
