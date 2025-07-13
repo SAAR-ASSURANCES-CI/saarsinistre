@@ -54,8 +54,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/sinistres-en-retard', [DashboardController::class, 'getSinistresEnRetard'])->name('sinistres.retard');
 
         //ROUTE USERS
-        Route::controller(UserController::class)->group(function () {
-            Route::get('/users', 'index')->name('users');
-        });
+        Route::get('/users', [UserController::class, 'index'])->name('users');
+        Route::post('/users', [UserController::class, 'store'])->name('users.store');
+        Route::patch('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
+        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
     });
 });
