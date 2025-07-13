@@ -183,7 +183,7 @@
                     <option value="">Tous les rôles</option>
                     <option value="admin">Administrateur</option>
                     <option value="gestionnaire">Gestionnaire</option>
-                    <option value="user">Utilisateur</option>
+                    <option value="user">Assuré</option>
                 </select>
                 <select id="filter-status"
                     class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-saar-blue focus:border-transparent">
@@ -204,11 +204,10 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-gray-500 text-sm">Total Utilisateurs</p>
-                        <p class="text-2xl font-bold text-gray-800" id="total-users">15</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ $gestionnaires->count() + $assures->count() }}</p>
                     </div>
                     <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                        <svg class="w-6 h-6 text-saar-blue" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-saar-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z">
                             </path>
@@ -220,11 +219,10 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-gray-500 text-sm">Gestionnaires</p>
-                        <p class="text-2xl font-bold text-gray-800" id="total-managers">8</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ $gestionnaires->count() }}</p>
                     </div>
                     <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
@@ -235,11 +233,10 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-gray-500 text-sm">Utilisateurs Actifs</p>
-                        <p class="text-2xl font-bold text-gray-800" id="active-users">12</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ $gestionnaires->where('actif', true)->count() + $assures->where('actif', true)->count() }}</p>
                     </div>
                     <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z">
                             </path>
@@ -251,7 +248,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-gray-500 text-sm">Comptes Suspendus</p>
-                        <p class="text-2xl font-bold text-gray-800" id="suspended-users">3</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ $gestionnaires->where('actif', false)->count() + $assures->where('actif', false)->count() }}</p>
                     </div>
                     <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
                         <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -264,67 +261,334 @@
             </div>
         </div>
 
-        <!-- Table des utilisateurs -->
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Utilisateur
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Email
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Rôle
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Statut
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Sinistres
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Limite
-                            </th>
-                            <th
-                                class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Actions
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody id="users-table-body" class="bg-white divide-y divide-gray-200">
-                        <!-- Les données seront injectées ici via JavaScript -->
-                    </tbody>
-                </table>
+        <!-- Onglets -->
+        <div class="mb-6 border-b border-gray-200">
+            <ul class="flex flex-wrap -mb-px" id="users-tabs" role="tablist">
+                <li class="mr-2" role="presentation">
+                    <button class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300"
+                            id="gestionnaires-tab" data-tabs-target="#gestionnaires" type="button" role="tab"
+                            aria-controls="gestionnaires" aria-selected="true">
+                        Gestionnaires & Admins
+                    </button>
+                </li>
+                <li class="mr-2" role="presentation">
+                    <button class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300"
+                            id="assures-tab" data-tabs-target="#assures" type="button" role="tab"
+                            aria-controls="assures" aria-selected="false">
+                        Assurés
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Contenu des onglets -->
+        <div class="tab-content">
+            <!-- Onglet Gestionnaires -->
+            <div class="hidden p-4 rounded-lg bg-gray-50" id="gestionnaires" role="tabpanel" aria-labelledby="gestionnaires-tab">
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Utilisateur
+                                    </th>
+                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Email
+                                    </th>
+                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Rôle
+                                    </th>
+                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Statut
+                                    </th>
+                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Sinistres
+                                    </th>
+                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Limite
+                                    </th>
+                                    <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach($gestionnaires as $user)
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 bg-gradient-to-r from-saar-blue to-blue-600 rounded-full flex items-center justify-center">
+                                                <span class="text-white text-sm font-semibold">
+                                                    {{ substr($user->nom_complet, 0, 1) }}
+                                                    @php
+                                                        $lastSpace = strrpos($user->nom_complet, ' ');
+                                                        echo $lastSpace !== false
+                                                            ? substr($user->nom_complet, $lastSpace + 1, 1)
+                                                            : '';
+                                                    @endphp
+                                                </span>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">{{ $user->nom_complet }}</div>
+                                                <div class="text-sm text-gray-500">ID: {{ $user->id }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ $user->email }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @if($user->role === 'admin')
+                                            <span class="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">Administrateur</span>
+                                        @else
+                                            <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">Gestionnaire</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @if($user->actif)
+                                            <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Actif</span>
+                                        @else
+                                            <span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">Inactif</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center space-x-2">
+                                            <span class="text-sm font-medium text-gray-900">{{ $user->sinistres_en_cours }}</span>
+                                            <div class="w-16 bg-gray-200 rounded-full h-2">
+                                                @php
+                                                    $progressPercentage = ($user->sinistres_en_cours / $user->limite_sinistres) * 100;
+                                                    $progressColor = $progressPercentage > 80 ? 'bg-red-500' : ($progressPercentage > 60 ? 'bg-yellow-500' : 'bg-green-500');
+                                                @endphp
+                                                <div class="{{ $progressColor }} h-2 rounded-full" style="width: {{ min($progressPercentage, 100) }}%"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ $user->limite_sinistres }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <div class="flex items-center space-x-2 justify-end">
+                                            <button onclick="editUser({{ $user->id }})" class="text-saar-blue hover:text-blue-800 transition-colors">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                </svg>
+                                            </button>
+                                            <form action="{{ route('dashboard.users.toggle-status', $user->id) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="text-gray-600 hover:text-gray-800 transition-colors">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                            <form action="{{ route('dashboard.users.destroy', $user->id) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')" class="text-red-600 hover:text-red-800 transition-colors">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onglet Assurés -->
+            <div class="hidden p-4 rounded-lg bg-gray-50" id="assures" role="tabpanel" aria-labelledby="assures-tab">
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Utilisateur
+                                    </th>
+                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Email
+                                    </th>
+                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Numéro Assuré
+                                    </th>
+                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Statut
+                                    </th>
+                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Sinistres
+                                    </th>
+                                    <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach($assures as $user)
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 bg-gradient-to-r from-saar-blue to-blue-600 rounded-full flex items-center justify-center">
+                                                <span class="text-white text-sm font-semibold">
+                                                    {{ substr($user->nom_complet, 0, 1) }}
+                                                    @php
+                                                        $lastSpace = strrpos($user->nom_complet, ' ');
+                                                        echo $lastSpace !== false
+                                                            ? substr($user->nom_complet, $lastSpace + 1, 1)
+                                                            : '';
+                                                    @endphp
+                                                </span>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">{{ $user->nom_complet }}</div>
+                                                <div class="text-sm text-gray-500">ID: {{ $user->id }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ $user->email }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ $user->numero_assure ?? 'N/A' }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @if($user->actif)
+                                            <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Actif</span>
+                                        @else
+                                            <span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">Inactif</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center space-x-2">
+                                            <span class="text-sm font-medium text-gray-900">{{ $user->sinistres_en_cours }}</span>
+                                            <div class="w-16 bg-gray-200 rounded-full h-2">
+                                                @php
+                                                    $progressPercentage = ($user->sinistres_en_cours / $user->limite_sinistres) * 100;
+                                                    $progressColor = $progressPercentage > 80 ? 'bg-red-500' : ($progressPercentage > 60 ? 'bg-yellow-500' : 'bg-green-500');
+                                                @endphp
+                                                <div class="{{ $progressColor }} h-2 rounded-full" style="width: {{ min($progressPercentage, 100) }}%"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <div class="flex items-center space-x-2 justify-end">
+                                            <button onclick="editUser({{ $user->id }})" class="text-saar-blue hover:text-blue-800 transition-colors">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                </svg>
+                                            </button>
+                                            <form action="{{ route('dashboard.users.toggle-status', $user->id) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="text-gray-600 hover:text-gray-800 transition-colors">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                            <form action="{{ route('dashboard.users.destroy', $user->id) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')" class="text-red-600 hover:text-red-800 transition-colors">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Pagination -->
         <div class="flex items-center justify-between mt-6">
             <div class="flex items-center text-sm text-gray-700">
-                <span>Affichage de <span class="font-medium">1</span> à <span class="font-medium">10</span> sur <span
-                        class="font-medium">15</span> résultats</span>
-            </div>
-            <div class="flex items-center space-x-2">
-                <button
-                    class="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
-                    disabled>
-                    Précédent
-                </button>
-                <button class="px-3 py-2 text-sm bg-saar-blue text-white rounded-md">1</button>
-                <button
-                    class="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50">2</button>
-                <button class="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50">
-                    Suivant
-                </button>
+                <span>Affichage de <span class="font-medium">1</span> à <span class="font-medium">{{ $gestionnaires->count() + $assures->count() }}</span> sur <span
+                        class="font-medium">{{ $gestionnaires->count() + $assures->count() }}</span> résultats</span>
             </div>
         </div>
     </main>
 
+    <!-- Modal d'ajout d'utilisateur -->
+    <div id="add-user-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-1/2 shadow-lg rounded-xl bg-white">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Ajouter un nouvel utilisateur</h3>
+                <button onclick="closeAddUserModal()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <form action="{{ route('dashboard.users.store') }}" method="POST">
+                @csrf
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="nom_complet" class="block text-sm font-medium text-gray-700 mb-1">Nom complet</label>
+                        <input type="text" name="nom_complet" id="nom_complet" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-saar-blue focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" name="email" id="email" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-saar-blue focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Rôle</label>
+                        <select name="role" id="role" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-saar-blue focus:border-transparent"
+                            onchange="toggleAssureField()">
+                            <option value="">Sélectionner un rôle</option>
+                            <option value="admin">Administrateur</option>
+                            <option value="gestionnaire">Gestionnaire</option>
+                            <option value="assure">Assuré</option>
+                        </select>
+                    </div>
+                    <div id="numero-assure-container" class="hidden">
+                        <label for="numero_assure" class="block text-sm font-medium text-gray-700 mb-1">Numéro d'assuré</label>
+                        <input type="text" name="numero_assure" id="numero_assure"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-saar-blue focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
+                        <input type="password" name="password" id="password" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-saar-blue focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirmer le mot de passe</label>
+                        <input type="password" name="password_confirmation" id="password_confirmation" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-saar-blue focus:border-transparent">
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeAddUserModal()"
+                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                        Annuler
+                    </button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-gradient-to-r from-saar-blue to-blue-600 text-white rounded-lg hover:shadow-lg transition-all">
+                        Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
-        // Toggle notifications dropdown
         function toggleNotifications() {
             const dropdown = document.getElementById('notifications-dropdown');
             dropdown.classList.toggle('hidden');
@@ -336,217 +600,57 @@
             menu.classList.toggle('hidden');
         }
 
-        // Set active menu
-        function setActiveMenu(element) {
-            // Remove active class from all menu items
-            document.querySelectorAll('.menu-item').forEach(item => {
-                item.classList.remove('active');
-                item.classList.remove('border-white');
-                item.classList.add('text-white/80', 'border-transparent');
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('[data-tabs-target]');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const target = document.querySelector(this.dataset.tabsTarget);
+
+                    // Masquer tous les contenus d'onglets
+                    document.querySelectorAll('.tab-content > div').forEach(content => {
+                        content.classList.add('hidden');
+                    });
+
+                    target.classList.remove('hidden');
+
+                    tabs.forEach(t => {
+                        t.classList.remove('border-saar-blue', 'text-saar-blue');
+                        t.classList.add('border-transparent', 'text-gray-500');
+                    });
+
+                    this.classList.remove('border-transparent', 'text-gray-500');
+                    this.classList.add('border-saar-blue', 'text-saar-blue');
+                });
             });
 
-            // Add active class to clicked item
-            element.classList.add('active');
-            element.classList.remove('text-white/80', 'border-transparent');
-            element.classList.add('text-white', 'border-white');
-
-            // Show corresponding view
-            const views = document.querySelectorAll('.content-view');
-            views.forEach(view => view.classList.add('hidden'));
-
-            const menuText = element.textContent.trim().toLowerCase();
-            if (menuText.includes('tableau')) {
-                document.getElementById('dashboard-view').classList.remove('hidden');
-            } else if (menuText.includes('utilisateurs')) {
-                document.getElementById('users-view').classList.remove('hidden');
-                loadUsers(); // Charger les données utilisateurs
-            } else if (menuText.includes('média')) {
-                document.getElementById('media-view').classList.remove('hidden');
+            if (tabs.length > 0) {
+                tabs[0].click();
             }
-        }
+        });
 
-        // Données d'exemple pour les utilisateurs
-        const sampleUsers = [{
-                id: 1,
-                nom_complet: "Marie Dupont",
-                email: "marie.dupont@saar.com",
-                role: "admin",
-                actif: true,
-                sinistres_en_cours: 5,
-                limite_sinistres: 20,
-                created_at: "2024-01-15"
-            },
-            {
-                id: 2,
-                nom_complet: "Jean Martin",
-                email: "jean.martin@saar.com",
-                role: "gestionnaire",
-                actif: true,
-                sinistres_en_cours: 12,
-                limite_sinistres: 15,
-                created_at: "2024-02-10"
-            },
-            {
-                id: 3,
-                nom_complet: "Sophie Laurent",
-                email: "sophie.laurent@saar.com",
-                role: "gestionnaire",
-                actif: true,
-                sinistres_en_cours: 8,
-                limite_sinistres: 15,
-                created_at: "2024-01-20"
-            },
-            {
-                id: 4,
-                nom_complet: "Pierre Dubois",
-                email: "pierre.dubois@saar.com",
-                role: "user",
-                actif: false,
-                sinistres_en_cours: 0,
-                limite_sinistres: 5,
-                created_at: "2024-03-05"
-            },
-            {
-                id: 5,
-                nom_complet: "Amélie Bernard",
-                email: "amelie.bernard@saar.com",
-                role: "gestionnaire",
-                actif: true,
-                sinistres_en_cours: 7,
-                limite_sinistres: 15,
-                created_at: "2024-02-28"
-            }
-        ];
-
-        // Charger les utilisateurs
-        function loadUsers() {
-            const tbody = document.getElementById('users-table-body');
-            tbody.innerHTML = '';
-
-            sampleUsers.forEach(user => {
-                const row = createUserRow(user);
-                tbody.appendChild(row);
-            });
-
-            updateUserStats();
-        }
-
-        // Créer une ligne utilisateur
-        function createUserRow(user) {
-            const row = document.createElement('tr');
-            row.className = 'hover:bg-gray-50 transition-colors';
-
-            const statusBadge = user.actif ?
-                '<span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Actif</span>' :
-                '<span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">Inactif</span>';
-
-            const roleBadge = {
-                'admin': '<span class="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">Administrateur</span>',
-                'gestionnaire': '<span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">Gestionnaire</span>',
-                'user': '<span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">Utilisateur</span>'
-            } [user.role];
-
-            const progressPercentage = (user.sinistres_en_cours / user.limite_sinistres) * 100;
-            const progressColor = progressPercentage > 80 ? 'bg-red-500' : progressPercentage > 60 ? 'bg-yellow-500' :
-                'bg-green-500';
-
-            row.innerHTML = `
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="flex items-center">
-                        <div class="w-10 h-10 bg-gradient-to-r from-saar-blue to-blue-600 rounded-full flex items-center justify-center">
-                            <span class="text-white text-sm font-semibold">${user.nom_complet.split(' ').map(n => n[0]).join('')}</span>
-                        </div>
-                        <div class="ml-4">
-                            <div class="text-sm font-medium text-gray-900">${user.nom_complet}</div>
-                            <div class="text-sm text-gray-500">ID: ${user.id}</div>
-                        </div>
-                    </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">${user.email}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    ${roleBadge}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    ${statusBadge}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="flex items-center space-x-2">
-                        <span class="text-sm font-medium text-gray-900">${user.sinistres_en_cours}</span>
-                        <div class="w-16 bg-gray-200 rounded-full h-2">
-                            <div class="${progressColor} h-2 rounded-full" style="width: ${Math.min(progressPercentage, 100)}%"></div>
-                        </div>
-                    </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${user.limite_sinistres}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div class="flex items-center space-x-2 justify-end">
-                        <button onclick="editUser(${user.id})" class="text-saar-blue hover:text-blue-800 transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                            </svg>
-                        </button>
-                        <button onclick="toggleUserStatus(${user.id})" class="text-gray-600 hover:text-gray-800 transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                            </svg>
-                        </button>
-                        <button onclick="deleteUser(${user.id})" class="text-red-600 hover:text-red-800 transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </td>
-            `;
-
-            return row;
-        }
-
-        // Mettre à jour les statistiques
-        function updateUserStats() {
-            const totalUsers = sampleUsers.length;
-            const activeUsers = sampleUsers.filter(u => u.actif).length;
-            const managers = sampleUsers.filter(u => u.role === 'gestionnaire' || u.role === 'admin').length;
-            const suspendedUsers = sampleUsers.filter(u => !u.actif).length;
-
-            document.getElementById('total-users').textContent = totalUsers;
-            document.getElementById('active-users').textContent = activeUsers;
-            document.getElementById('total-managers').textContent = managers;
-            document.getElementById('suspended-users').textContent = suspendedUsers;
-        }
-
-        // Actions des utilisateurs
-        function editUser(id) {
-            alert(`Éditer l'utilisateur ${id}`);
-        }
-
-        function toggleUserStatus(id) {
-            alert(`Basculer le statut de l'utilisateur ${id}`);
-        }
-
-        function deleteUser(id) {
-            if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
-                alert(`Supprimer l'utilisateur ${id}`);
-            }
-        }
-
+        // Gestion du modal
         function openAddUserModal() {
-            alert('Ouvrir le modal d\'ajout d\'utilisateur');
+            document.getElementById('add-user-modal').classList.remove('hidden');
         }
 
-        function resetFilters() {
-            document.getElementById('search-users').value = '';
-            document.getElementById('filter-role').value = '';
-            document.getElementById('filter-status').value = '';
-            loadUsers();
+        function closeAddUserModal() {
+            document.getElementById('add-user-modal').classList.add('hidden');
         }
 
-        // Close dropdowns when clicking outside
+        function toggleAssureField() {
+            const role = document.getElementById('role').value;
+            const container = document.getElementById('numero-assure-container');
+
+            if (role === 'assure') {
+                container.classList.remove('hidden');
+                document.getElementById('numero_assure').required = true;
+            } else {
+                container.classList.add('hidden');
+                document.getElementById('numero_assure').required = false;
+            }
+        }
+
         document.addEventListener('click', function(event) {
             const notificationsDropdown = document.getElementById('notifications-dropdown');
             const userMenu = document.getElementById('user-menu');
@@ -556,6 +660,13 @@
                 userMenu.classList.add('hidden');
             }
         });
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('add-user-modal');
+            if (event.target === modal) {
+                closeAddUserModal();
+            }
+        }
     </script>
 
     <style>
