@@ -921,11 +921,6 @@
             const constatCheckbox = document.getElementById('constat');
             formData.set('constat_autorite', constatCheckbox.checked ? '1' : '0');
 
-            console.log('FormData contents:');
-            for (let [key, value] of formData.entries()) {
-                console.log(key + ':', value);
-            }
-
             const submitUrl = '/declaration/store';
 
             fetch(submitUrl, {
@@ -957,8 +952,6 @@
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Success response:');
-
                     if (data.success) {
                         showSuccessPage(data);
                     } else {
