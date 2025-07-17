@@ -374,10 +374,27 @@
                                     <label class="block text-sm font-medium text-gray-700 mb-3">Visite technique
                                         (Recto) *</label>
                                     <div
-                                        class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-saar-blue transition-all cursor-pointer">
+                                        class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-saar-blue hover:bg-blue-50 transition-all duration-300 cursor-pointer">
                                         <input type="file" accept=".pdf,.jpg,.jpeg,.png" required class="hidden">
-                                        <span class="text-sm text-saar-blue font-semibold">Télécharger</span>
-                                        <div class="upload-success hidden text-xs text-green-600 mt-1">✓ Téléchargé
+                                        <div class="upload-content">
+                                            <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" stroke="currentColor"
+                                                fill="none" viewBox="0 0 48 48">
+                                                <path
+                                                    d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                                    stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round" />
+                                            </svg>
+                                            <span class="text-sm text-saar-blue font-semibold">Cliquer pour
+                                                télécharger</span>
+                                            <p class="text-xs text-gray-500 mt-1">PDF, JPG, PNG (max 5MB)</p>
+                                        </div>
+                                        <div class="upload-success hidden">
+                                            <svg class="mx-auto h-12 w-12 text-green-500 mb-2" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                            <p class="text-sm text-green-600 font-semibold">Fichier téléchargé ✓</p>
                                         </div>
                                     </div>
                                 </div>
@@ -387,10 +404,27 @@
                                     <label class="block text-sm font-medium text-gray-700 mb-3">Visite technique
                                         (Verso) *</label>
                                     <div
-                                        class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-saar-blue transition-all cursor-pointer">
+                                        class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-saar-blue hover:bg-blue-50 transition-all duration-300 cursor-pointer">
                                         <input type="file" accept=".pdf,.jpg,.jpeg,.png" required class="hidden">
-                                        <span class="text-sm text-saar-blue font-semibold">Télécharger</span>
-                                        <div class="upload-success hidden text-xs text-green-600 mt-1">✓ Téléchargé
+                                        <div class="upload-content">
+                                            <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" stroke="currentColor"
+                                                fill="none" viewBox="0 0 48 48">
+                                                <path
+                                                    d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                                    stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round" />
+                                            </svg>
+                                            <span class="text-sm text-saar-blue font-semibold">Cliquer pour
+                                                télécharger</span>
+                                            <p class="text-xs text-gray-500 mt-1">PDF, JPG, PNG (max 5MB)</p>
+                                        </div>
+                                        <div class="upload-success hidden">
+                                            <svg class="mx-auto h-12 w-12 text-green-500 mb-2" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                            <p class="text-sm text-green-600 font-semibold">Fichier téléchargé ✓</p>
                                         </div>
                                     </div>
                                 </div>
@@ -400,10 +434,27 @@
                                     <label class="block text-sm font-medium text-gray-700 mb-3">Attestation d'assurance
                                         *</label>
                                     <div
-                                        class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-saar-blue transition-all cursor-pointer">
+                                        class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-saar-blue hover:bg-blue-50 transition-all duration-300 cursor-pointer">
                                         <input type="file" accept=".pdf,.jpg,.jpeg,.png" required class="hidden">
-                                        <span class="text-sm text-saar-blue font-semibold">Télécharger</span>
-                                        <div class="upload-success hidden text-xs text-green-600 mt-1">✓ Téléchargé
+                                        <div class="upload-content">
+                                            <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" stroke="currentColor"
+                                                fill="none" viewBox="0 0 48 48">
+                                                <path
+                                                    d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                                    stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round" />
+                                            </svg>
+                                            <span class="text-sm text-saar-blue font-semibold">Cliquer pour
+                                                télécharger</span>
+                                            <p class="text-xs text-gray-500 mt-1">PDF, JPG, PNG (max 5MB)</p>
+                                        </div>
+                                        <div class="upload-success hidden">
+                                            <svg class="mx-auto h-12 w-12 text-green-500 mb-2" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                            <p class="text-sm text-green-600 font-semibold">Fichier téléchargé ✓</p>
                                         </div>
                                     </div>
                                 </div>
@@ -413,10 +464,27 @@
                                     <label class="block text-sm font-medium text-gray-700 mb-3">Permis de conduire
                                         *</label>
                                     <div
-                                        class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-saar-blue transition-all cursor-pointer">
+                                        class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-saar-blue hover:bg-blue-50 transition-all duration-300 cursor-pointer">
                                         <input type="file" accept=".pdf,.jpg,.jpeg,.png" required class="hidden">
-                                        <span class="text-sm text-saar-blue font-semibold">Télécharger</span>
-                                        <div class="upload-success hidden text-xs text-green-600 mt-1">✓ Téléchargé
+                                        <div class="upload-content">
+                                            <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" stroke="currentColor"
+                                                fill="none" viewBox="0 0 48 48">
+                                                <path
+                                                    d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                                    stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round" />
+                                            </svg>
+                                            <span class="text-sm text-saar-blue font-semibold">Cliquer pour
+                                                télécharger</span>
+                                            <p class="text-xs text-gray-500 mt-1">PDF, JPG, PNG (max 5MB)</p>
+                                        </div>
+                                        <div class="upload-success hidden">
+                                            <svg class="mx-auto h-12 w-12 text-green-500 mb-2" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                            <p class="text-sm text-green-600 font-semibold">Fichier téléchargé ✓</p>
                                         </div>
                                     </div>
                                 </div>
