@@ -244,35 +244,17 @@
         </div>
     </div>
 
-    <!-- Documents reçus -->
-    <div class="section">
-        <div class="section-title">📎 DOCUMENTS REÇUS ({{ $sinistre->documents->count() }})</div>
-        <div class="documents-list">
-            @foreach ($sinistre->documents as $document)
-                <div class="document-item">
-                    <strong>{{ $document->libelle_document }}</strong>
-                    <span style="float: right; color: #718096;">{{ round($document->taille_fichier / 1024, 1) }}
-                        KB</span>
-                </div>
-            @endforeach
-        </div>
-    </div>
-
     <!-- Prochaines étapes -->
     <div class="section">
         <div class="section-title"> PROCHAINES ÉTAPES</div>
         <div style="background: #ebf8ff; padding: 15px; border-radius: 5px;">
-            <div style="margin-bottom: 8px;"><strong>1.</strong> Vous recevrez un email de confirmation</div>
-            <div style="margin-bottom: 8px;"><strong>2.</strong> Un gestionnaire sera assigné sous 24h ouvrées</div>
-            <div><strong>3.</strong> Notre équipe étudiera votre dossier et vous contactera si nécessaire</div>
+            <div style="margin-bottom: 8px;"><strong>1.</strong> Un gestionnaire sera assigné sous 24h ouvrées</div>
+            <div style="margin-bottom: 8px;"><strong>2.</strong> Notre équipe étudiera votre dossier et vous contactera si nécessaire</div>
         </div>
     </div>
 
     <!-- Pied de page -->
     <div class="footer">
-        <div class="footer-contact">
-            <strong>Contact :</strong> {{ $company['phone'] }} | {{ $company['email'] }}
-        </div>
         <div class="footer-note">
             Document généré le {{ $date_generation }} | Conservez ce reçu comme preuve de votre déclaration
         </div>

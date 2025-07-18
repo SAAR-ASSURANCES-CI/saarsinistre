@@ -14,13 +14,30 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         User::firstOrCreate([
-            'email' => 'AKOMPISSI@saar-assurances.com'
+            'email' => 'admin@saar-assurances.com'
         ], [
             'nom_complet' => 'Administrateur SAAR',
             'password' => Hash::make('password'),
             'role' => 'admin',
             'actif' => true,
-            'limite_sinistres' => 50
+        ]);
+
+        User::firstOrCreate([
+            'email' => 'AKOMPISSI@saar-assurances.com'
+        ], [
+            'nom_complet' => 'Awouatsa Kompissi',
+            'password' => Hash::make('password'),
+            'role' => 'gestionnaire',
+            'actif' => true,
+        ]);
+
+        User::firstOrCreate([
+            'email' => 'karimkompissi@gmail.com'
+        ], [
+            'nom_complet' => 'Karim kompissi',
+            'password' => Hash::make('password'),
+            'role' => 'gestionnaire',
+            'actif' => true,
         ]);
 
         User::firstOrCreate([
@@ -30,7 +47,6 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
             'role' => 'gestionnaire',
             'actif' => true,
-            'limite_sinistres' => 20
         ]);
 
         $this->command->info('Utilisateurs de test créés avec succès !');

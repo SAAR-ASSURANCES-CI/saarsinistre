@@ -61,7 +61,7 @@ class Sinistre extends Model
     }
 
     /**
-     * 
+     *
      * @return BelongsTo<User, Sinistre>
      */
     public function assure(): BelongsTo

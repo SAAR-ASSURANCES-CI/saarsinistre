@@ -225,7 +225,6 @@ class DeclarationController extends Controller
     private function declencherNotifications(Sinistre $sinistre): void
     {
         try {
-
             //SEND EMAIL TO GESTIONNAIRES
             $this->sendEmail($sinistre);
 
@@ -288,7 +287,7 @@ class DeclarationController extends Controller
             $orangeService->sendSmsConfirmationSinistre(
                 $telephone,
                 $user->nom_complet,
-                "COMPTE-{$user->numero_assure}"
+                "{$user->numero_assure}"
             );
         } catch (Exception $e) {
             Log::error('Erreur lors de l\'envoi du SMS de connexion: ' . $e->getMessage());
@@ -298,7 +297,9 @@ class DeclarationController extends Controller
     private function sendEmail(Sinistre $sinistre)
     {
         try {
-            $gestionnaires = User::whereIn('role', ['gestionnaire', 'admin'])->get();
+            $gestionnaires = User::where('role', 'gestionnaire')
+                ->where('actif', true)
+                ->get();
 
             dispatch(function () use ($sinistre, $gestionnaires) {
 

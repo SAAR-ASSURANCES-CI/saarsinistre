@@ -24,7 +24,6 @@ class User extends Authenticatable
         'role',
         'actif',
         'sinistres_en_cours',
-        'limite_sinistres',
         'password',
         'numero_assure',
         'password_temp',
