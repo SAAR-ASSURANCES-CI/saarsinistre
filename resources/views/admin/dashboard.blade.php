@@ -215,7 +215,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2h4a1 1 0 011 1v14a2 2 0 01-2 2H4a2 2 0 01-2-2V5a1 1 0 011-1h4z">
                         </path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m-4 4h4">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 8h10M7 12h4m-4 4h4">
                         </path>
                     </svg>
                     <span class="font-medium">Média</span>
@@ -268,6 +269,22 @@
             <div
                 class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300">
                 <div class="flex items-center">
+                    <div class="p-3 rounded-xl bg-blue-100">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">En Cours</p>
+                        <p id="stat-en-cours" class="text-2xl font-bold text-gray-900">{{ $stats['en_cours'] }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300">
+                <div class="flex items-center">
                     <div class="p-3 rounded-xl bg-green-100">
                         <svg class="w-6 h-6 text-saar-green" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
@@ -278,23 +295,6 @@
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-600">Traités</p>
                         <p id="stat-traites" class="text-2xl font-bold text-gray-900">{{ $stats['traites'] }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <div
-                class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300">
-                <div class="flex items-center">
-                    <div class="p-3 rounded-xl bg-red-100">
-                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z">
-                            </path>
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">En Retard</p>
-                        <p id="stat-en-retard" class="text-2xl font-bold text-gray-900">{{ $stats['en_retard'] }}</p>
                     </div>
                 </div>
             </div>
@@ -973,11 +973,11 @@
                     </div>
 
                     ${sinistre.circonstances ? `
-                                            <div class="bg-yellow-50 p-4 rounded-lg">
-                                                <h4 class="font-semibold text-gray-900 mb-3">Circonstances</h4>
-                                                <p class="text-sm text-gray-700">${sinistre.circonstances}</p>
-                                            </div>
-                                        ` : ''}
+                                                            <div class="bg-yellow-50 p-4 rounded-lg">
+                                                                <h4 class="font-semibold text-gray-900 mb-3">Circonstances</h4>
+                                                                <p class="text-sm text-gray-700">${sinistre.circonstances}</p>
+                                                            </div>
+                                                        ` : ''}
                 </div>
             </div>
 
