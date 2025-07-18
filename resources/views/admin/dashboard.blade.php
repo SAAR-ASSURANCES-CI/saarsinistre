@@ -616,6 +616,7 @@
 
         async function loadSinistres() {
             showLoading(true);
+
             try {
                 const params = new URLSearchParams({
                     page: currentPage,
@@ -630,6 +631,7 @@
                 updatePagination(data);
 
             } catch (error) {
+                console.error('Erreur lors du chargement des sinistres:', error);
                 displayEmptyState();
             } finally {
                 showLoading(false);
@@ -966,11 +968,11 @@
                     </div>
 
                     ${sinistre.circonstances ? `
-                                                            <div class="bg-yellow-50 p-4 rounded-lg">
-                                                                <h4 class="font-semibold text-gray-900 mb-3">Circonstances</h4>
-                                                                <p class="text-sm text-gray-700">${sinistre.circonstances}</p>
-                                                            </div>
-                                                        ` : ''}
+                                                        <div class="bg-yellow-50 p-4 rounded-lg">
+                                                            <h4 class="font-semibold text-gray-900 mb-3">Circonstances</h4>
+                                                            <p class="text-sm text-gray-700">${sinistre.circonstances}</p>
+                                                        </div>
+                                                    ` : ''}
                 </div>
             </div>
 
