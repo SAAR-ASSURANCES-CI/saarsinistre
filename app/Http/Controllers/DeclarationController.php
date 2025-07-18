@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\SendSinistreNotificationEmail;
 use Exception;
 use App\Models\User;
 use App\Models\Sinistre;
@@ -12,8 +11,11 @@ use App\Models\DocumentSinistre;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Jobs\SendAccountCreationSms;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Http;
+use App\Jobs\SendSinistreConfirmationSms;
+use App\Jobs\SendSinistreNotificationEmail;
+use App\Http\Requests\StoreDeclarationRequest;
 
 class DeclarationController extends Controller
 {
@@ -23,20 +25,16 @@ class DeclarationController extends Controller
         return view('declaration.formulaire');
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(StoreDeclarationRequest $request): JsonResponse
     {
         try {
-
-            $validated = $this->validateRequest($request);
-
             DB::beginTransaction();
 
-            $user = $this->creerCompteAssure($validated);
+            $user = $this->creerCompteAssure($request->validated());
 
-            $this->envoyerSMSConnexion($user, $validated['telephone_assure']);
+            SendAccountCreationSms::dispatch($user, $request->telephone_assure);
 
-            $validated['assure_id'] = $user->id;
-            $sinistre = $this->creerSinistre($validated);
+            $sinistre = $this->creerSinistre($request->validated() + ['assure_id' => $user->id]);
 
             $this->gererDocuments($request, $sinistre);
 
@@ -60,73 +58,6 @@ class DeclarationController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
-    }
-
-
-    private function validateRequest(Request $request): array
-    {
-        return $request->validate([
-            'nom_assure' => 'required|string|max:255',
-            'email_assure' => 'nullable|email|max:255',
-            'telephone_assure' => 'required|string|max:20',
-            'numero_police' => 'required|string|max:50',
-
-            'date_sinistre' => 'required|date|before_or_equal:today',
-            'heure_sinistre' => 'nullable|date_format:H:i',
-            'lieu_sinistre' => 'required|string|max:500',
-            'circonstances' => 'required|string|max:2000',
-            'conducteur_nom' => 'required|string|max:255',
-
-            'constat_autorite' => 'boolean',
-            'officier_nom' => 'nullable|required_if:constat_autorite,true|string|max:255',
-            'commissariat' => 'nullable|required_if:constat_autorite,true|string|max:255',
-            'dommages_releves' => 'nullable|string|max:1000',
-
-            'carte_grise_recto' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'carte_grise_verso' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'visite_technique_recto' => 'required|file|mimes:pdf,jpg,jpeg,png|max:1280',
-            'visite_technique_verso' => 'required|file|mimes:pdf,jpg,jpeg,png|max:1280',
-            'attestation_assurance' => 'required|file|mimes:pdf,jpg,jpeg,png|max:1280',
-            'permis_conduire' => 'required|file|mimes:pdf,jpg,jpeg,png|max:1280',
-
-            'photos_vehicule' => 'nullable|array|max:100',
-            'photos_vehicule.*' => 'file|mimes:jpg,jpeg,png|max:1280',
-        ], [
-            'nom_assure.required' => 'Le nom complet est obligatoire.',
-            'nom_assure.max' => 'Le nom ne doit pas dépasser 255 caractères.',
-            'email_assure.required' => 'L\'adresse email est obligatoire.',
-            'email_assure.email' => 'L\'adresse email n\'est pas valide.',
-            'email_assure.max' => 'L\'email ne doit pas dépasser 255 caractères.',
-            'telephone_assure.required' => 'Le numéro de téléphone est obligatoire.',
-            'telephone_assure.max' => 'Le téléphone ne doit pas dépasser 20 caractères.',
-            'numero_police.required' => 'Le numéro de police est obligatoire.',
-            'numero_police.max' => 'Le numéro de police ne doit pas dépasser 50 caractères.',
-
-            'date_sinistre.required' => 'La date du sinistre est obligatoire.',
-            'date_sinistre.before_or_equal' => 'La date du sinistre ne peut pas être dans le futur.',
-            'lieu_sinistre.required' => 'Le lieu du sinistre est obligatoire.',
-            'lieu_sinistre.max' => 'Le lieu ne doit pas dépasser 500 caractères.',
-            'circonstances.required' => 'La description des circonstances est obligatoire.',
-            'circonstances.max' => 'La description ne doit pas dépasser 2000 caractères.',
-            'conducteur_nom.required' => 'Le nom du conducteur est obligatoire.',
-            'conducteur_nom.max' => 'Le nom du conducteur ne doit pas dépasser 255 caractères.',
-
-            'officier_nom.required_if' => 'Le nom de l\'officier est requis si un constat a été établi.',
-            'officier_nom.max' => 'Le nom de l\'officier ne doit pas dépasser 255 caractères.',
-            'commissariat.required_if' => 'Le commissariat/brigade est requis si un constat a été établi.',
-            'commissariat.max' => 'Le nom du commissariat ne doit pas dépasser 255 caractères.',
-            'dommages_releves.max' => 'La description des dommages ne doit pas dépasser 1000 caractères.',
-
-            'carte_grise_recto.required' => 'La carte grise (recto) est obligatoire.',
-            'carte_grise_verso.required' => 'La carte grise (verso) est obligatoire.',
-            'visite_technique_recto.required' => 'La visite technique (recto) est obligatoire.',
-            'visite_technique_verso.required' => 'La visite technique (verso) est obligatoire.',
-            'attestation_assurance.required' => 'L\'attestation d\'assurance est obligatoire.',
-            'permis_conduire.required' => 'Le permis de conduire est obligatoire.',
-            '*.mimes' => 'Format de fichier non autorisé. Utilisez PDF, JPG, JPEG ou PNG.',
-            '*.max' => 'La taille du fichier ne doit pas dépasser 5MB.',
-            'photos_vehicule.max' => 'Vous ne pouvez télécharger que 100 photos maximum.',
-        ]);
     }
 
     private function creerSinistre(array $validated): Sinistre
@@ -229,7 +160,7 @@ class DeclarationController extends Controller
             $this->sendEmail($sinistre);
 
             //SEND SMS TO ASSURE
-            $this->sendSmsConfirmation($sinistre);
+            SendSinistreConfirmationSms::dispatch($sinistre);
 
             // $this->declencherWorkflowN8n('nouveau_sinistre', $sinistre);
         } catch (Exception $e) {
@@ -273,27 +204,6 @@ class DeclarationController extends Controller
         return $user;
     }
 
-    private function envoyerSMSConnexion(User $user, string $telephone): void
-    {
-        try {
-            $orangeService = app(\App\Services\OrangeService::class);
-
-            $message = "SAAR ASSURANCE\n";
-            $message .= "Votre espace client est prêt:\n";
-            $message .= "Identifiant: {$user->numero_assure}\n";
-            $message .= "Code: {$user->password_temp}\n";
-            $message .= "Valable 48h\n";
-
-            $orangeService->sendSmsConfirmationSinistre(
-                $telephone,
-                $user->nom_complet,
-                "{$user->numero_assure}"
-            );
-        } catch (Exception $e) {
-            Log::error('Erreur lors de l\'envoi du SMS de connexion: ' . $e->getMessage());
-        }
-    }
-
     private function sendEmail(Sinistre $sinistre)
     {
         try {
@@ -326,78 +236,32 @@ class DeclarationController extends Controller
         }
     }
 
-    private function sendSmsConfirmation(Sinistre $sinistre): void
-    {
-        try {
-            if (empty($sinistre->telephone_assure)) {
-                Log::warning('Numéro de téléphone manquant pour le sinistre', [
-                    'sinistre_id' => $sinistre->id,
-                    'numero_sinistre' => $sinistre->numero_sinistre
-                ]);
-                return;
-            }
+    // private function sendSmsConfirmation(Sinistre $sinistre): void
+    // {
+    //     try {
+    //         if (empty($sinistre->telephone_assure)) {
+    //             Log::warning('Numéro de téléphone manquant pour le sinistre', [
+    //                 'sinistre_id' => $sinistre->id,
+    //                 'numero_sinistre' => $sinistre->numero_sinistre
+    //             ]);
+    //             return;
+    //         }
 
-            $orangeService = app(\App\Services\OrangeService::class);
+    //         $orangeService = app(\App\Services\OrangeService::class);
 
-            $orangeService->sendSmsConfirmationSinistre(
-                $sinistre->telephone_assure,
-                $sinistre->nom_assure,
-                $sinistre->numero_sinistre
-            );
-        } catch (Exception $e) {
-            Log::error('Erreur lors de l\'envoi du SMS de confirmation', [
-                'sinistre_id' => $sinistre->id,
-                'numero_sinistre' => $sinistre->numero_sinistre,
-                'error' => $e->getMessage()
-            ]);
-        }
-    }
-
-    /**
-     * Déclencher le workflow n8n
-     */
-    private function declencherWorkflowN8n(string $webhook, Sinistre $sinistre): void
-    {
-        $webhookUrl = config('n8n.webhook_url', default: env('N8N_WEBHOOK_URL'));
-
-        if (!$webhookUrl) {
-            Log::warning('URL webhook n8n non configurée');
-            return;
-        }
-
-        try {
-            $payload = [
-                'sinistre_id' => $sinistre->id,
-                'numero_sinistre' => $sinistre->numero_sinistre,
-                'nom_assure' => $sinistre->nom_assure,
-                'email_assure' => $sinistre->email_assure ?? '',
-                'telephone_assure' => $sinistre->telephone_assure,
-                'numero_police' => $sinistre->numero_police,
-                'date_sinistre' => $sinistre->date_sinistre,
-                'heure_sinistre' => $sinistre->heure_sinistre ? $sinistre->heure_sinistre->format('H:i') : 'Non précisée',
-                'lieu_sinistre' => $sinistre->lieu_sinistre,
-                'circonstances' => $sinistre->circonstances,
-                'conducteur_nom' => $sinistre->conducteur_nom,
-                'constat_autorite' => $sinistre->constat_autorite,
-                'statut' => ucfirst(str_replace('_', ' ', $sinistre->statut)),
-                'date_creation' => $sinistre->created_at->format('d/m/Y H:i'),
-
-                'officier_nom' => $sinistre->officier_nom ?? '',
-                'commissariat' => $sinistre->commissariat ?? '',
-                'dommages_releves' => $sinistre->dommages_releves ?? '',
-            ];
-
-            $response = Http::timeout(10)->post($webhookUrl . '/' . $webhook, $payload);
-
-            if ($response->successful()) {
-                Log::info("Webhook n8n déclenché avec succès pour le sinistre {$sinistre->numero_sinistre}");
-            } else {
-                Log::warning("Échec du webhook n8n: " . $response->status() . " - " . $response->body());
-            }
-        } catch (Exception $e) {
-            Log::error('Erreur webhook n8n: ' . $e->getMessage());
-        }
-    }
+    //         $orangeService->sendSmsConfirmationSinistre(
+    //             $sinistre->telephone_assure,
+    //             $sinistre->nom_assure,
+    //             $sinistre->numero_sinistre
+    //         );
+    //     } catch (Exception $e) {
+    //         Log::error('Erreur lors de l\'envoi du SMS de confirmation', [
+    //             'sinistre_id' => $sinistre->id,
+    //             'numero_sinistre' => $sinistre->numero_sinistre,
+    //             'error' => $e->getMessage()
+    //         ]);
+    //     }
+    // }
 
     public function confirmation($sinistreId)
     {
