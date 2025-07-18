@@ -217,7 +217,7 @@ class OrangeService
                 'outboundSMSMessageRequest' => [
                     'address' => 'tel:+' . $recipientWithoutPlus,
                     'senderAddress' => 'tel:+' . $countrySenderNumber,
-                    'senderName' => 'SAAR CI',
+                    'senderName' => 'SAAR ASSURANCE CÔTE D\'IVOIRE',
                     'outboundSMSTextMessage' => [
                         'message' => $message,
                     ],
