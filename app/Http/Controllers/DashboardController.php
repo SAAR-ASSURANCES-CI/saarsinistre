@@ -95,7 +95,7 @@ class DashboardController extends Controller
                         return;
                     }
 
-                    if ($value && !User::where('id', $value)->whereIn('role', ['gestionnaire', 'admin'])->exists()) {
+                    if ($value && !User::where('id', $value)->where('role', 'gestionnaire')->exists()) {
                         $fail('Le gestionnaire sélectionné est invalide.');
                     }
                 }

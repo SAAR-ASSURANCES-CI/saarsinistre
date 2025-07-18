@@ -557,7 +557,6 @@
 
         // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Initialisation du dashboard...');
             loadSinistres();
             loadNotifications();
             setupEventListeners();
@@ -610,7 +609,6 @@
 
                 return await response.json();
             } catch (error) {
-                console.error('API Request failed:', error);
                 showErrorMessage('Erreur de communication avec le serveur');
                 throw error;
             }
@@ -618,8 +616,6 @@
 
         async function loadSinistres() {
             showLoading(true);
-            console.log('Chargement des sinistres...');
-
             try {
                 const params = new URLSearchParams({
                     page: currentPage,
@@ -630,13 +626,10 @@
                 });
 
                 const data = await apiRequest(`${API_BASE}/dashboard/sinistres?${params}`);
-                console.log('Données reçues:', data);
-
                 displaySinistres(data.data);
                 updatePagination(data);
 
             } catch (error) {
-                console.error('Erreur lors du chargement des sinistres:', error);
                 displayEmptyState();
             } finally {
                 showLoading(false);
