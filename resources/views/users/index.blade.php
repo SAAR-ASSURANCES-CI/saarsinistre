@@ -302,12 +302,6 @@
                                     <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Statut
                                     </th>
-                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Sinistres
-                                    </th>
-                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Limite
-                                    </th>
                                     <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Actions
                                     </th>
@@ -351,21 +345,6 @@
                                         @else
                                             <span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">Inactif</span>
                                         @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center space-x-2">
-                                            <span class="text-sm font-medium text-gray-900">{{ $user->sinistres_en_cours }}</span>
-                                            <div class="w-16 bg-gray-200 rounded-full h-2">
-                                                @php
-                                                    $progressPercentage = ($user->sinistres_en_cours / $user->limite_sinistres) * 100;
-                                                    $progressColor = $progressPercentage > 80 ? 'bg-red-500' : ($progressPercentage > 60 ? 'bg-yellow-500' : 'bg-green-500');
-                                                @endphp
-                                                <div class="{{ $progressColor }} h-2 rounded-full" style="width: {{ min($progressPercentage, 100) }}%"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ $user->limite_sinistres }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div class="flex items-center space-x-2 justify-end">
@@ -422,9 +401,6 @@
                                     <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Statut
                                     </th>
-                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Sinistres
-                                    </th>
                                     <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Actions
                                     </th>
@@ -453,7 +429,7 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">{{ $user->email }}</div>
+                                        <div class="text-sm text-gray-900">{{ $user->email ?? 'N/A' }}</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm text-gray-900">{{ $user->numero_assure ?? 'N/A' }}</div>
@@ -464,18 +440,6 @@
                                         @else
                                             <span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">Inactif</span>
                                         @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center space-x-2">
-                                            <span class="text-sm font-medium text-gray-900">{{ $user->sinistres_en_cours }}</span>
-                                            <div class="w-16 bg-gray-200 rounded-full h-2">
-                                                @php
-                                                    $progressPercentage = ($user->sinistres_en_cours / $user->limite_sinistres) * 100;
-                                                    $progressColor = $progressPercentage > 80 ? 'bg-red-500' : ($progressPercentage > 60 ? 'bg-yellow-500' : 'bg-green-500');
-                                                @endphp
-                                                <div class="{{ $progressColor }} h-2 rounded-full" style="width: {{ min($progressPercentage, 100) }}%"></div>
-                                            </div>
-                                        </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div class="flex items-center space-x-2 justify-end">
