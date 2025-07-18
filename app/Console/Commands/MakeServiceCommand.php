@@ -65,10 +65,7 @@ namespace App\Services;
 
 class {$name}
 {
-    public function handle()
-    {
-        // Handle the service logic
-    }
+    //
 }
 
 EOT;
