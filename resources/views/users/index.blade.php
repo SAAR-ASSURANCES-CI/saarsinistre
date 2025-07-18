@@ -19,6 +19,20 @@
             }
         }
     </script>
+
+    <style>
+        a[disabled] {
+            pointer-events: none;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .pagination-btn:disabled {
+            background-color: #e5e7eb !important;
+            color: #9ca3af !important;
+            border-color: #e5e7eb !important;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-50">
@@ -183,7 +197,7 @@
                     <option value="">Tous les rôles</option>
                     <option value="admin">Administrateur</option>
                     <option value="gestionnaire">Gestionnaire</option>
-                    <option value="user">Assuré</option>
+                    <option value="assure">Assuré</option>
                 </select>
                 <select id="filter-status"
                     class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-saar-blue focus:border-transparent">
@@ -204,10 +218,12 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-gray-500 text-sm">Total Utilisateurs</p>
-                        <p class="text-2xl font-bold text-gray-800">{{ $gestionnaires->count() + $assures->count() }}</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ $gestionnaires->count() + $assures->count() }}
+                        </p>
                     </div>
                     <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                        <svg class="w-6 h-6 text-saar-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-saar-blue" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z">
                             </path>
@@ -222,7 +238,8 @@
                         <p class="text-2xl font-bold text-gray-800">{{ $gestionnaires->count() }}</p>
                     </div>
                     <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
@@ -233,10 +250,13 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-gray-500 text-sm">Utilisateurs Actifs</p>
-                        <p class="text-2xl font-bold text-gray-800">{{ $gestionnaires->where('actif', true)->count() + $assures->where('actif', true)->count() }}</p>
+                        <p class="text-2xl font-bold text-gray-800">
+                            {{ $gestionnaires->where('actif', true)->count() + $assures->where('actif', true)->count() }}
+                        </p>
                     </div>
                     <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z">
                             </path>
@@ -248,7 +268,9 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-gray-500 text-sm">Comptes Suspendus</p>
-                        <p class="text-2xl font-bold text-gray-800">{{ $gestionnaires->where('actif', false)->count() + $assures->where('actif', false)->count() }}</p>
+                        <p class="text-2xl font-bold text-gray-800">
+                            {{ $gestionnaires->where('actif', false)->count() + $assures->where('actif', false)->count() }}
+                        </p>
                     </div>
                     <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
                         <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -265,16 +287,18 @@
         <div class="mb-6 border-b border-gray-200">
             <ul class="flex flex-wrap -mb-px" id="users-tabs" role="tablist">
                 <li class="mr-2" role="presentation">
-                    <button class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300"
-                            id="gestionnaires-tab" data-tabs-target="#gestionnaires" type="button" role="tab"
-                            aria-controls="gestionnaires" aria-selected="true">
+                    <button
+                        class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300"
+                        id="gestionnaires-tab" data-tabs-target="#gestionnaires" type="button" role="tab"
+                        aria-controls="gestionnaires" aria-selected="true">
                         Gestionnaires & Admins
                     </button>
                 </li>
                 <li class="mr-2" role="presentation">
-                    <button class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300"
-                            id="assures-tab" data-tabs-target="#assures" type="button" role="tab"
-                            aria-controls="assures" aria-selected="false">
+                    <button
+                        class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300"
+                        id="assures-tab" data-tabs-target="#assures" type="button" role="tab"
+                        aria-controls="assures" aria-selected="false">
                         Assurés
                     </button>
                 </li>
@@ -284,97 +308,130 @@
         <!-- Contenu des onglets -->
         <div class="tab-content">
             <!-- Onglet Gestionnaires -->
-            <div class="hidden p-4 rounded-lg bg-gray-50" id="gestionnaires" role="tabpanel" aria-labelledby="gestionnaires-tab">
+            <div class="hidden p-4 rounded-lg bg-gray-50" id="gestionnaires" role="tabpanel"
+                aria-labelledby="gestionnaires-tab">
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Utilisateur
                                     </th>
-                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Email
                                     </th>
-                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Rôle
                                     </th>
-                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Statut
                                     </th>
-                                    <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th
+                                        class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Actions
                                     </th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach($gestionnaires as $user)
-                                <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div class="w-10 h-10 bg-gradient-to-r from-saar-blue to-blue-600 rounded-full flex items-center justify-center">
-                                                <span class="text-white text-sm font-semibold">
-                                                    {{ substr($user->nom_complet, 0, 1) }}
-                                                    @php
-                                                        $lastSpace = strrpos($user->nom_complet, ' ');
-                                                        echo $lastSpace !== false
-                                                            ? substr($user->nom_complet, $lastSpace + 1, 1)
-                                                            : '';
-                                                    @endphp
-                                                </span>
+                                @foreach ($gestionnaires as $user)
+                                    <tr class="user-row hover:bg-gray-50 transition-colors"
+                                        data-role="{{ $user->role }}" data-status="{{ $user->actif ? '1' : '0' }}">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div
+                                                    class="w-10 h-10 bg-gradient-to-r from-saar-blue to-blue-600 rounded-full flex items-center justify-center">
+                                                    <span class="text-white text-sm font-semibold">
+                                                        {{ substr($user->nom_complet, 0, 1) }}
+                                                        @php
+                                                            $lastSpace = strrpos($user->nom_complet, ' ');
+                                                            echo $lastSpace !== false
+                                                                ? substr($user->nom_complet, $lastSpace + 1, 1)
+                                                                : '';
+                                                        @endphp
+                                                    </span>
+                                                </div>
+                                                <div class="ml-4">
+                                                    <div class="text-sm font-medium text-gray-900">
+                                                        {{ $user->nom_complet }}</div>
+                                                    <div class="text-sm text-gray-500">ID: {{ $user->id }}</div>
+                                                </div>
                                             </div>
-                                            <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900">{{ $user->nom_complet }}</div>
-                                                <div class="text-sm text-gray-500">ID: {{ $user->id }}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">{{ $user->email }}</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        @if($user->role === 'admin')
-                                            <span class="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">Administrateur</span>
-                                        @else
-                                            <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">Gestionnaire</span>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        @if($user->actif)
-                                            <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Actif</span>
-                                        @else
-                                            <span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">Inactif</span>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <div class="flex items-center space-x-2 justify-end">
-                                            <button onclick="editUser({{ $user->id }})" class="text-saar-blue hover:text-blue-800 transition-colors">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                                </svg>
-                                            </button>
-                                            <form action="{{ route('dashboard.users.toggle-status', $user->id) }}" method="POST" class="inline">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button type="submit" class="text-gray-600 hover:text-gray-800 transition-colors">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900">{{ $user->email }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            @if ($user->role === 'admin')
+                                                <span
+                                                    class="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">Administrateur</span>
+                                            @else
+                                                <span
+                                                    class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">Gestionnaire</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            @if ($user->actif)
+                                                <span
+                                                    class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Actif</span>
+                                            @else
+                                                <span
+                                                    class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">Inactif</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <div class="flex items-center space-x-2 justify-end">
+                                                <button onclick="editUser({{ $user->id }})"
+                                                    class="text-saar-blue hover:text-blue-800 transition-colors">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                                        </path>
                                                     </svg>
                                                 </button>
-                                            </form>
-                                            <form action="{{ route('dashboard.users.destroy', $user->id) }}" method="POST" class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')" class="text-red-600 hover:text-red-800 transition-colors">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                                    </svg>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
+                                                <form action="{{ route('dashboard.users.toggle-status', $user->id) }}"
+                                                    method="POST" class="inline">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="submit"
+                                                        class="text-gray-600 hover:text-gray-800 transition-colors">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z">
+                                                            </path>
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                                                            </path>
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                                <form action="{{ route('dashboard.users.destroy', $user->id) }}"
+                                                    method="POST" class="inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit"
+                                                        onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')"
+                                                        class="text-red-600 hover:text-red-800 transition-colors">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                            </path>
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
                                 @endforeach
                             </tbody>
                         </table>
@@ -383,93 +440,125 @@
             </div>
 
             <!-- Onglet Assurés -->
-            <div class="hidden p-4 rounded-lg bg-gray-50" id="assures" role="tabpanel" aria-labelledby="assures-tab">
+            <div class="hidden p-4 rounded-lg bg-gray-50" id="assures" role="tabpanel"
+                aria-labelledby="assures-tab">
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Utilisateur
                                     </th>
-                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Email
                                     </th>
-                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Numéro Assuré
                                     </th>
-                                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Statut
                                     </th>
-                                    <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th
+                                        class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Actions
                                     </th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach($assures as $user)
-                                <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div class="w-10 h-10 bg-gradient-to-r from-saar-blue to-blue-600 rounded-full flex items-center justify-center">
-                                                <span class="text-white text-sm font-semibold">
-                                                    {{ substr($user->nom_complet, 0, 1) }}
-                                                    @php
-                                                        $lastSpace = strrpos($user->nom_complet, ' ');
-                                                        echo $lastSpace !== false
-                                                            ? substr($user->nom_complet, $lastSpace + 1, 1)
-                                                            : '';
-                                                    @endphp
-                                                </span>
+                                @foreach ($assures as $user)
+                                    <tr class="user-row hover:bg-gray-50 transition-colors" data-role="assure"
+                                        data-status="{{ $user->actif ? '1' : '0' }}">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div
+                                                    class="w-10 h-10 bg-gradient-to-r from-saar-blue to-blue-600 rounded-full flex items-center justify-center">
+                                                    <span class="text-white text-sm font-semibold">
+                                                        {{ substr($user->nom_complet, 0, 1) }}
+                                                        @php
+                                                            $lastSpace = strrpos($user->nom_complet, ' ');
+                                                            echo $lastSpace !== false
+                                                                ? substr($user->nom_complet, $lastSpace + 1, 1)
+                                                                : '';
+                                                        @endphp
+                                                    </span>
+                                                </div>
+                                                <div class="ml-4">
+                                                    <div class="text-sm font-medium text-gray-900">
+                                                        {{ $user->nom_complet }}</div>
+                                                    <div class="text-sm text-gray-500">ID: {{ $user->id }}</div>
+                                                </div>
                                             </div>
-                                            <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900">{{ $user->nom_complet }}</div>
-                                                <div class="text-sm text-gray-500">ID: {{ $user->id }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900">{{ $user->email ?? 'N/A' }}</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-900">{{ $user->numero_assure ?? 'N/A' }}
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">{{ $user->email ?? 'N/A' }}</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">{{ $user->numero_assure ?? 'N/A' }}</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        @if($user->actif)
-                                            <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Actif</span>
-                                        @else
-                                            <span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">Inactif</span>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <div class="flex items-center space-x-2 justify-end">
-                                            <button onclick="editUser({{ $user->id }})" class="text-saar-blue hover:text-blue-800 transition-colors">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                                </svg>
-                                            </button>
-                                            <form action="{{ route('dashboard.users.toggle-status', $user->id) }}" method="POST" class="inline">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button type="submit" class="text-gray-600 hover:text-gray-800 transition-colors">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            @if ($user->actif)
+                                                <span
+                                                    class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Actif</span>
+                                            @else
+                                                <span
+                                                    class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">Inactif</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <div class="flex items-center space-x-2 justify-end">
+                                                <button onclick="editUser({{ $user->id }})"
+                                                    class="text-saar-blue hover:text-blue-800 transition-colors">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                                        </path>
                                                     </svg>
                                                 </button>
-                                            </form>
-                                            <form action="{{ route('dashboard.users.destroy', $user->id) }}" method="POST" class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')" class="text-red-600 hover:text-red-800 transition-colors">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                                    </svg>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
+                                                <form action="{{ route('dashboard.users.toggle-status', $user->id) }}"
+                                                    method="POST" class="inline">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="submit"
+                                                        class="text-gray-600 hover:text-gray-800 transition-colors">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z">
+                                                            </path>
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                                                            </path>
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                                <form action="{{ route('dashboard.users.destroy', $user->id) }}"
+                                                    method="POST" class="inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit"
+                                                        onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')"
+                                                        class="text-red-600 hover:text-red-800 transition-colors">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                            </path>
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
                                 @endforeach
                             </tbody>
                         </table>
@@ -480,21 +569,81 @@
 
         <!-- Pagination -->
         <div class="flex items-center justify-between mt-6">
-            <div class="flex items-center text-sm text-gray-700">
-                <span>Affichage de <span class="font-medium">1</span> à <span class="font-medium">{{ $gestionnaires->count() + $assures->count() }}</span> sur <span
-                        class="font-medium">{{ $gestionnaires->count() + $assures->count() }}</span> résultats</span>
+            <!-- Pagination pour les gestionnaires -->
+            <div id="gestionnaires-pagination" class="hidden w-full">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center text-sm text-gray-700">
+                        <span>
+                            Affichage de <span class="font-medium">{{ $gestionnaires->firstItem() }}</span>
+                            à <span class="font-medium">{{ $gestionnaires->lastItem() }}</span> sur
+                            <span class="font-medium">{{ $gestionnaires->total() }}</span> résultats
+                        </span>
+                    </div>
+
+                    <div class="flex space-x-2">
+                        <div class="flex items-center space-x-2">
+                            <a href="{{ $gestionnaires->previousPageUrl() }}"
+                                class="px-3 py-1 border rounded-lg {{ !$gestionnaires->onFirstPage() ? 'bg-white hover:bg-gray-50' : 'bg-gray-100 cursor-not-allowed' }}"
+                                @if ($gestionnaires->onFirstPage()) disabled @endif>
+                                &larr; Préc.
+                            </a>
+                            <span class="px-3 py-1 bg-saar-blue text-white rounded-lg">
+                                {{ $gestionnaires->currentPage() }}
+                            </span>
+                            <a href="{{ $gestionnaires->nextPageUrl() }}"
+                                class="px-3 py-1 border rounded-lg {{ $gestionnaires->hasMorePages() ? 'bg-white hover:bg-gray-50' : 'bg-gray-100 cursor-not-allowed' }}"
+                                @if (!$gestionnaires->hasMorePages()) disabled @endif>
+                                Suiv. &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination pour les assurés-->
+            <div id="assures-pagination" class="hidden w-full">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center text-sm text-gray-700">
+                        <span>
+                            Affichage de <span class="font-medium">{{ $assures->firstItem() }}</span>
+                            à <span class="font-medium">{{ $assures->lastItem() }}</span> sur
+                            <span class="font-medium">{{ $assures->total() }}</span> résultats
+                        </span>
+                    </div>
+
+                    <div class="flex space-x-2">
+                        <div class="flex items-center space-x-2">
+                            <a href="{{ $assures->previousPageUrl() }}"
+                                class="px-3 py-1 border rounded-lg {{ !$assures->onFirstPage() ? 'bg-white hover:bg-gray-50' : 'bg-gray-100 cursor-not-allowed' }}"
+                                @if ($assures->onFirstPage()) disabled @endif>
+                                &larr; Préc.
+                            </a>
+                            </a>
+                            <span class="px-3 py-1 bg-saar-blue text-white rounded-lg">
+                                {{ $assures->currentPage() }}
+                            </span>
+                            <a href="{{ $assures->nextPageUrl() }}"
+                                class="px-3 py-1 border rounded-lg {{ $assures->hasMorePages() ? 'bg-white hover:bg-gray-50' : 'bg-gray-100 cursor-not-allowed' }}"
+                                @if (!$assures->hasMorePages()) disabled @endif>
+                                Suiv. &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
 
     <!-- Modal d'ajout d'utilisateur -->
-    <div id="add-user-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div id="add-user-modal"
+        class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
         <div class="relative top-20 mx-auto p-5 border w-1/2 shadow-lg rounded-xl bg-white">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-bold text-gray-800">Ajouter un nouvel utilisateur</h3>
                 <button onclick="closeAddUserModal()" class="text-gray-500 hover:text-gray-700">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
@@ -502,7 +651,8 @@
                 @csrf
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
-                        <label for="nom_complet" class="block text-sm font-medium text-gray-700 mb-1">Nom complet</label>
+                        <label for="nom_complet" class="block text-sm font-medium text-gray-700 mb-1">Nom
+                            complet</label>
                         <input type="text" name="nom_complet" id="nom_complet" required
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-saar-blue focus:border-transparent">
                     </div>
@@ -523,17 +673,20 @@
                         </select>
                     </div>
                     <div id="numero-assure-container" class="hidden">
-                        <label for="numero_assure" class="block text-sm font-medium text-gray-700 mb-1">Numéro d'assuré</label>
+                        <label for="numero_assure" class="block text-sm font-medium text-gray-700 mb-1">Numéro
+                            d'assuré</label>
                         <input type="text" name="numero_assure" id="numero_assure"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-saar-blue focus:border-transparent">
                     </div>
                     <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Mot de
+                            passe</label>
                         <input type="password" name="password" id="password" required
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-saar-blue focus:border-transparent">
                     </div>
                     <div>
-                        <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirmer le mot de passe</label>
+                        <label for="password_confirmation"
+                            class="block text-sm font-medium text-gray-700 mb-1">Confirmer le mot de passe</label>
                         <input type="password" name="password_confirmation" id="password_confirmation" required
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-saar-blue focus:border-transparent">
                     </div>
@@ -558,7 +711,6 @@
             dropdown.classList.toggle('hidden');
         }
 
-        // Toggle user menu dropdown
         function toggleUserMenu() {
             const menu = document.getElementById('user-menu');
             menu.classList.toggle('hidden');
@@ -570,13 +722,22 @@
             tabs.forEach(tab => {
                 tab.addEventListener('click', function() {
                     const target = document.querySelector(this.dataset.tabsTarget);
+                    const targetId = target.id;
 
-                    // Masquer tous les contenus d'onglets
                     document.querySelectorAll('.tab-content > div').forEach(content => {
                         content.classList.add('hidden');
                     });
 
                     target.classList.remove('hidden');
+
+                    if (targetId === 'gestionnaires') {
+                        document.getElementById('gestionnaires-pagination').classList.remove(
+                            'hidden');
+                        document.getElementById('assures-pagination').classList.add('hidden');
+                    } else if (targetId === 'assures') {
+                        document.getElementById('assures-pagination').classList.remove('hidden');
+                        document.getElementById('gestionnaires-pagination').classList.add('hidden');
+                    }
 
                     tabs.forEach(t => {
                         t.classList.remove('border-saar-blue', 'text-saar-blue');
@@ -593,7 +754,6 @@
             }
         });
 
-        // Gestion du modal
         function openAddUserModal() {
             document.getElementById('add-user-modal').classList.remove('hidden');
         }
@@ -625,12 +785,64 @@
             }
         });
 
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const urlParams = new URLSearchParams(window.location.search);
+
+            if (urlParams.has('search')) {
+                document.getElementById('search-users').value = urlParams.get('search');
+            }
+            if (urlParams.has('role')) {
+                document.getElementById('filter-role').value = urlParams.get('role');
+            }
+            if (urlParams.has('status')) {
+                document.getElementById('filter-status').value = urlParams.get('status');
+            }
+        });
+
         window.onclick = function(event) {
             const modal = document.getElementById('add-user-modal');
             if (event.target === modal) {
                 closeAddUserModal();
             }
         }
+
+        function updateQueryStringParameter(uri, key, value) {
+            const re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+            const separator = uri.indexOf('?') !== -1 ? "&" : "?";
+            if (uri.match(re)) {
+                return uri.replace(re, '$1' + key + "=" + value + '$2');
+            }
+            return uri + separator + key + "=" + value;
+        }
+
+        function filterUsers() {
+            const searchTerm = document.getElementById('search-users').value.toLowerCase();
+            const roleFilter = document.getElementById('filter-role').value;
+            const statusFilter = document.getElementById('filter-status').value;
+
+            let url = window.location.pathname + '?';
+            if (searchTerm) url += 'search=' + encodeURIComponent(searchTerm) + '&';
+            if (roleFilter) url += 'role=' + encodeURIComponent(roleFilter) + '&';
+            if (statusFilter) url += 'status=' + encodeURIComponent(statusFilter);
+
+            window.location.href = url;
+        }
+
+        function resetFilters() {
+            document.getElementById('search-users').value = '';
+            document.getElementById('filter-role').value = '';
+            document.getElementById('filter-status').value = '';
+
+            const rows = document.querySelectorAll('.user-row');
+            rows.forEach(row => {
+                row.style.display = '';
+            });
+        }
+
+        document.getElementById('search-users').addEventListener('input', filterUsers);
+        document.getElementById('filter-role').addEventListener('change', filterUsers);
+        document.getElementById('filter-status').addEventListener('change', filterUsers);
     </script>
 
     <style>

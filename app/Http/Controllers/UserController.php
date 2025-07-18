@@ -17,10 +17,37 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $gestionnaires = User::whereIn('role', ['gestionnaire', 'admin'])->get();
-        $assures = User::where('role', 'assure')->get();
+        $gestionnairesQuery = User::whereIn('role', ['gestionnaire', 'admin']);
+        $assuresQuery = User::where('role', 'assure');
+
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $gestionnairesQuery->where(function ($query) use ($search) {
+                $query->where('nom_complet', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%');
+            });
+
+            $assuresQuery->where(function ($query) use ($search) {
+                $query->where('nom_complet', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%')
+                    ->orWhere('numero_assure', 'like', '%' . $search . '%');
+            });
+        }
+
+        if ($request->has('role')) {
+            $gestionnairesQuery->where('role', $request->input('role'));
+        }
+
+        if ($request->has('status')) {
+            $status = $request->input('status') == '1';
+            $gestionnairesQuery->where('actif', $status);
+            $assuresQuery->where('actif', $status);
+        }
+
+        $gestionnaires = $gestionnairesQuery->paginate(10)->appends($request->query());
+        $assures = $assuresQuery->paginate(10)->appends($request->query());
 
         return view('users.index', compact(['gestionnaires', 'assures']));
     }
