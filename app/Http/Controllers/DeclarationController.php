@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendSinistreNotificationEmail;
 use Exception;
 use App\Models\User;
 use App\Models\Sinistre;
@@ -13,7 +14,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Mail;
 
 class DeclarationController extends Controller
 {
@@ -301,31 +301,27 @@ class DeclarationController extends Controller
                 ->where('actif', true)
                 ->get();
 
-            dispatch(function () use ($sinistre, $gestionnaires) {
+            if ($gestionnaires->isEmpty()) {
+                Log::warning('Aucun gestionnaire actif trouvé', [
+                    'sinistre_id' => $sinistre->id,
+                    'numero_sinistre' => $sinistre->numero_sinistre
+                ]);
+                return;
+            }
 
-                $dataEmail = [
-                    'sinistre' => $sinistre,
-                    'url_sinistre' => route('dashboard'),
-                    'company' => [
-                        'name' => 'SAAR ASSURANCE',
-                        'phone' => '+225 20 30 30 30',
-                        'email' => 'contact@saar-assurance.ci',
-                        'address' => 'Abidjan, Côte d\'Ivoire'
-                    ]
-                ];
+            SendSinistreNotificationEmail::dispatch($sinistre, $gestionnaires)
+                ->delay(now()->addSeconds(5));
 
-                foreach ($gestionnaires as $gestionnaire) {
-                    Mail::send('emails.nouveau-sinistre', $dataEmail, function ($message) use ($gestionnaire, $sinistre) {
-                        $message->to($gestionnaire->email, $gestionnaire->nom_complet)
-                            ->subject('Nouveau sinistre déclaré - N° ' . $sinistre->numero_sinistre)
-                            ->from(config('mail.from.address'), config('mail.from.name'));
-                    });
-                }
-            })->delay(now()->addSeconds(5));
+            Log::info('Job d\'envoi d\'email planifié avec succès', [
+                'sinistre_id' => $sinistre->id,
+                'numero_sinistre' => $sinistre->numero_sinistre,
+                'nb_gestionnaires' => $gestionnaires->count()
+            ]);
         } catch (Exception $e) {
             Log::error('Erreur lors de l\'envoi des emails aux gestionnaires: ' . $e->getMessage(), [
                 'sinistre_id' => $sinistre->id,
-                'numero_sinistre' => $sinistre->numero_sinistre
+                'numero_sinistre' => $sinistre->numero_sinistre,
+                'error' => $e->getMessage()
             ]);
         }
     }
