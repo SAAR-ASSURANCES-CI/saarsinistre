@@ -16,13 +16,12 @@ class DashboardController extends Controller
             'en_attente' => Sinistre::where('statut', 'en_attente')->count(),
             'traites' => Sinistre::whereIn('statut', ['regle', 'clos'])->count(),
             'en_retard' => Sinistre::where('en_retard', true)->count(),
+            'en_cours' => Sinistre::where('statut', 'en_cours')->count()
         ];
 
-        $gestionnaires = User::select('id', 'nom_complet')
-            ->whereHas('sinistres')
-            ->orWhere('id', Auth::id())
+        $gestionnaires = User::gestionnaires()
             ->orderBy('nom_complet')
-            ->get();
+            ->get(['id', 'nom_complet']);
 
         return view('admin.dashboard', compact('stats', 'gestionnaires'));
     }
@@ -89,20 +88,33 @@ class DashboardController extends Controller
     public function assignerGestionnaire(Request $request, Sinistre $sinistre)
     {
         $request->validate([
-            'gestionnaire_id' => 'nullable|exists:users,id'
+            'gestionnaire_id' => [
+                'nullable',
+                function ($attribute, $value, $fail) {
+                    if ($value === 'self') {
+                        return;
+                    }
+
+                    if ($value && !User::where('id', $value)->where('role', 'gestionnaire')->exists()) {
+                        $fail('Le gestionnaire sélectionné est invalide.');
+                    }
+                }
+            ]
         ]);
 
-        $gestionnaireId = $request->gestionnaire_id;
+        $gestionnaireId = null;
 
         if ($request->gestionnaire_id === 'self') {
             $gestionnaireId = Auth::id();
+        } elseif ($request->gestionnaire_id) {
+            $gestionnaireId = $request->gestionnaire_id;
         }
 
         $sinistre->assignerGestionnaire($gestionnaireId);
 
         return response()->json([
             'success' => true,
-            'message' => 'Gestionnaire affecté avec succès',
+            'message' => $gestionnaireId ? 'Gestionnaire affecté avec succès' : 'Sinistre désaffecté avec succès',
             'sinistre' => $sinistre->fresh()->load('gestionnaire:id,nom_complet')
         ]);
     }

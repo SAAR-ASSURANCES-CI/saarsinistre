@@ -97,7 +97,7 @@ class User extends Authenticatable
      */
     public function estGestionnaire(): bool
     {
-        return $this->role === 'gestionnaire' || $this->role === 'admin';
+        return $this->role === 'gestionnaire';
     }
 
     /**
@@ -105,7 +105,7 @@ class User extends Authenticatable
      */
     public function scopeGestionnaires($query)
     {
-        return $query->whereIn('role', ['gestionnaire', 'admin']);
+        return $query->where('role', 'gestionnaire');
     }
 
     public function isTempPasswordExpired(): bool
