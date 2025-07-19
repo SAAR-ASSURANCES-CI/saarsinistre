@@ -14,6 +14,13 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
+     * The user's role.
+     *
+     * @var string|null
+     */
+    public $role;
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>

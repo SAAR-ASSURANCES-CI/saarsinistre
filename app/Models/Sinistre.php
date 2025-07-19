@@ -9,6 +9,8 @@ use Carbon\Carbon;
 
 class Sinistre extends Model
 {
+    public $timestamps = true;
+
     protected $fillable = [
         'numero_sinistre',
         'nom_assure',
@@ -142,7 +144,8 @@ class Sinistre extends Model
      */
     public function calculerJoursEnCours(): void
     {
-        $this->jours_en_cours = $this->created_at->diffInDays(now());
+        $createdAt = $this->getAttribute('created_at');
+        $this->jours_en_cours = $createdAt ? $createdAt->diffInDays(now()) : 0;
         $this->en_retard = $this->jours_en_cours > 15; // Seuil de 15 jours
         $this->save();
     }
@@ -187,7 +190,8 @@ class Sinistre extends Model
             'clos' => 'Clos'
         ];
 
-        return $statuts[$this->statut] ?? $this->statut;
+        $statut = $this->getAttribute('statut');
+        return $statuts[$statut] ?? $statut;
     }
 
     /**
@@ -206,7 +210,8 @@ class Sinistre extends Model
             'clos' => 'gray'
         ];
 
-        return $couleurs[$this->statut] ?? 'gray';
+        $statut = $this->getAttribute('statut');
+        return $couleurs[$statut] ?? 'gray';
     }
 
     /**
@@ -214,7 +219,7 @@ class Sinistre extends Model
      */
     public function peutEtreModifie(): bool
     {
-        return !in_array($this->statut, ['regle', 'refuse', 'clos']);
+        return !in_array($this->getAttribute('statut'), ['regle', 'refuse', 'clos']);
     }
 
     /**
@@ -247,7 +252,7 @@ class Sinistre extends Model
      */
     public function getDateLimiteAttribute(): Carbon
     {
-        return $this->created_at->addDays(15);
+        return $this->getAttribute('created_at')->addDays(15);
     }
 
     /**

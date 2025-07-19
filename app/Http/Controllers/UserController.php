@@ -63,13 +63,13 @@ class UserController extends Controller
         ]);
 
         $user = User::create([
-            'nom_complet' => $request->nom_complet,
-            'email' => $request->email,
-            'role' => $request->role,
-            'numero_assure' => $request->numero_assure,
-            'password' => Hash::make($request->password),
+            'nom_complet' => $request->input('nom_complet'),
+            'email' => $request->input('email'),
+            'role' => $request->input('role'),
+            'numero_assure' => $request->input('numero_assure'),
+            'password' => Hash::make($request->input('password')),
             'actif' => true,
-            'limite_sinistres' => $request->role === 'assure' ? 5 : ($request->role === 'gestionnaire' ? 15 : 20),
+            'limite_sinistres' => $request->input('role') === 'assure' ? 5 : ($request->input('role') === 'gestionnaire' ? 15 : 20),
         ]);
 
         return redirect()->route('dashboard.users')->with('success', 'Utilisateur créé avec succès');
@@ -79,20 +79,20 @@ class UserController extends Controller
     {
         $request->validate([
             'nom_complet' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->getKey(),
             'role' => 'required|in:admin,gestionnaire,user',
-            'numero_assure' => 'nullable|string|max:50|unique:users,numero_assure,' . $user->id,
+            'numero_assure' => 'nullable|string|max:50|unique:users,numero_assure,' . $user->getKey(),
             'actif' => 'boolean',
             'limite_sinistres' => 'nullable|integer|min:1',
         ]);
 
         $user->update([
-            'nom_complet' => $request->nom_complet,
-            'email' => $request->email,
-            'role' => $request->role,
-            'numero_assure' => $request->role === 'user' ? $request->numero_assure : null,
-            'actif' => $request->actif ?? false,
-            'limite_sinistres' => $request->limite_sinistres,
+            'nom_complet' => $request->input('nom_complet'),
+            'email' => $request->input('email'),
+            'role' => $request->input('role'),
+            'numero_assure' => $request->input('role') === 'user' ? $request->input('numero_assure') : null,
+            'actif' => $request->input('actif', false),
+            'limite_sinistres' => $request->input('limite_sinistres'),
         ]);
 
         return redirect()->route('dashboard.users')->with('success', 'Utilisateur mis à jour avec succès');

@@ -15,7 +15,7 @@ class DashboardController extends Controller
             'total' => Sinistre::count(),
             'en_attente' => Sinistre::where('statut', 'en_attente')->count(),
             'traites' => Sinistre::whereIn('statut', ['regle', 'clos'])->count(),
-            'en_retard' => Sinistre::where('en_retard', true)->count(),
+            'expertise_requise' => Sinistre::where('statut', 'expertise_requise')->count(),
             'en_cours' => Sinistre::where('statut', 'en_cours')->count()
         ];
 
