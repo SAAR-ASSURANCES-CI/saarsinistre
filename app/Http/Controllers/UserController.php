@@ -72,7 +72,7 @@ class UserController extends Controller
             'limite_sinistres' => $request->input('role') === 'assure' ? 5 : ($request->input('role') === 'gestionnaire' ? 15 : 20),
         ]);
 
-        return redirect()->route('dashboard.users')->with('success', 'Utilisateur créé avec succès');
+        return redirect()->route('dashboard.users.index')->with('success', 'Utilisateur créé avec succès');
     }
 
     public function update(Request $request, User $user)
