@@ -15,7 +15,6 @@ Route::prefix('declaration')->name('declaration.')->group(function () {
     Route::get('/formulaire', [DeclarationController::class, 'create'])->name('create');
     Route::post('/store', [DeclarationController::class, 'store'])->name('store');
     Route::get('/confirmation/{sinistre}', [DeclarationController::class, 'confirmation'])->name('confirmation');
-
     Route::get('/statut/{numeroSinistre}', [DeclarationController::class, 'statut'])->name('statut');
     Route::get('/{sinistre}/recu', [DeclarationController::class, 'downloadRecu'])->name('recu');
 });
@@ -23,7 +22,7 @@ Route::prefix('declaration')->name('declaration.')->group(function () {
 
 Route::middleware(['guest'])->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 });
 
 
@@ -31,32 +30,36 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 
 
 Route::middleware(['auth'])->group(function () {
-
+    // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Sous-routes du tableau de bord
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
-
-        Route::get('/sinistres', [DashboardController::class, 'getSinistres'])->name('sinistres');
-
-        Route::get('/sinistres/{sinistre}/details', [DashboardController::class, 'getDetails'])->name('sinistres.details');
-
-        Route::post('/sinistres/{sinistre}/assign', [DashboardController::class, 'assignerGestionnaire'])->name('sinistres.assign');
-
-        Route::post('/sinistres/{sinistre}/status', [DashboardController::class, 'changerStatut'])->name('sinistres.status');
+        Route::prefix('sinistres')->name('sinistres.')->group(function () {
+            Route::get('/', [DashboardController::class, 'getSinistres'])->name('index');
+            Route::get('/{sinistre}/details', [DashboardController::class, 'getDetails'])->name('details');
+            Route::post('/{sinistre}/assign', [DashboardController::class, 'assignerGestionnaire'])->name('assign');
+            Route::post('/{sinistre}/status', [DashboardController::class, 'changerStatut'])->name('status');
+            Route::get('/en-retard', [DashboardController::class, 'getSinistresEnRetard'])->name('retard');
+        });
 
         Route::get('/stats', [DashboardController::class, 'getStats'])->name('stats');
 
-        Route::get('/notifications', [DashboardController::class, 'getNotifications'])->name('notifications');
-        Route::post('/notifications/mark-read', [DashboardController::class, 'markNotificationsAsRead'])->name('notifications.mark-read');
+        // Notifications
+        Route::prefix('notifications')->name('notifications.')->group(function () {
+            Route::get('/', [DashboardController::class, 'getNotifications'])->name('index');
+            Route::post('/mark-read', [DashboardController::class, 'markNotificationsAsRead'])->name('mark-read');
+        });
 
+        // Recherche
         Route::get('/search', [DashboardController::class, 'searchSinistres'])->name('search');
 
-        Route::get('/sinistres-en-retard', [DashboardController::class, 'getSinistresEnRetard'])->name('sinistres.retard');
-
-        //ROUTE USERS
-        Route::get('/users', [UserController::class, 'index'])->name('users');
-        Route::post('/users', [UserController::class, 'store'])->name('users.store');
-        Route::patch('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
-        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+        // Gestion des utilisateurs
+        Route::prefix('users')->name('users.')->group(function () {
+            Route::get('/', [UserController::class, 'index'])->name('index');
+            Route::post('/', [UserController::class, 'store'])->name('store');
+            Route::patch('/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('toggle-status');
+            Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+        });
     });
 });
