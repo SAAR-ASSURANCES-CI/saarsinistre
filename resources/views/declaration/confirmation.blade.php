@@ -158,8 +158,8 @@
                             class="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-4">
                             1</div>
                         <div>
-                            <p class="font-semibold text-gray-900">Confirmation par email</p>
-                            <p class="text-sm text-gray-600">Vous recevrez un email de confirmation avec tous les
+                            <p class="font-semibold text-gray-900">Confirmation par sms</p>
+                            <p class="text-sm text-gray-600">Vous recevrez un sms de confirmation avec tous les
                                 détails dans quelques minutes.</p>
                         </div>
                     </div>
@@ -170,7 +170,7 @@
                             2</div>
                         <div>
                             <p class="font-semibold text-gray-900">Attribution d'un gestionnaire</p>
-                            <p class="text-sm text-gray-600">Un expert sera assigné à votre dossier sous 24h ouvrées.
+                            <p class="text-sm text-gray-600">Un gestionnaire sera assigné à votre dossier sous 24h ouvrées.
                             </p>
                         </div>
                     </div>
@@ -197,7 +197,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 10v6m0 0l-4-4m4 4l4-4m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
-                        Télécharger le reçu PDF
+                        Télécharger votre attestation de déclaration
                     </a>
 
                     <a href="/"

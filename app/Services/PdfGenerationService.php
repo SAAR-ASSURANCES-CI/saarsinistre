@@ -25,7 +25,7 @@ class PdfGenerationService
         $pdf = PDF::loadView('declaration.recu-pdf', $data);
         $pdf->setPaper('A4', 'portrait');
 
-        $nomFichier = 'Recu_Declaration_' . $sinistre->numero_sinistre . '.pdf';
+        $nomFichier = 'Attestation_Declaration_' . $sinistre->numero_sinistre . '.pdf';
 
         return $pdf->download($nomFichier);
     }

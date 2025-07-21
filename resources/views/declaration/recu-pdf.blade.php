@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Reçu de Déclaration - {{ $sinistre->numero_sinistre }}</title>
+    <title>Attestation de Déclaration - {{ $sinistre->numero_sinistre }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -150,14 +150,14 @@
 </head>
 
 <body>
-    <div class="watermark">SAAR ASSURANCE</div>
+    <div class="watermark">SAAR ASSURANCES</div>
 
     <!-- En-tête -->
     <div class="header">
         <div class="company-name">{{ $company['name'] }}</div>
         <div>{{ $company['address'] }}</div>
         <div>Tél: {{ $company['phone'] }} | Email: {{ $company['email'] }}</div>
-        <div class="document-title">REÇU DE DÉCLARATION DE SINISTRE</div>
+        <div class="document-title">ATTESTATION DE DÉCLARATION DE SINISTRE</div>
     </div>
 
     <!-- Numéro de sinistre -->
