@@ -107,6 +107,10 @@
                                     {{ $sinistre->statut_libelle }}
                                 </span>
                             </p>
+                            <p><strong>Impliqué un tiers :</strong> {{ $sinistre->implique_tiers ? 'Oui' : 'Non' }}</p>
+                            @if($sinistre->implique_tiers && $sinistre->details_tiers)
+                                <p><strong>Détails tiers :</strong> {{ $sinistre->details_tiers }}</p>
+                            @endif
                         </div>
                     </div>
                 </div>

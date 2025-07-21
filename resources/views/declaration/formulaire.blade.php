@@ -270,6 +270,22 @@
                             </div>
                         </div>
 
+                        <!-- Implique-tiers -->
+                        <div class="form-group">
+                            <div class="flex items-center mb-2">
+                                <input type="checkbox" name="implique_tiers" id="implique_tiers" value="1" class="h-5 w-5 text-saar-blue focus:ring-blue-500 border-gray-300 rounded">
+                                <label for="implique_tiers" class="ml-3 text-sm font-semibold text-gray-700">
+                                    Le sinistre implique un tiers ?
+                                </label>
+                            </div>
+                            <div id="details-tiers-group" class="hidden mt-4">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Détails sur le(s) tiers impliqué(s)
+                                </label>
+                                <textarea name="details_tiers" id="details_tiers" rows="3" class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-saar-blue focus:ring-4 focus:ring-blue-100 transition-all duration-300 resize-none" placeholder="Décrivez les informations sur le(s) tiers impliqué(s)..."></textarea>
+                            </div>
+                        </div>
+
                         <div class="form-group">
                             <label class="block text-sm font-semibold text-gray-700 mb-3">
                                 Dommages relevés sur le véhicule
@@ -674,6 +690,15 @@
                 }
             });
 
+            document.getElementById('implique_tiers').addEventListener('change', function() {
+                const detailsGroup = document.getElementById('details-tiers-group');
+                if (this.checked) {
+                    detailsGroup.classList.remove('hidden');
+                } else {
+                    detailsGroup.classList.add('hidden');
+                }
+            });
+
             setupFileUploads();
         }
 
@@ -920,6 +945,17 @@
 
             const constatCheckbox = document.getElementById('constat');
             formData.set('constat_autorite', constatCheckbox.checked ? '1' : '0');
+
+            const impliqueTiersCheckbox = document.getElementById('implique_tiers');
+            formData.set('implique_tiers', impliqueTiersCheckbox.checked ? '1' : '0');
+
+            const detailsTiersTextarea = document.getElementById('details_tiers');
+            if (impliqueTiersCheckbox.checked) {
+                formData.set('details_tiers', detailsTiersTextarea.value);
+            } else {
+                formData.delete('details_tiers');
+            }
+
 
             const submitUrl = '/declaration/store';
 

@@ -225,6 +225,20 @@
                     @endif
                 @endif
 
+                @if ($sinistre->implique_tiers)
+                    <div class="info-row">
+                        <div class="info-label">Implique un tiers :</div>
+                        <div class="info-value priority-high">✅ Oui</div>
+                    </div>
+
+                    @if ($sinistre->details_tiers)
+                        <div class="info-row">
+                            <div class="info-label">Détails tiers :</div>
+                            <div class="info-value">{{ $sinistre->details_tiers }}</div>
+                        </div>
+                    @endif
+                @endif
+
                 <div class="info-row">
                     <div class="info-label">Date de déclaration :</div>
                     <div class="info-value">{{ $sinistre->created_at->format('d/m/Y à H:i') }}</div>

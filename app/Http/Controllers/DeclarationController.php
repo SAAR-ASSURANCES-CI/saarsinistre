@@ -44,6 +44,7 @@ class DeclarationController extends Controller
 
             $user = $this->accountService->createAssureAccount($request->validated());
             $sinistre = $this->createSinistre($request->validated() + ['assure_id' => $user->id]);
+            $sinistre->refresh();
 
             $this->documentService->handleDocuments($request, $sinistre);
             $this->notificationService->triggerSinistreNotifications($sinistre);

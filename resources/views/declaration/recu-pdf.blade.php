@@ -233,6 +233,16 @@
                     <span class="status-badge">{{ ucfirst(str_replace('_', ' ', $sinistre->statut)) }}</span>
                 </div>
             </div>
+            <div class="info-row">
+                <div class="info-label">Impliqué un tiers :</div>
+                <div class="info-value">{{ $sinistre->implique_tiers ? 'Oui' : 'Non' }}</div>
+            </div>
+            @if ($sinistre->implique_tiers && $sinistre->details_tiers)
+                <div class="info-row">
+                    <div class="info-label">Détails tiers :</div>
+                    <div class="info-value">{{ $sinistre->details_tiers }}</div>
+                </div>
+            @endif
         </div>
     </div>
 
