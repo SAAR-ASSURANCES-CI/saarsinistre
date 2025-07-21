@@ -30,15 +30,15 @@ class SendAccountCreationSms implements ShouldQueue
     {
         try {
             $message = "SAAR ASSURANCE\n";
-            $message .= "Votre espace client est prêt:\n";
-            $message .= "Identifiant: {$this->user->numero_assure}\n";
+            $message .= "Votre espace client est prêt :\n";
+            $message .= "Identifiant: {$this->user->username}\n";
             $message .= "Code: {$this->user->password_temp}\n";
             $message .= "Valable 48h\n";
 
             $orangeService->sendSmsConfirmationSinistre(
                 $this->telephone,
                 $this->user->nom_complet,
-                $this->user->numero_assure
+                $this->user->username
             );
         } catch (\Exception $e) {
             Log::error('Erreur lors de l\'envoi du SMS de connexion: ' . $e->getMessage());
