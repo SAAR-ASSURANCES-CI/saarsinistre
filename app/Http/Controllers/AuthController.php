@@ -34,6 +34,14 @@ class AuthController extends Controller
 
         $credentials = $request->only('email', 'password');
 
+        $user = User::where('email', $credentials['email'])->first();
+
+        if ($user && !$user->actif) {
+            return back()->withErrors([
+                'email' => 'Votre compte est désactivé. Veuillez contacter l\'administrateur.',
+            ])->withInput($request->except('password'));
+        }
+
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 

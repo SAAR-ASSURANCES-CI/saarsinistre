@@ -5,19 +5,17 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
 
 class UserController extends Controller
 {
-    /**************************/
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Display a listing of the resource or handle AJAX filtering.
      */
-    public function index(Request $request): View
+    public function index(Request $request): JsonResponse|View
     {
         $gestionnairesQuery = User::whereIn('role', ['gestionnaire', 'admin']);
         $assuresQuery = User::where('role', 'assure');
@@ -49,7 +47,29 @@ class UserController extends Controller
         $gestionnaires = $gestionnairesQuery->paginate(10)->appends($request->query());
         $assures = $assuresQuery->paginate(10)->appends($request->query());
 
+        if ($request->ajax()) {
+            return response()->json([
+                'gestionnaires' => view('users.partials.gestionnaires-table', compact('gestionnaires'))->render(),
+                'assures' => view('users.partials.assures-table', compact('assures'))->render(),
+                'gestionnaires_pagination' => $gestionnaires->links()->render(),
+                'assures_pagination' => $assures->links()->render(),
+            ]);
+        }
+
         return view('users.index', compact(['gestionnaires', 'assures']));
+    }
+
+    public function edit(User $user): JsonResponse
+    {
+        return response()->json([
+            'id' => $user->id,
+            'nom_complet' => $user->nom_complet,
+            'email' => $user->email,
+            'role' => $user->role,
+            'numero_assure' => $user->numero_assure,
+            'limite_sinistres' => $user->limite_sinistres,
+            'actif' => (bool)$user->actif
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -57,19 +77,18 @@ class UserController extends Controller
         $request->validate([
             'nom_complet' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'role' => 'required|in:admin,gestionnaire,user',
+            'role' => 'required|in:admin,gestionnaire,assure',
             'numero_assure' => 'nullable|string|max:50|unique:users',
             'password' => ['required', Rules\Password::defaults()],
         ]);
 
-        $user = User::create([
+        User::create([
             'nom_complet' => $request->input('nom_complet'),
             'email' => $request->input('email'),
             'role' => $request->input('role'),
             'numero_assure' => $request->input('numero_assure'),
             'password' => Hash::make($request->input('password')),
             'actif' => true,
-            'limite_sinistres' => $request->input('role') === 'assure' ? 5 : ($request->input('role') === 'gestionnaire' ? 15 : 20),
         ]);
 
         return redirect()->route('dashboard.users.index')->with('success', 'Utilisateur créé avec succès');
@@ -79,29 +98,28 @@ class UserController extends Controller
     {
         $request->validate([
             'nom_complet' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->getKey(),
-            'role' => 'required|in:admin,gestionnaire,user',
-            'numero_assure' => 'nullable|string|max:50|unique:users,numero_assure,' . $user->getKey(),
-            'actif' => 'boolean',
-            'limite_sinistres' => 'nullable|integer|min:1',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'role' => 'required|in:admin,gestionnaire,assure',
+            'numero_assure' => 'nullable|string|max:50|unique:users,numero_assure,' . $user->id,
+            'limite_sinistres' => 'required|integer|min:1',
+            'actif' => 'boolean'
         ]);
 
         $user->update([
-            'nom_complet' => $request->input('nom_complet'),
-            'email' => $request->input('email'),
-            'role' => $request->input('role'),
-            'numero_assure' => $request->input('role') === 'user' ? $request->input('numero_assure') : null,
-            'actif' => $request->input('actif', false),
-            'limite_sinistres' => $request->input('limite_sinistres'),
+            'nom_complet' => $request->nom_complet,
+            'email' => $request->email,
+            'role' => $request->role,
+            'numero_assure' => $request->role === 'assure' ? $request->numero_assure : null,
+            'actif' => $request->actif ?? false
         ]);
 
-        return redirect()->route('dashboard.users')->with('success', 'Utilisateur mis à jour avec succès');
+        return response()->json(['success' => 'Utilisateur mis à jour avec succès']);
     }
 
     public function destroy(User $user): RedirectResponse
     {
         $user->delete();
-        return redirect()->route('dashboard.users')->with('success', 'Utilisateur supprimé avec succès');
+        return redirect()->route('dashboard.users.index')->with('success', 'Utilisateur supprimé avec succès');
     }
 
     public function toggleStatus(User $user): RedirectResponse
