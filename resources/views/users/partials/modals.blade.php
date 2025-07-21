@@ -67,3 +67,70 @@
             </form>
         </div>
     </div>
+
+
+    <!-- Modal pour modifier un utilisateur -->
+    <div id="edit-user-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Modifier un utilisateur</h3>
+                <button onclick="closeEditUserModal()" class="text-gray-400 hover:text-gray-500">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <form id="edit-user-form" method="POST" action="">
+                @csrf
+                @method('PUT')
+
+                <div class="mb-4">
+                    <label for="edit-nom_complet" class="block text-sm font-medium text-gray-700">Nom complet</label>
+                    <input type="text" id="edit-nom_complet" name="nom_complet" required
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-saar-blue focus:border-saar-blue">
+                </div>
+
+                <div class="mb-4">
+                    <label for="edit-email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="edit-email" name="email" required
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-saar-blue focus:border-saar-blue">
+                </div>
+
+                <div class="mb-4">
+                    <label for="edit-role" class="block text-sm font-medium text-gray-700">Rôle</label>
+                    <select id="edit-role" name="role" required onchange="toggleEditAssureField()"
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-saar-blue focus:border-saar-blue">
+                        <option value="admin">Administrateur</option>
+                        <option value="gestionnaire">Gestionnaire</option>
+                        <option value="assure">Assuré</option>
+                    </select>
+                </div>
+
+                <div id="edit-numero-assure-container" class="mb-4 hidden">
+                    <label for="edit-numero_assure" class="block text-sm font-medium text-gray-700">Numéro
+                        assuré</label>
+                    <input type="text" id="edit-numero_assure" name="numero_assure"
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-saar-blue focus:border-saar-blue">
+                </div>
+
+                <div class="mb-4 flex items-center">
+                    <input type="checkbox" id="edit-actif" name="actif" value="1"
+                        class="h-4 w-4 text-saar-blue focus:ring-saar-blue border-gray-300 rounded">
+                    <label for="edit-actif" class="ml-2 block text-sm text-gray-700">Actif</label>
+                </div>
+
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" onclick="closeEditUserModal()"
+                        class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Annuler
+                    </button>
+                    <button type="submit"
+                        class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-saar-blue hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-saar-blue">
+                        Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
