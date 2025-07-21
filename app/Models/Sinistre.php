@@ -31,6 +31,9 @@ class Sinistre extends Model
         'commissariat',
         'dommages_releves',
 
+        'implique_tiers',
+        'details_tiers',
+
         'statut',
         'gestionnaire_id',
         'montant_estime',
@@ -52,6 +55,7 @@ class Sinistre extends Model
         'montant_estime' => 'decimal:2',
         'montant_regle' => 'decimal:2',
         'jours_en_cours' => 'integer',
+        'implique_tiers' => 'boolean',
     ];
 
     /**

@@ -26,6 +26,8 @@ class StoreDeclarationRequest extends FormRequest
             'email_assure' => 'nullable|email|max:255',
             'telephone_assure' => 'required|string|max:20',
             'numero_police' => 'required|string|max:50',
+            'implique_tiers' => 'boolean',
+            'details_tiers' => 'nullable|required_if:implique_tiers,true|string|max:2000',
 
             'date_sinistre' => 'required|date|before_or_equal:today',
             'heure_sinistre' => 'nullable|date_format:H:i',
