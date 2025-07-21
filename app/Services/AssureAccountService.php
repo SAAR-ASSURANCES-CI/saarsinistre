@@ -52,9 +52,10 @@ class AssureAccountService
     /**
      * Génère un username unique basé sur le nom complet
      */
-    protected function generateUniqueUsername(string $nomComplet): string
+    public function generateUniqueUsername(string $nomComplet): string
     {
-        // On enlève les accents, espaces, caractères spéciaux, on met en minuscule
+        $nomComplet = mb_strtolower($nomComplet, 'UTF-8');
+        
         $base = strtolower(preg_replace('/[^a-z0-9]/', '', iconv('UTF-8', 'ASCII//TRANSLIT', $nomComplet)));
         $username = $base;
         $i = 1;
