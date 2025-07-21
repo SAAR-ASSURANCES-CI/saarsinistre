@@ -33,6 +33,7 @@ class User extends Authenticatable
         'sinistres_en_cours',
         'password',
         'numero_assure',
+        'username', 
         'password_temp',
         'password_expire_at',
     ];
