@@ -930,7 +930,8 @@
                         'X-Requested-With': 'XMLHttpRequest',
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-                    }
+                    },
+                    credentials: 'same-origin'
                 })
                 .then(async response => {
                     const contentType = response.headers.get('content-type');

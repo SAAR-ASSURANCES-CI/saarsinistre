@@ -103,7 +103,7 @@ class Sinistre extends Model
         $annee = date('Y');
         $compteur = static::whereYear('created_at', $annee)->count() + 1;
 
-        return 'SIN-' . $annee . '-' . str_pad($compteur, 5, '0', STR_PAD_LEFT);
+        return 'APP-' . str_pad($compteur, 5, '0', STR_PAD_LEFT) . '-' . $annee;
     }
 
     /**
