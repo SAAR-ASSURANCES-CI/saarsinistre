@@ -73,6 +73,13 @@
 
     <div class="relative z-10 container mx-auto px-4 py-8">
 
+        <!-- Bouton Connexion en haut à droite -->
+        <div class="absolute top-8 right-8 z-20">
+            <div class="inline-flex space-x-2">
+                <a href="{{ route('login.assure') }}" class="px-5 py-2 bg-saar-green text-white font-semibold rounded-xl shadow hover:bg-green-700 transition-all">Espace assuré</a>
+            </div>
+        </div>
+
         <!-- Header avec logo et branding -->
         <div class="text-center mb-16 animate-fade-in-up">
             <div class="inline-flex items-center justify-center mb-8">

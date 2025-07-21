@@ -23,6 +23,7 @@ Route::prefix('declaration')->name('declaration.')->group(function () {
 Route::middleware(['guest'])->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+    Route::get('/login/assure', [AuthController::class, 'showLoginAssureForm'])->name('login.assure');
 });
 
 
