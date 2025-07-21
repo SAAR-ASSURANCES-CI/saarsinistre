@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Exception;
+use App\Models\User;
 use App\Models\Sinistre;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -42,11 +43,34 @@ class DeclarationController extends Controller
         try {
             DB::beginTransaction();
 
-            $user = $this->accountService->createAssureAccount($request->validated());
-            $sinistre = $this->createSinistre($request->validated() + ['assure_id' => $user->id]);
+            $data = $request->validated();
+            
+            $user = null;
+            if (!empty($data['email_assure'])) {
+                $user = User::where('email', $data['email_assure'])->first();
+            }
+            if (!$user && !empty($data['telephone_assure'])) {
+                $sinistre = Sinistre::where('telephone_assure', $data['telephone_assure'])->first();
+                if ($sinistre && $sinistre->assure_id) {
+                    $user = User::find($sinistre->assure_id);
+                }
+            }
+            if (!$user) {
+               
+                $username = (new AssureAccountService)->generateUniqueUsername($data['nom_assure']);
+                $user = User::where('username', $username)->first();
+            }
+
+            if (!$user) {
+                
+                $user = $this->accountService->createAssureAccount($data);
+            }
+            
+            $sinistre = $this->createSinistre($data + ['assure_id' => $user->id]);
             $sinistre->refresh();
 
             $this->documentService->handleDocuments($request, $sinistre);
+            
             $this->notificationService->triggerSinistreNotifications($sinistre);
 
             DB::commit();
