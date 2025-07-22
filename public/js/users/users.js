@@ -8,7 +8,7 @@ function toggleUserMenu() {
     menu.classList.toggle("hidden");
 }
 
-// Fonction principale de filtrage AJAX
+
 function filterUsers() {
     const searchTerm = document.getElementById("search-users").value;
     const roleFilter = document.getElementById("filter-role").value;
@@ -48,7 +48,7 @@ function fetchUsers(search, role, status) {
 }
 
 function updateUserTables(data) {
-    // Mettre à jour la table des gestionnaires
+    
     const gestionnairesContainer = document.getElementById(
         "gestionnaires-container"
     );
@@ -56,13 +56,13 @@ function updateUserTables(data) {
         gestionnairesContainer.innerHTML = data.gestionnaires;
     }
 
-    // Mettre à jour la table des assurés
+    
     const assuresContainer = document.getElementById("assures-container");
     if (assuresContainer) {
         assuresContainer.innerHTML = data.assures;
     }
 
-    // Mettre à jour la pagination
+   
     const gestionnairesPagination = document.getElementById(
         "gestionnaires-pagination"
     );
@@ -78,14 +78,14 @@ function resetFilters() {
     document.getElementById("filter-role").value = "";
     document.getElementById("filter-status").value = "";
 
-    // Réinitialiser l'URL et charger tous les utilisateurs
+    
     window.history.pushState({}, "", window.location.pathname);
     fetchUsers("", "", "");
 }
 
-// Initialisation après le chargement du DOM
+
 document.addEventListener("DOMContentLoaded", function () {
-    // Gestion des tabs
+    
     const tabs = document.querySelectorAll("[data-tabs-target]");
 
     tabs.forEach((tab) => {
@@ -131,7 +131,7 @@ document.addEventListener("DOMContentLoaded", function () {
         tabs[0].click();
     }
 
-    // Configuration des écouteurs d'événements pour les filtres
+  
     let searchTimeout;
     document
         .getElementById("search-users")
@@ -147,7 +147,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .getElementById("filter-status")
         .addEventListener("change", filterUsers);
 
-    // Gestion des clics en dehors des menus déroulants
+    
     document.addEventListener("click", function (event) {
         const notificationsDropdown = document.getElementById(
             "notifications-dropdown"
@@ -159,9 +159,53 @@ document.addEventListener("DOMContentLoaded", function () {
             userMenu.classList.add("hidden");
         }
     });
+
+    const editUserForm = document.getElementById("edit-user-form");
+    if (editUserForm) {
+        editUserForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            const userId = this.action.split("/").pop();
+            const formData = new FormData(this);
+            
+            if (!formData.has('actif')) {
+                formData.append('actif', 0);
+            }
+            formData.append('_method', 'PUT');
+            fetch(`/dashboard/users/${userId}`, {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                },
+                body: formData,
+            })
+                .then((response) => {
+                    if (!response.ok) throw new Error('Erreur lors de la modification');
+                    return response.json();
+                })
+                .then((data) => {
+                    closeEditUserModal();
+                    const roleFilter = document.getElementById("filter-role");
+                    if (roleFilter) {
+                        roleFilter.value = "";
+                    }
+                    filterUsers();
+                    if (window.toastr) toastr.success(data.success || 'Utilisateur modifié');
+                })
+                .catch(async (error) => {
+                    let errorMsg = error.message;
+                    if (error.response && error.response.status === 422) {
+                        const data = await error.response.json();
+                        errorMsg = Object.values(data.errors).join('\n');
+                    }
+                    if (window.toastr) toastr.error(errorMsg);
+                    else alert(errorMsg);
+                });
+        });
+    }
 });
 
-// Gestion de la modal
+
 function openAddUserModal() {
     document.getElementById("add-user-modal").classList.remove("hidden");
 }
@@ -177,7 +221,7 @@ window.onclick = function (event) {
     }
 };
 
-// Gestion du champ numéro assuré
+
 function toggleAssureField() {
     const role = document.getElementById("role").value;
     const container = document.getElementById("numero-assure-container");
@@ -191,20 +235,23 @@ function toggleAssureField() {
     }
 }
 
-// Fonctions pour la modal d'édition
+
 function openEditUserModal(userId) {
-    // Récupérer les données de l'utilisateur via AJAX
+    
     fetch(`/dashboard/users/${userId}/edit`)
         .then((response) => response.json())
         .then((user) => {
-            // Remplir le formulaire
+            
             document.getElementById("edit-nom_complet").value =
                 user.nom_complet;
             document.getElementById("edit-email").value = user.email;
-            document.getElementById("edit-role").value = user.role;
-            document.getElementById("edit-actif").checked = user.actif;
+            setTimeout(function() {
+                document.getElementById("edit-role").value = user.role;
+                const event = new Event('change', { bubbles: true });
+                document.getElementById("edit-role").dispatchEvent(event);
+            }, 0);
 
-            // Gérer le champ numéro assuré
+           
             if (user.role === "assure") {
                 document
                     .getElementById("edit-numero-assure-container")
@@ -217,12 +264,12 @@ function openEditUserModal(userId) {
                     .classList.add("hidden");
             }
 
-            // Mettre à jour l'action du formulaire
+            
             document.getElementById(
                 "edit-user-form"
             ).action = `/dashboard/users/${userId}`;
 
-            // Afficher la modal
+           
             document
                 .getElementById("edit-user-modal")
                 .classList.remove("hidden");
@@ -262,3 +309,30 @@ window.onclick = function(event) {
         closeEditUserModal();
     }
 };
+
+function openInfoUserModal(userId) {
+    fetch(`/dashboard/users/${userId}/edit`)
+        .then((response) => response.json())
+        .then((user) => {
+            document.getElementById("info-nom_complet").textContent = user.nom_complet;
+            document.getElementById("info-email").textContent = user.email;
+            document.getElementById("info-role").textContent = user.role === 'admin' ? 'Administrateur' : (user.role === 'gestionnaire' ? 'Gestionnaire' : 'Assuré');
+            document.getElementById("info-actif").textContent = user.actif ? 'Actif' : 'Inactif';
+
+            
+            const numeroAssureContainer = document.getElementById("info-numero-assure-container");
+            if (user.role === 'assure') {
+                numeroAssureContainer.classList.remove("hidden");
+                document.getElementById("info-numero_assure").textContent = user.numero_assure || 'N/A';
+            } else {
+                numeroAssureContainer.classList.add("hidden");
+            }
+
+            document.getElementById("info-user-modal").classList.remove("hidden");
+        })
+        .catch((error) => console.error("Erreur lors du chargement des infos utilisateur:", error));
+}
+
+function closeInfoUserModal() {
+    document.getElementById("info-user-modal").classList.add("hidden");
+}

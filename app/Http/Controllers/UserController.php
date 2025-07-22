@@ -67,7 +67,6 @@ class UserController extends Controller
             'email' => $user->email,
             'role' => $user->role,
             'numero_assure' => $user->numero_assure,
-            'limite_sinistres' => $user->limite_sinistres,
             'actif' => (bool)$user->actif
         ]);
     }
@@ -101,8 +100,6 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'role' => 'required|in:admin,gestionnaire,assure',
             'numero_assure' => 'nullable|string|max:50|unique:users,numero_assure,' . $user->id,
-            'limite_sinistres' => 'required|integer|min:1',
-            'actif' => 'boolean'
         ]);
 
         $user->update([
@@ -110,7 +107,6 @@ class UserController extends Controller
             'email' => $request->email,
             'role' => $request->role,
             'numero_assure' => $request->role === 'assure' ? $request->numero_assure : null,
-            'actif' => $request->actif ?? false
         ]);
 
         return response()->json(['success' => 'Utilisateur mis à jour avec succès']);
