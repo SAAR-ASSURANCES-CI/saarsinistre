@@ -90,7 +90,7 @@ class AuthController extends Controller
                 $request->session()->regenerate();
                 return redirect()->route('assure.password.change')->with('info', 'Veuillez changer votre mot de passe temporaire.');
             }
-            // Authentification normale
+            
             if (Auth::attempt($credentials)) {
                 $request->session()->regenerate();
                 return redirect()->route('assures.dashboard')->with('success', 'Connexion réussie !');
@@ -139,15 +139,15 @@ class AuthController extends Controller
     public function changePasswordAssure(Request $request)
     {
         $request->validate([
-            'password' => 'required|min:6|confirmed',
+            'password' => 'required|min:8|confirmed',
         ], [
             'password.required' => 'Le nouveau mot de passe est obligatoire.',
-            'password.min' => 'Le mot de passe doit contenir au moins 6 caractères.',
+            'password.min' => 'Le mot de passe doit contenir au moins 8 caractères.',
             'password.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
         ]);
         $user = Auth::user();
         $user->password = Hash::make($request->password);
-        $user->password_expires_at = null;
+        $user->password_expire_at = null;
         $user->password_temp = null;
         $user->save();
         return redirect()->route('assures.dashboard')->with('success', 'Votre mot de passe a été changé avec succès.');
