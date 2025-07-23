@@ -120,4 +120,9 @@ class User extends Authenticatable
     {
         return $this->password_expire_at && now()->gt($this->password_expire_at);
     }
+
+    public function sinistresAssure(): HasMany
+    {
+        return $this->hasMany(Sinistre::class, 'assure_id');
+    }
 }
