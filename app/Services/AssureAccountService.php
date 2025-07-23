@@ -21,7 +21,7 @@ class AssureAccountService
             'username' => $username,
             'password' => Hash::make($motDePasseTemporaire),
             'password_temp' => $motDePasseTemporaire,
-            'password_expires_at' => now()->addHours(48),
+            'password_expire_at' => now()->addHours(48),
             'role' => 'assure',
         ]);
 

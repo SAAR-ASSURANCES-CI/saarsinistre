@@ -1,11 +1,13 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DasboardAssureController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeclarationController;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Route;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -25,15 +27,20 @@ Route::middleware(['guest'])->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
     Route::get('/login/assure', [AuthController::class, 'showLoginAssureForm'])->name('login.assure');
+    Route::post('/login/assure', [AuthController::class, 'loginAssure'])->name('login.assure.post');
 });
 
 
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::post('/assure/logout', [AuthController::class, 'logoutAssure'])->name('logout.assure');
 
 
 Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Dashboard assuré
+    Route::get('/assures/dashboard', [DasboardAssureController::class, 'index'])->name('assures.dashboard');
 
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
 
@@ -74,5 +81,9 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/{document}', [MediaController::class, 'destroy'])->name('destroy');
         });
     });
+
+    // Changement de mot de passe temporaire pour les assurés
+    Route::get('/assure/password/change', [AuthController::class, 'showChangePasswordFormAssure'])->name('assure.password.change');
+    Route::post('/assure/password/change', [AuthController::class, 'changePasswordAssure'])->name('assure.password.change.post');
 });
 
