@@ -25,8 +25,8 @@
             </a>
 
             <!-- Média -->
-            <a href="#"
-                class="menu-item flex items-center space-x-2 px-6 py-4 text-white/80 hover:text-white hover:bg-white/10 transition-all duration-200 border-b-3 border-transparent hover:border-white/50">
+            <a href="{{ route('dashboard.media.index') }}"
+                class="menu-item flex items-center space-x-2 px-6 py-4 {{ request()->routeIs('dashboard.media.*') ? 'text-white bg-white/20 border-white' : 'text-white/80 hover:text-white hover:bg-white/10' }} transition-all duration-200 border-b-3 border-transparent hover:border-white/50">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2h4a1 1 0 011 1v14a2 2 0 01-2 2H4a2 2 0 01-2-2V5a1 1 0 011-1h4z">

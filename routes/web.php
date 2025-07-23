@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeclarationController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\MediaController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -34,8 +35,9 @@ Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Sous-routes du tableau de bord
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
+
+        //sinistre
         Route::prefix('sinistres')->name('sinistres.')->group(function () {
             Route::get('/', [DashboardController::class, 'getSinistres'])->name('index');
             Route::get('/{sinistre}/details', [DashboardController::class, 'getDetails'])->name('details');
@@ -64,5 +66,13 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/{user}', [UserController::class, 'update'])->name('update');
             Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
         });
+
+        //media
+        Route::prefix('media')->name('media.')->group(function () {
+            Route::get('/', [MediaController::class, 'index'])->name('index');
+            Route::post('/upload', [MediaController::class, 'store'])->name('store');
+            Route::delete('/{document}', [MediaController::class, 'destroy'])->name('destroy');
+        });
     });
 });
+
