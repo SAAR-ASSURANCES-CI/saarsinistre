@@ -29,20 +29,11 @@ Route::middleware(['guest'])->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
-
 Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Sous-routes du tableau de bord
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
-        Route::prefix('sinistres')->name('sinistres.')->group(function () {
-            Route::get('/', [DashboardController::class, 'getSinistres'])->name('index');
-            Route::get('/{sinistre}/details', [DashboardController::class, 'getDetails'])->name('details');
-            Route::post('/{sinistre}/assign', [DashboardController::class, 'assignerGestionnaire'])->name('assign');
-            Route::post('/{sinistre}/status', [DashboardController::class, 'changerStatut'])->name('status');
-            Route::get('/en-retard', [DashboardController::class, 'getSinistresEnRetard'])->name('retard');
-        });
 
         Route::get('/stats', [DashboardController::class, 'getStats'])->name('stats');
 
