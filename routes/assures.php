@@ -1,0 +1,33 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DasboardAssureController;
+use App\Http\Controllers\DeclarationController;
+use App\Http\Controllers\AuthController;
+
+//Authentification
+Route::middleware(['guest'])->group(function () {
+    Route::get('/login/assure', [AuthController::class, 'showLoginAssureForm'])->name('login.assure');
+    Route::post('/login/assure', [AuthController::class, 'loginAssure'])->name('login.assure.post');
+});
+
+Route::post('/assure/logout', [AuthController::class, 'logoutAssure'])->name('logout.assure');
+
+// Routes accessibles uniquement aux assurés authentifiés
+Route::middleware(['auth'])->group(function () {
+    // Dashboard assuré
+    Route::get('/assures/dashboard', [DasboardAssureController::class, 'index'])->name('assures.dashboard');
+
+    // Changement de mot de passe pour assuré
+    Route::get('/assure/password/change', [AuthController::class, 'showChangePasswordFormAssure'])->name('assure.password.change');
+    Route::post('/assure/password/change', [AuthController::class, 'changePasswordAssure'])->name('assure.password.change.post');
+});
+
+// Déclaration de sinistre (accessible à tous ou à restreindre selon besoin)
+Route::prefix('declaration')->name('declaration.')->group(function () {
+    Route::get('/formulaire', [DeclarationController::class, 'create'])->name('create');
+    Route::post('/store', [DeclarationController::class, 'store'])->name('store');
+    Route::get('/confirmation/{sinistre}', [DeclarationController::class, 'confirmation'])->name('confirmation');
+    Route::get('/statut/{numeroSinistre}', [DeclarationController::class, 'statut'])->name('statut');
+    Route::get('/{sinistre}/recu', [DeclarationController::class, 'downloadRecu'])->name('recu');
+}); 

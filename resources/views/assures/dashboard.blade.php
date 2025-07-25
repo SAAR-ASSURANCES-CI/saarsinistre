@@ -172,6 +172,11 @@
                                     <button type="button" class="details-btn text-blue-600 hover:text-blue-900" data-sinistre='@json($sinistreData)' title="Voir les détails">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm6 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                     </button>
+                                    <a href="{{ route('chat.index', $sinistre->id) }}" class="inline-block ml-2 text-red-600 hover:text-red-800" title="Messagerie">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m-2 8a9 9 0 100-18 9 9 0 000 18z" />
+                                        </svg>
+                                    </a>
                                 </td>
                             </tr>
                         @empty
