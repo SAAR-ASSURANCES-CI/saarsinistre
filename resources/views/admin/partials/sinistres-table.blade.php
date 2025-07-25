@@ -18,10 +18,21 @@
                         Gestionnaire</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions
                     </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Discussion</th>
                 </tr>
             </thead>
             <tbody id="sinistres-tbody" class="bg-white divide-y divide-gray-200">
                 <!-- Données des sinistres seront chargées ici -->
+                {{-- Exemple d'icône de chat à intégrer dynamiquement dans chaque ligne (à faire côté JS aussi) --}}
+                {{--
+                <td class="px-6 py-4 text-center">
+                    <a href="{{ route('chat.index', $sinistre->id) }}" class="inline-block text-saar-blue hover:text-saar-red transition-transform duration-200 rounded-full p-2 shadow-sm hover:scale-110 focus:outline-none focus:ring-2 focus:ring-saar-red animate-bounce-in" title="Ouvrir la discussion">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m-2 8a9 9 0 100-18 9 9 0 000 18z" />
+                        </svg>
+                    </a>
+                </td>
+                --}}
             </tbody>
         </table>
     </div>

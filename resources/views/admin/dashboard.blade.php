@@ -19,7 +19,7 @@
         @include('admin.partials.sinistres-table')
     </div>
 
-    <footer class="w-full py-4 bg-white/80 border-t border-gray-200 text-center text-xs text-gray-500 mt-8">
+    <footer class="w-full py-3 bg-white/80 border-t border-gray-200 text-center text-xs text-gray-500 mt-8">
         © Saar Assurances Côte d'Ivoire. Tous droits réservés.
     </footer>
 
