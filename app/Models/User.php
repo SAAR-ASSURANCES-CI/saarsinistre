@@ -125,4 +125,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Sinistre::class, 'assure_id');
     }
+
+    public function messagesEnvoyes()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    public function messagesRecus()
+    {
+        return $this->hasMany(Message::class, 'receiver_id');
+    }
 }

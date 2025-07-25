@@ -83,6 +83,11 @@ class Sinistre extends Model
         return $this->hasMany(DocumentSinistre::class);
     }
 
+    public function messages()
+    {
+        return $this->hasMany(Message::class);
+    }
+
     /**
      * Boot method pour générer le numéro de sinistre
      */
