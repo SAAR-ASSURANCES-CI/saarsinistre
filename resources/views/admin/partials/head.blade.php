@@ -16,8 +16,69 @@
 </script>
 <script src="/js/pwa.js"></script>
 <style>
+    @media (max-width: 640px) {
+        .stats-cards {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .sinistre-actions {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .sinistre-actions button {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .search-filters {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .search-filters > div {
+            width: 100%;
+            max-width: 100%;
+        }
+    }
+
+    /* Animation pour la modal */
+    @keyframes slideIn {
+        from {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .animate-modal {
+        animation: slideIn 0.3s ease-out;
+    }
+
     .menu-item.active {
         background: rgba(255, 255, 255, 0.15);
         border-bottom-color: white !important;
+    }
+
+    .preview-modal img {
+        max-width: 100%;
+        max-height: 80vh;
+        object-fit: contain;
+    }
+
+    .preview-modal {
+        transition: all 0.3s ease;
+    }
+
+    .preview-modal-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        padding: 1rem;
+        border-top: 1px solid #e5e7eb;
     }
 </style>

@@ -47,7 +47,12 @@ class SinistreDocumentService
         $extension = $file->getClientOriginalExtension();
         $nomFichier = $type . '_' . time() . '_' . uniqid() . '.' . $extension;
 
-        $chemin = $file->storeAs("sinistres/{$sinistre->id}", $nomFichier, 'public');
+        $directory = "sinistres/{$sinistre->id}";
+        if (!Storage::disk('public')->exists($directory)) {
+            Storage::disk('public')->makeDirectory($directory);
+        }
+
+        $chemin = $file->storeAs($directory, $nomFichier, 'public');
 
         DocumentSinistre::create([
             'sinistre_id' => $sinistre->id,

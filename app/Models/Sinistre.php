@@ -47,7 +47,6 @@ class Sinistre extends Model
 
     protected $casts = [
         'date_sinistre' => 'date',
-        'heure_sinistre' => 'datetime:H:i:s',
         'date_affectation' => 'datetime',
         'date_reglement' => 'datetime',
         'derniere_notification' => 'datetime',
