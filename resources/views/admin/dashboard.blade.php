@@ -14,12 +14,14 @@
     @include('admin.partials.navbar')
 
     <div class="container mx-auto px-4 py-8">
-        @include('admin.partials.stats-cards')
-        @include('admin.partials.search-filters')
-        @include('admin.partials.sinistres-table')
+        <div class="grid grid-cols-1 gap-6">
+            @include('admin.partials.stats-cards')
+            @include('admin.partials.search-filters')
+            @include('admin.partials.sinistres-table')
+        </div>
     </div>
 
-    <footer class="w-full py-4 bg-white/80 border-t border-gray-200 text-center text-xs text-gray-500 mt-8">
+    <footer class="w-full py-3 bg-white/80 border-t border-gray-200 text-center text-xs text-gray-500 mt-8">
         © Saar Assurances Côte d'Ivoire. Tous droits réservés.
     </footer>
 

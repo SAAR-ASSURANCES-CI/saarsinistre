@@ -68,4 +68,14 @@ Route::middleware(['auth'])->group(function () {
     // Notifications non lues
     Route::get('/notifications/unread-messages', [NotificationController::class, 'unreadMessages']);
     Route::get('/notifications/unread-messages/count', [NotificationController::class, 'unreadMessagesCount']);
+
+    Route::get('/storage/sinistres/{sinistreId}/{filename}', function ($sinistreId, $filename) {
+        $path = "sinistres/{$sinistreId}/{$filename}";
+        
+        if (!Storage::disk('public')->exists($path)) {
+            abort(404);
+        }
+    
+        return response()->file(storage_path("app/public/{$path}"));
+    })->where('filename', '.*')->name('sinistre.document');
 }); 

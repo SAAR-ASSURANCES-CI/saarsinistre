@@ -14,7 +14,7 @@
                     <a href="/">
                         <h1
                             class="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-saar-red to-saar-red">
-                            SAAR ASSURANCE</h1>
+                            SAAR ASSURANCES</h1>
                     </a>
                     <p class="text-xs text-gray-600">Dashboard de Gestion</p>
                 </div>

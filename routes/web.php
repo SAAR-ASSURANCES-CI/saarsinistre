@@ -8,6 +8,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+
 // Inclusion des routes spécifiques
 require __DIR__.'/assures.php';
 require __DIR__.'/gestionnaires.php';

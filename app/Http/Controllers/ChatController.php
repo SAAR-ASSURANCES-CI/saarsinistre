@@ -17,6 +17,7 @@ class ChatController extends Controller
     {
         $sinistre = Sinistre::with(['messages.sender', 'messages.receiver'])->findOrFail($sinistre_id);
         $user = Auth::user();
+
         // Sécurité : seul l'assuré ou le gestionnaire peut accéder
         if ($user->id !== $sinistre->assure_id && $user->id !== $sinistre->gestionnaire_id) {
             abort(403);
@@ -25,7 +26,7 @@ class ChatController extends Controller
         return view('chat.index', compact('sinistre', 'messages'));
     }
 
-    // Récupérer les messages (pour AJAX/polling)
+  
     public function fetch($sinistre_id)
     {
         $sinistre = Sinistre::findOrFail($sinistre_id);
@@ -37,7 +38,6 @@ class ChatController extends Controller
         return response()->json($messages);
     }
 
-    // Envoyer un message
     public function store(Request $request, $sinistre_id)
     {
         $request->validate([

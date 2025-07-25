@@ -26,6 +26,21 @@ class DashboardController extends Controller
         return view('admin.dashboard', compact('stats', 'gestionnaires'));
     }
 
+    public function getSinistreDetails($id)
+    {
+        $sinistre = Sinistre::with(['gestionnaire', 'documents'])
+            ->findOrFail($id);
+        
+       
+        $sinistre->documents->each(function ($document) {
+            $document->url = asset('storage/' . $document->chemin_fichier);
+        });
+    
+        return response()->json([
+            'sinistre' => $sinistre,
+        ]);
+    }
+
     public function getSinistres(Request $request)
     {
         $query = Sinistre::with(['gestionnaire:id,nom_complet'])
