@@ -21,6 +21,9 @@ Route::middleware(['auth'])->group(function () {
     // Changement de mot de passe pour assuré
     Route::get('/assure/password/change', [AuthController::class, 'showChangePasswordFormAssure'])->name('assure.password.change');
     Route::post('/assure/password/change', [AuthController::class, 'changePasswordAssure'])->name('assure.password.change.post');
+
+    Route::get('/sinistres/{sinistre}/chat', [ChatController::class, 'index'])->name('assures.chat.index');
+    Route::post('/sinistres/{sinistre}/chat', [ChatController::class, 'store'])->name('assures.chat.store');
 });
 
 // Déclaration de sinistre (accessible à tous ou à restreindre selon besoin)

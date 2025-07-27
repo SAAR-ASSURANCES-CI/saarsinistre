@@ -16,6 +16,7 @@
     --color-primary-700: #1d4ed8;
 }
 
+
 /* Styles personnalisés pour le système de gestion de sinistres */
 @layer components {
     .btn-primary {
@@ -99,7 +100,7 @@
     }
 
     .table-responsive {
-        @apply overflow-x-auto shadow ring-1 ring-black ring-opacity-5 rounded-lg;
+        @apply overflow-x-auto shadow ring-1 ring-black ring-black/5 rounded-lg;
     }
 
     .table {
@@ -159,7 +160,7 @@
     }
 
     .modal-overlay {
-        @apply fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50;
+        @apply fixed inset-0 bg-gray-600 bg-*/opacity-50 overflow-y-auto h-full w-full z-50;
     }
 
     .modal-container {
@@ -187,7 +188,7 @@
     }
 
     .stats-card {
-        @apply bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-6;
+        @apply bg-white bg-*/opacity-20 backdrop-blur-sm rounded-lg p-6;
     }
 }
 
