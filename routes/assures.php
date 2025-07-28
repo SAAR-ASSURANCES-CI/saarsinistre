@@ -26,6 +26,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/sinistres/{sinistre}/chat', [ChatController::class, 'index'])->name('assures.chat.index');
     Route::post('/sinistres/{sinistre}/chat', [ChatController::class, 'store'])->name('assures.chat.store');
     Route::get('/sinistres/{sinistre}/chat/fetch', [ChatController::class, 'fetch'])->name('assures.chat.fetch');
+    
 });
 
 // Déclaration de sinistre (accessible à tous ou à restreindre selon besoin)
