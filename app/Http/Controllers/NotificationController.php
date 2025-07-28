@@ -8,7 +8,6 @@ use App\Models\Message;
 
 class NotificationController extends Controller
 {
-    // Retourne la liste des messages non lus reçus par l'utilisateur connecté
     public function unreadMessages()
     {
         $user = Auth::user();
@@ -30,7 +29,6 @@ class NotificationController extends Controller
         return response()->json($messages);
     }
 
-    // Retourne le nombre de messages non lus reçus par l'utilisateur connecté
     public function unreadMessagesCount()
     {
         $user = Auth::user();

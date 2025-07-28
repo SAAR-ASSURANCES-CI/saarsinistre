@@ -2,39 +2,52 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Sinistre;
 use App\Models\Message;
+use App\Models\Sinistre;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Notification;
-use App\Notifications\NewMessageNotification;
 
 class ChatController extends Controller
 {
-    
     public function index($sinistre_id)
     {
-        $sinistre = Sinistre::with(['messages.sender', 'messages.receiver'])->findOrFail($sinistre_id);
+        $sinistre = Sinistre::with(['messages' => function($query) {
+            $query->with(['sender' => function($q) {
+                $q->select('id', 'nom_complet');
+            }])->orderBy('created_at', 'asc');
+        }])->findOrFail($sinistre_id);
+    
         $user = Auth::user();
-
-        // Sécurité : seul l'assuré ou le gestionnaire peut accéder
+    
         if ($user->id !== $sinistre->assure_id && $user->id !== $sinistre->gestionnaire_id) {
             abort(403);
         }
-        $messages = $sinistre->messages()->with(['sender', 'receiver'])->orderBy('created_at')->get();
-        return view('chat.index', compact('sinistre', 'messages'));
+    
+        Message::where('sinistre_id', $sinistre_id)
+            ->where('receiver_id', $user->id)
+            ->where('lu', false)
+            ->update(['lu' => true]);
+    
+        return view('chat.index', [
+            'sinistre' => $sinistre,
+            'messages' => $sinistre->messages
+        ]);
     }
 
-  
     public function fetch($sinistre_id)
     {
-        $sinistre = Sinistre::findOrFail($sinistre_id);
-        $user = Auth::user();
-        if ($user->id !== $sinistre->assure_id && $user->id !== $sinistre->gestionnaire_id) {
-            abort(403);
-        }
-        $messages = $sinistre->messages()->with(['sender', 'receiver'])->orderBy('created_at')->get();
+        $lastMessageId = request()->query('last_id', 0);
+    
+        $messages = Message::where('sinistre_id', $sinistre_id)
+            ->when($lastMessageId > 0, function($query) use ($lastMessageId) {
+                $query->where('id', '>', $lastMessageId);
+            })
+            ->with(['sender' => function($q) {
+                $q->select('id', 'nom_complet');
+            }])
+            ->orderBy('created_at', 'asc')
+            ->get();
+    
         return response()->json($messages);
     }
 
@@ -43,16 +56,18 @@ class ChatController extends Controller
         $request->validate([
             'contenu' => 'required|string|max:2000',
         ]);
+
         $sinistre = Sinistre::findOrFail($sinistre_id);
         $user = Auth::user();
+
         if ($user->id !== $sinistre->assure_id && $user->id !== $sinistre->gestionnaire_id) {
             abort(403);
         }
-        // Déterminer le destinataire
-        $receiver_id = ($user->id === $sinistre->assure_id) ? $sinistre->gestionnaire_id : $sinistre->assure_id;
-        if (!$receiver_id) {
-            return response()->json(['error' => 'Aucun destinataire.'], 422);
-        }
+
+        $receiver_id = ($user->id === $sinistre->assure_id) 
+            ? $sinistre->gestionnaire_id 
+            : $sinistre->assure_id;
+
         $message = Message::create([
             'sinistre_id' => $sinistre->id,
             'sender_id' => $user->id,
@@ -60,8 +75,11 @@ class ChatController extends Controller
             'contenu' => $request->contenu,
             'lu' => false,
         ]);
-        // Notification push (Reverb via event/notification)
-        Notification::sendNow($message->receiver, new NewMessageNotification($message));
-        return response()->json($message->load(['sender', 'receiver']));
+
+        $message->load(['sender' => function($q) {
+            $q->select('id', 'nom_complet');
+        }]);
+
+        return response()->json($message, 201);
     }
-} 
+}

@@ -137,37 +137,157 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="https://unpkg.com/laravel-echo/dist/echo.iife.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/pusher-js@8.2.0/dist/web/pusher.min.js"></script>
     <script>
-        window.Echo = new Echo({
-            broadcaster: 'reverb',
-            key: '{{ config('broadcasting.connections.reverb.key') }}',
-            wsHost: '{{ config('broadcasting.connections.reverb.host') }}',
-            wsPort: {{ config('broadcasting.connections.reverb.port', 443) }},
-            wssPort: {{ config('broadcasting.connections.reverb.port', 443) }},
-            forceTLS: true,
-            enabledTransports: ['ws', 'wss'],
-            authEndpoint: '/broadcasting/auth',
-            auth: {
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
-            }
-        });
-
         const userId = {{ Auth::id() }};
         const sinistreId = {{ $sinistre->id }};
         const chatBox = document.getElementById('chat-box');
         const chatForm = document.getElementById('chat-form');
         const chatInput = document.getElementById('chat-input');
-
+        let lastMessageId = {{ $messages->isNotEmpty() ? $messages->last()->id : 0 }};
+        let isLoading = false;
+        let pollingInterval = 3000; 
+        let retryCount = 0;
+        const maxRetryCount = 5;
+        let isInitialLoad = true;
+    
         function scrollToBottom() {
             chatBox.scrollTop = chatBox.scrollHeight;
         }
-        scrollToBottom();
-
-        chatForm.addEventListener('submit', function(e) {
+    
+        function setLoading(state) {
+            isLoading = state;
+            chatBox.classList.toggle('opacity-60', state);
+        }
+    
+        function loadInitialMessages() {
+            if (isLoading) return;
+            
+            setLoading(true);
+            axios.get(`/sinistres/${sinistreId}/chat/fetch`)
+                .then(response => {
+                    const messages = response.data;
+                    chatBox.innerHTML = '';
+                    
+                    messages.forEach(msg => {
+                        appendMessage(msg, msg.sender_id === userId, false);
+                    });
+                    
+                    if (messages.length > 0) {
+                        lastMessageId = messages[messages.length - 1].id;
+                    }
+                    
+                    scrollToBottom();
+                    isInitialLoad = false;
+                })
+                .catch(error => {
+                    console.error('Erreur de chargement initial:', error);
+                    // Réessayer après un délai
+                    setTimeout(loadInitialMessages, 2000);
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+        }
+    
+        function appendMessage(message, isMine = false, animate = true) {
+            const existingMessage = document.querySelector(`[data-message-id="${message.id}"]`);
+            if (existingMessage) {
+                const contentDiv = existingMessage.querySelector('.message-content');
+                if (contentDiv && contentDiv.textContent !== message.contenu) {
+                    contentDiv.textContent = message.contenu;
+                }
+                return;
+            }
+    
+            const initiale = message.sender.nom_complet ? message.sender.nom_complet.charAt(0).toUpperCase() : '?';
+            const bg = isMine ? 'bg-red-100' : 'bg-blue-100';
+            const border = isMine ? 'border-red-500' : 'border-blue-500';
+            const align = isMine ? 'justify-end' : 'justify-start';
+            const avatarBg = isMine ? 'bg-red-600' : 'bg-blue-600';
+    
+            const messageEl = document.createElement('div');
+            messageEl.className = `flex items-end ${align} message-enter`;
+            messageEl.dataset.messageId = message.id;
+            
+            if (!isMine) {
+                messageEl.innerHTML += `
+                    <div class="flex-shrink-0 w-8 h-8 rounded-full ${avatarBg} flex items-center justify-center text-white font-bold shadow mr-2">
+                        ${initiale}
+                    </div>
+                `;
+            }
+            
+            messageEl.innerHTML += `
+                <div class="max-w-xs md:max-w-md px-4 py-2 rounded-2xl shadow ${bg} border-l-4 ${border} ${isMine ? 'text-right' : 'text-left'}">
+                    <div class="text-xs text-gray-500 mb-1 font-semibold">${message.sender.nom_complet}</div>
+                    <div class="whitespace-pre-line text-sm message-content">${message.contenu}</div>
+                    <div class="text-[11px] text-gray-400 mt-1">${formatDate(message.created_at)}</div>
+                </div>
+            `;
+            
+            if (isMine) {
+                messageEl.innerHTML += `
+                    <div class="flex-shrink-0 w-8 h-8 rounded-full ${avatarBg} flex items-center justify-center text-white font-bold shadow ml-2">
+                        ${initiale}
+                    </div>
+                `;
+            }
+            
+            chatBox.appendChild(messageEl);
+            
+            if (animate) {
+                setTimeout(() => {
+                    messageEl.classList.add('message-enter-active');
+                }, 10);
+            }
+            
+            if (message.id > lastMessageId) {
+                lastMessageId = message.id;
+            }
+        }
+    
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+    
+        function fetchMessages() {
+            if (isLoading || isInitialLoad) return;
+            
+            setLoading(true);
+            
+            axios.get(`/sinistres/${sinistreId}/chat/fetch?last_id=${lastMessageId}`)
+                .then(response => {
+                    const messages = response.data;
+                    if (messages.length > 0) {
+                        messages.forEach(msg => {
+                            appendMessage(msg, msg.sender_id === userId, true);
+                        });
+                        scrollToBottom();
+                    }
+                    retryCount = 0;
+                    pollingInterval = 3000;
+                })
+                .catch(error => {
+                    console.error('Erreur de polling:', error);
+                    retryCount++;
+                    if (retryCount >= maxRetryCount) {
+                        pollingInterval = Math.min(pollingInterval * 2, 30000);
+                    }
+                })
+                .finally(() => {
+                    setLoading(false);
+                    setTimeout(fetchMessages, pollingInterval);
+                });
+        }
+    
+        function handleMessageSubmit(e) {
             e.preventDefault();
             const contenu = chatInput.value.trim();
             if (!contenu) return;
@@ -176,117 +296,48 @@
             submitBtn.disabled = true;
             submitBtn.classList.add('opacity-75');
             
+            setLoading(true);
+            
             axios.post(`/sinistres/${sinistreId}/chat`, { contenu })
-                .then(res => {
-                    appendMessage(res.data, true);
+                .then(response => {
+                    appendMessage(response.data, true, true);
                     chatInput.value = '';
                     scrollToBottom();
+                })
+                .catch(error => {
+                    console.error('Erreur d\'envoi:', error);
+                    alert('Une erreur est survenue lors de l\'envoi du message.');
                 })
                 .finally(() => {
                     submitBtn.disabled = false;
                     submitBtn.classList.remove('opacity-75');
+                    setLoading(false);
                 });
-        });
-
-        
-        function appendMessage(message, isMine = false) {
-            const initiale = message.sender.nom_complet ? message.sender.nom_complet.charAt(0).toUpperCase() : '?';
-            const bg = isMine ? 'bg-red-100' : 'bg-blue-100';
-            const border = isMine ? 'border-red-500' : 'border-blue-500';
-            const align = isMine ? 'justify-end' : 'justify-start';
-            const avatarBg = isMine ? 'bg-red-600' : 'bg-blue-600';
+        }
+    
+        function initChat() {
+            chatForm.addEventListener('submit', handleMessageSubmit);
             
-            const html = `
-                <div class="flex items-end ${align} message-enter message-enter-active">
-                    ${!isMine ? `<div class="flex-shrink-0 w-8 h-8 rounded-full ${avatarBg} flex items-center justify-center text-white font-bold shadow mr-2 transition-transform hover:scale-110">${initiale}</div>` : ''}
-                    <div class="max-w-xs md:max-w-md px-4 py-2 rounded-2xl shadow ${bg} border-l-4 ${border} ${isMine ? 'text-right' : 'text-left'} transition-all duration-200 hover:shadow-md">
-                        <div class="text-xs text-gray-500 mb-1 font-semibold">${message.sender.nom_complet}</div>
-                        <div class="whitespace-pre-line text-sm">${message.contenu}</div>
-                        <div class="text-[11px] text-gray-400 mt-1">${new Date(message.created_at).toLocaleString('fr-FR')}</div>
-                    </div>
-                    ${isMine ? `<div class="flex-shrink-0 w-8 h-8 rounded-full ${avatarBg} flex items-center justify-center text-white font-bold shadow ml-2 transition-transform hover:scale-110">${initiale}</div>` : ''}
-                </div>
-            `;
+            chatInput.addEventListener('input', function() {
+                const submitBtn = chatForm.querySelector('button[type="submit"]');
+                submitBtn.disabled = !chatInput.value.trim();
+            });
+            chatInput.dispatchEvent(new Event('input'));
             
-            const div = document.createElement('div');
-            div.innerHTML = html;
-            chatBox.appendChild(div.firstElementChild);
-            scrollToBottom();
+            loadInitialMessages();
+            
+            setTimeout(() => {
+                fetchMessages();
+            }, 1000);
+            
+            chatInput.focus();
         }
-
-        const notifBell = document.getElementById('notif-bell');
-        const notifMenu = document.getElementById('notif-menu');
-        notifBell.addEventListener('click', function(e) {
-            notifMenu.classList.toggle('hidden');
-            notifMenu.classList.toggle('scale-95');
-            notifMenu.classList.toggle('opacity-0');
-            if (!notifMenu.classList.contains('hidden')) {
-                fetchUnreadMessages();
-            }
-        });
-        document.addEventListener('click', function(e) {
-            if (!notifBell.contains(e.target) && !notifMenu.contains(e.target)) {
-                notifMenu.classList.add('hidden', 'scale-95', 'opacity-0');
-            }
-        });
-
-        
-        function fetchUnreadMessages() {
-            axios.get('/notifications/unread-messages').then(res => {
-                const notifList = document.getElementById('notif-list');
-                notifList.innerHTML = '';
-                const messages = res.data;
-                if (messages.length === 0) {
-                    notifList.innerHTML = '<li class="p-4 text-gray-400 text-center">Aucun message non lu</li>';
-                } else {
-                    messages.forEach(msg => {
-                        const li = document.createElement('li');
-                        li.className = 'p-3 hover:bg-red-50 cursor-pointer flex flex-col transition-colors duration-200';
-                        li.innerHTML = `<span class="font-semibold text-red-700">${msg.sender_nom}</span><span class="text-xs text-gray-500">${msg.created_at}</span><span class="text-sm mt-1">${msg.contenu.substring(0, 60)}${msg.contenu.length > 60 ? '…' : ''}</span>`;
-                        li.onclick = function() {
-                            window.location.href = `/sinistres/${msg.sinistre_id}/chat`;
-                        };
-                        notifList.appendChild(li);
-                    });
-                }
-            });
+    
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initChat);
+        } else {
+            initChat();
         }
-
-        
-        function updateNotifBadge(count) {
-            const badge = document.getElementById('notif-badge');
-            if (count > 0) {
-                badge.textContent = count;
-                badge.classList.remove('hidden');
-                badge.classList.add('animate-pulse');
-            } else {
-                badge.classList.add('hidden');
-                badge.classList.remove('animate-pulse');
-            }
-        }
-
-        
-        function refreshNotifCount() {
-            axios.get('/notifications/unread-messages/count').then(res => {
-                updateNotifBadge(res.data.count);
-            });
-        }
-        refreshNotifCount();
-
-        
-        window.Echo.private(`users.${userId}`)
-            .listen('.new-message', (e) => {
-                refreshNotifCount();
-                if (e.sinistre_id == sinistreId) {
-                    axios.get(`/sinistres/${sinistreId}/chat/fetch`).then(res => {
-                        chatBox.innerHTML = '';
-                        res.data.forEach(msg => appendMessage(msg, msg.sender_id === userId));
-                    });
-                }
-            });
-
-       
-        chatInput.focus();
     </script>
 </body>
 </html>
