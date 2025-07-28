@@ -1,9 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\DasboardAssureController;
-use App\Http\Controllers\DeclarationController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ChatController;
+use App\Http\Controllers\DeclarationController;
+use App\Http\Controllers\DasboardAssureController;
 
 //Authentification
 Route::middleware(['guest'])->group(function () {

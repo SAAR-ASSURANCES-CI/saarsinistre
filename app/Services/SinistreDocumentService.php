@@ -2,9 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\DocumentSinistre;
 use App\Models\Sinistre;
 use Illuminate\Http\Request;
-use App\Models\DocumentSinistre;
+use Illuminate\Support\Facades\Storage;
 
 class SinistreDocumentService
 {
