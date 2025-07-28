@@ -2,11 +2,15 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ChatController;
+use App\Http\Controllers\NotificationController;
 
 // Page d'accueil
 Route::get('/', function () {
     return view('welcome');
 });
+
+
 
 
 // Inclusion des routes spécifiques

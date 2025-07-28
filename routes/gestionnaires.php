@@ -60,15 +60,6 @@ Route::middleware(['auth', 'role:admin,gestionnaire'])->group(function () {
         });
     });
 
-    // Chat sinistre
-    Route::get('/sinistres/{sinistre}/chat', [ChatController::class, 'index'])->name('chat.index');
-    Route::get('/sinistres/{sinistre}/chat/fetch', [ChatController::class, 'fetch'])->name('chat.fetch');
-    Route::post('/sinistres/{sinistre}/chat', [ChatController::class, 'store'])->name('chat.store');
-
-    // Notifications non lues
-    Route::get('/notifications/unread-messages', [NotificationController::class, 'unreadMessages']);
-    Route::get('/notifications/unread-messages/count', [NotificationController::class, 'unreadMessagesCount']);
-
     Route::get('/storage/sinistres/{sinistreId}/{filename}', function ($sinistreId, $filename) {
         $path = "sinistres/{$sinistreId}/{$filename}";
 
@@ -78,4 +69,15 @@ Route::middleware(['auth', 'role:admin,gestionnaire'])->group(function () {
 
         return response()->file(storage_path("app/public/{$path}"));
     })->where('filename', '.*')->name('sinistre.document');
+});
+
+Route::middleware(['auth'])->group(function () {
+    // Chat sinistre
+    Route::get('/sinistres/{sinistre}/chat', [ChatController::class, 'index'])->name('chat.index');
+    Route::get('/sinistres/{sinistre}/chat/fetch', [ChatController::class, 'fetch'])->name('chat.fetch');
+    Route::post('/sinistres/{sinistre}/chat', [ChatController::class, 'store'])->name('chat.store');
+
+    // Notifications non lues
+    Route::get('/notifications/unread-messages', [NotificationController::class, 'unreadMessages']);
+    Route::get('/notifications/unread-messages/count', [NotificationController::class, 'unreadMessagesCount']);
 });
