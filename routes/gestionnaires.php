@@ -7,18 +7,16 @@ use App\Http\Controllers\MediaController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Support\Facades\Storage;
 
 // Authentification
-Route::middleware(['guest'])->group(function () {
-    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [AuthController::class, 'login'])->name('login.post');
-    
-});
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Routes accessibles uniquement aux gestionnaires authentifiés
-Route::middleware(['auth'])->group(function () {
+// Routes accessibles uniquement aux gestionnaires et admins authentifiés
+Route::middleware(['auth', 'role:admin,gestionnaire'])->group(function () {
     // Dashboard principal
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -44,8 +42,8 @@ Route::middleware(['auth'])->group(function () {
         // Recherche
         Route::get('/search', [DashboardController::class, 'searchSinistres'])->name('search');
 
-        // Gestion des utilisateurs
-        Route::prefix('users')->name('users.')->group(function () {
+        // Gestion des utilisateurs (réservé aux admins)
+        Route::prefix('users')->name('users.')->middleware('role:admin')->group(function () {
             Route::get('/', [UserController::class, 'index'])->name('index');
             Route::post('/', [UserController::class, 'store'])->name('store');
             Route::patch('/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('toggle-status');
@@ -73,11 +71,11 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/storage/sinistres/{sinistreId}/{filename}', function ($sinistreId, $filename) {
         $path = "sinistres/{$sinistreId}/{$filename}";
-        
+
         if (!Storage::disk('public')->exists($path)) {
             abort(404);
         }
-    
+
         return response()->file(storage_path("app/public/{$path}"));
     })->where('filename', '.*')->name('sinistre.document');
-}); 
+});

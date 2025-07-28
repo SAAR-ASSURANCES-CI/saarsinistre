@@ -41,11 +41,19 @@ class AuthController extends Controller
         ]);
         $credentials = $request->only('email', 'password');
         $user = User::where('email', $credentials['email'])->first();
+
         if ($user && !$user->actif) {
             return back()->withErrors([
                 'email' => 'Votre compte est désactivé. Veuillez contacter l\'administrateur.',
             ])->withInput($request->except('password'));
         }
+
+        if (!in_array($user->role, ['admin', 'gestionnaire'])) {
+            return back()->withErrors([
+                'email' => 'Accès refusé. Cette interface est réservée aux gestionnaires et administrateurs.'
+            ])->withInput();
+        }
+
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             $user = Auth::user();
@@ -61,6 +69,27 @@ class AuthController extends Controller
      */
     public function loginAssure(Request $request)
     {
+        $this->validateLoginRequest($request);
+
+        $credentials = $request->only('username', 'password');
+        $user = $this->findUserByUsername($credentials['username']);
+
+        if (!$user) {
+            return $this->loginError("Aucun utilisateur trouvé avec ce nom d'utilisateur.", $request);
+        }
+
+        $validationResult = $this->validateUser($user, $credentials['password']);
+        if ($validationResult !== true) {
+            return $this->loginError($validationResult, $request);
+        }
+
+        $this->authenticateUser($user, $request);
+
+        return $this->handleSuccessfulLogin($user);
+    }
+
+    private function validateLoginRequest(Request $request): void
+    {
         $request->validate([
             'username' => 'required|string',
             'password' => 'required|min:6',
@@ -69,36 +98,55 @@ class AuthController extends Controller
             'password.required' => 'Le mot de passe est obligatoire.',
             'password.min' => 'Le mot de passe doit contenir au moins 6 caractères.',
         ]);
-        $credentials = $request->only('username', 'password');
-        $user = User::where('username', $credentials['username'])->first();
-        if (!$user) {
-            return back()->withErrors([
-                'username' => "Aucun utilisateur trouvé avec ce nom d'utilisateur.",
-            ])->withInput($request->except('password'));
-        }
+    }
+
+    private function findUserByUsername(string $username): ?User
+    {
+        return User::where('username', $username)->first();
+    }
+
+    private function validateUser(User $user, string $password): string|bool
+    {
         if (!$user->actif) {
-            return back()->withErrors([
-                'username' => 'Votre compte est désactivé. Veuillez contacter l\'administrateur.',
-            ])->withInput($request->except('password'));
+            return 'Votre compte est désactivé. Veuillez contacter l\'administrateur.';
         }
-       
-        if (Hash::check($credentials['password'], $user->password)) {
-            
-            if ($user->password_expire_at && $user->password_expire_at->isFuture()) {
-            
-                Auth::login($user);
-                $request->session()->regenerate();
-                return redirect()->route('assure.password.change')->with('info', 'Veuillez changer votre mot de passe temporaire.');
-            }
-            
-            if (Auth::attempt($credentials)) {
-                $request->session()->regenerate();
-                return redirect()->route('assures.dashboard')->with('success', 'Connexion réussie !');
-            }
+
+        if ($user->role !== 'assure') {
+            return 'Accès refusé. Cette interface est réservée aux assurés.';
         }
-        return back()->withErrors([
-            'username' => "Les identifiants fournis ne correspondent pas à nos enregistrements.",
-        ])->withInput($request->except('password'));
+
+        if (!Hash::check($password, $user->password)) {
+            return "Les identifiants fournis ne correspondent pas à nos enregistrements.";
+        }
+
+        if ($user->password_expire_at && $user->password_expire_at->isPast()) {
+            return 'Votre mot de passe temporaire a expiré. Veuillez contacter l\'administrateur.';
+        }
+
+        return true;
+    }
+
+    private function authenticateUser(User $user, Request $request): void
+    {
+        Auth::login($user);
+        $request->session()->regenerate();
+    }
+
+    private function handleSuccessfulLogin(User $user)
+    {
+        if ($user->password_expire_at && $user->password_expire_at->isFuture()) {
+            return redirect()->route('assure.password.change')
+                ->with('info', 'Veuillez changer votre mot de passe temporaire.');
+        }
+
+        return redirect()->route('assures.dashboard')
+            ->with('success', 'Connexion réussie !');
+    }
+
+    private function loginError(string $message, Request $request)
+    {
+        return back()->withErrors(['username' => $message])
+            ->withInput($request->except('password'));
     }
 
     /**
@@ -119,7 +167,7 @@ class AuthController extends Controller
      */
     public function logoutAssure(Request $request)
     {
-        Auth::guard('assure')->logout();
+        Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect()->route('login.assure');

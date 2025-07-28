@@ -13,12 +13,6 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * The user's role.
-     *
-     * @var string|null
-     */
-    public $role;
 
     /**
      * The attributes that are mass assignable.
