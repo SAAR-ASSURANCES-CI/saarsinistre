@@ -11,5 +11,10 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 
 Broadcast::channel('sinistre.{sinistreId}', function ($user, $sinistreId) {
     $sinistre = Sinistre::find($sinistreId);
-    return $sinistre && ($user->id === $sinistre->assure_id || $user->id === $sinistre->gestionnaire_id);
+    
+    if (!$sinistre) {
+        return false;
+    }
+    
+    return $user->id === $sinistre->assure_id || $user->id === $sinistre->gestionnaire_id;
 });
