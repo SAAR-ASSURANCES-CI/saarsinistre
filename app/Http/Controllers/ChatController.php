@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\MessageSent;
 use App\Models\Message;
 use App\Models\Sinistre;
 use Illuminate\Http\Request;
@@ -11,23 +12,24 @@ class ChatController extends Controller
 {
     public function index($sinistre_id)
     {
-        $sinistre = Sinistre::with(['messages' => function($query) {
-            $query->with(['sender' => function($q) {
+        $sinistre = Sinistre::with(['messages' => function ($query) {
+            $query->with(['sender' => function ($q) {
                 $q->select('id', 'nom_complet');
             }])->orderBy('created_at', 'asc');
         }])->findOrFail($sinistre_id);
-    
+
         $user = Auth::user();
-    
+
         if ($user->id !== $sinistre->assure_id && $user->id !== $sinistre->gestionnaire_id) {
             abort(403);
         }
-    
+
+        // Marquer les messages comme lus
         Message::where('sinistre_id', $sinistre_id)
             ->where('receiver_id', $user->id)
             ->where('lu', false)
             ->update(['lu' => true]);
-    
+
         return view('chat.index', [
             'sinistre' => $sinistre,
             'messages' => $sinistre->messages
@@ -36,18 +38,35 @@ class ChatController extends Controller
 
     public function fetch($sinistre_id)
     {
+        $sinistre = Sinistre::findOrFail($sinistre_id);
+        $user = Auth::user();
+
+        // Vérifier les permissions
+        if ($user->id !== $sinistre->assure_id && $user->id !== $sinistre->gestionnaire_id) {
+            abort(403);
+        }
+
         $lastMessageId = request()->query('last_id', 0);
-    
-        $messages = Message::where('sinistre_id', $sinistre_id)
-            ->when($lastMessageId > 0, function($query) use ($lastMessageId) {
-                $query->where('id', '>', $lastMessageId);
-            })
-            ->with(['sender' => function($q) {
+
+        $query = Message::where('sinistre_id', $sinistre_id)
+            ->with(['sender' => function ($q) {
                 $q->select('id', 'nom_complet');
             }])
-            ->orderBy('created_at', 'asc')
-            ->get();
-    
+            ->orderBy('created_at', 'asc');
+
+        // Si last_id est fourni, récupérer seulement les messages plus récents
+        if ($lastMessageId > 0) {
+            $query->where('id', '>', $lastMessageId);
+        }
+
+        $messages = $query->get();
+
+        // Marquer les messages comme lus pour l'utilisateur actuel
+        Message::where('sinistre_id', $sinistre_id)
+            ->where('receiver_id', $user->id)
+            ->where('lu', false)
+            ->update(['lu' => true]);
+
         return response()->json($messages);
     }
 
@@ -64,8 +83,8 @@ class ChatController extends Controller
             abort(403);
         }
 
-        $receiver_id = ($user->id === $sinistre->assure_id) 
-            ? $sinistre->gestionnaire_id 
+        $receiver_id = ($user->id === $sinistre->assure_id)
+            ? $sinistre->gestionnaire_id
             : $sinistre->assure_id;
 
         $message = Message::create([
@@ -76,9 +95,12 @@ class ChatController extends Controller
             'lu' => false,
         ]);
 
-        $message->load(['sender' => function($q) {
+        $message->load(['sender' => function ($q) {
             $q->select('id', 'nom_complet');
         }]);
+
+        // Déclencher l'événement de diffusion
+        broadcast(new MessageSent($message));
 
         return response()->json($message, 201);
     }
