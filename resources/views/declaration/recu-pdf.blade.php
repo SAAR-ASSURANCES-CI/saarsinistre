@@ -195,12 +195,12 @@
         <div class="info-grid">
             <div class="info-row">
                 <div class="info-label">Date du sinistre :</div>
-                <div class="info-value">{{ $sinistre->date_sinistre->format('d/m/Y') }}</div>
+                <div class="info-value">{{ $sinistre->date_sinistre }}</div>
             </div>
             @if ($sinistre->heure_sinistre)
                 <div class="info-row">
                     <div class="info-label">Heure du sinistre :</div>
-                    <div class="info-value">{{ $sinistre->heure_sinistre->format('H:i') }}</div>
+                    <div class="info-value">{{ $sinistre->heure_sinistre}}</div>
                 </div>
             @endif
             <div class="info-row">

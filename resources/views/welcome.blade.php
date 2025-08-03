@@ -108,7 +108,7 @@
 
             <h1
                 class="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-saar-orange via-red-500 to-saar-orange mb-4">
-                SAAR ASSURANCE
+                SAAR ASSURANCES
             </h1>
             <p class="text-xl md:text-2xl font-semibold text-saar-blue mb-6">
                 CÔTE D'IVOIRE
