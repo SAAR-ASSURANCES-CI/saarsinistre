@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 
 class DocumentSinistre extends Model
 {
+    protected $appends = ['url'];
     protected $fillable = [
         'sinistre_id',
         'type_document',

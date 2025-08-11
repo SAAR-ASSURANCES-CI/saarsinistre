@@ -16,7 +16,10 @@ class DashboardController extends Controller
             'en_attente' => Sinistre::where('statut', 'en_attente')->count(),
             'traites' => Sinistre::whereIn('statut', ['regle', 'clos'])->count(),
             'expertise_requise' => Sinistre::where('statut', 'expertise_requise')->count(),
-            'en_cours' => Sinistre::where('statut', 'en_cours')->count()
+            'en_cours' => Sinistre::where('statut', 'en_cours')->count(),
+            'en_retard' => Sinistre::where('en_retard', true)->count(),
+            'en_attente_documents' => Sinistre::where('statut', 'en_attente_documents')->count(),
+            'refuse' => Sinistre::where('statut', 'refuse')->count(),
         ];
 
         $gestionnaires = User::gestionnaires()
@@ -30,12 +33,7 @@ class DashboardController extends Controller
     {
         $sinistre = Sinistre::with(['gestionnaire', 'documents'])
             ->findOrFail($id);
-        
-       
-        $sinistre->documents->each(function ($document) {
-            $document->url = asset('storage/' . $document->chemin_fichier);
-        });
-    
+
         return response()->json([
             'sinistre' => $sinistre,
         ]);
@@ -192,6 +190,7 @@ class DashboardController extends Controller
             'en_retard' => Sinistre::where('en_retard', true)->count(),
             'expertise_requise' => Sinistre::where('statut', 'expertise_requise')->count(),
             'en_attente_documents' => Sinistre::where('statut', 'en_attente_documents')->count(),
+            'refuse' => Sinistre::where('statut', 'refuse')->count(),
         ];
 
         $statsByGestionnaire = Sinistre::select('gestionnaire_id')
