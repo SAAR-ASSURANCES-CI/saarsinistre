@@ -126,6 +126,14 @@ class SinistresManager {
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
                         </button>
+
+                        <a href="/dashboard/sinistres/${sinistre.id}/fiche" target="_blank"
+                           class="text-red-600 hover:text-red-800 transition-colors"
+                           title="Télécharger la fiche sinistre">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v12m0 0l-3-3m3 3l3-3M5 20h14a2 2 0 002-2V7a2 2 0 00-2-2h-5l-2-2H5a2 2 0 00-2 2v13a2 2 0 002 2z"></path>
+                            </svg>
+                        </a>
                     </div>
                 </td>
                 <td class="px-6 py-4 text-center">
