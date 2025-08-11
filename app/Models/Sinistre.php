@@ -163,11 +163,18 @@ class Sinistre extends Model
      */
     public function assignerGestionnaire($gestionnaireId): void
     {
-        $this->update([
+        $attributes = [
             'gestionnaire_id' => $gestionnaireId,
             'date_affectation' => now(),
-            'statut' => 'en_cours'
-        ]);
+        ];
+
+        if (is_null($this->gestionnaire_id) && $gestionnaireId) {
+            if ($this->statut === 'en_attente') {
+                $attributes['statut'] = 'en_cours';
+            }
+        }
+
+        $this->update($attributes);
     }
 
     /**
