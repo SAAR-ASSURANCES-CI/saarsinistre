@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DashboardController;
+use App\Services\PdfGenerationService;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserController;
@@ -28,6 +29,9 @@ Route::middleware(['auth', 'role:admin,gestionnaire'])->group(function () {
             Route::post('/{sinistre}/assign', [DashboardController::class, 'assignerGestionnaire'])->name('assign');
             Route::post('/{sinistre}/status', [DashboardController::class, 'changerStatut'])->name('status');
             Route::get('/en-retard', [DashboardController::class, 'getSinistresEnRetard'])->name('retard');
+            Route::get('/{sinistre}/fiche', function (PdfGenerationService $pdfService, $sinistre) {
+                return $pdfService->generateSinistreFiche((int)$sinistre);
+            })->name('fiche');
         });
 
         // Statistiques

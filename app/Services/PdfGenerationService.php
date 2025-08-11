@@ -15,7 +15,7 @@ class PdfGenerationService
             'sinistre' => $sinistre,
             'date_generation' => now()->format('d/m/Y H:i'),
             'company' => [
-                'name' => 'SAAR ASSURANCE',
+                'name' => 'SAAR ASSURANCES',
                 'phone' => '+225 20 30 30 30',
                 'email' => 'contact@saar-assurance.ci',
                 'address' => 'Abidjan, Côte d\'Ivoire'
@@ -26,6 +26,29 @@ class PdfGenerationService
         $pdf->setPaper('A4', 'portrait');
 
         $nomFichier = 'Attestation_Declaration_' . $sinistre->numero_sinistre . '.pdf';
+
+        return $pdf->download($nomFichier);
+    }
+
+    public function generateSinistreFiche(int $sinistreId)
+    {
+        $sinistre = Sinistre::with(['documents', 'gestionnaire'])->findOrFail($sinistreId);
+
+        $data = [
+            'sinistre' => $sinistre,
+            'date_generation' => now()->format('d/m/Y H:i'),
+            'company' => [
+                'name' => 'SAAR ASSURANCES',
+                'phone' => '+225 20 30 30 30',
+                'email' => 'contact@saar-assurance.ci',
+                'address' => 'Abidjan, Côte d\'Ivoire'
+            ]
+        ];
+
+        $pdf = PDF::loadView('admin.sinistre-fiche-pdf', $data);
+        $pdf->setPaper('A4', 'portrait');
+
+        $nomFichier = 'Fiche_Sinistre_' . $sinistre->numero_sinistre . '.pdf';
 
         return $pdf->download($nomFichier);
     }
