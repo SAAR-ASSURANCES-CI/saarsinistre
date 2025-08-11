@@ -288,6 +288,17 @@ class SinistresManager {
             stats.en_attente;
         document.getElementById("stat-traites").textContent = stats.traites;
         document.getElementById("stat-en-cours").textContent = stats.en_cours;
+        const exp = document.getElementById("stat-expertise-requise");
+        if (exp) exp.textContent = stats.expertise_requise;
+
+        const enRetard = document.getElementById("stat-en-retard");
+        if (enRetard) enRetard.textContent = stats.en_retard;
+
+        const enAttenteDocs = document.getElementById("stat-en-attente-documents");
+        if (enAttenteDocs) enAttenteDocs.textContent = stats.en_attente_documents;
+
+        const refuses = document.getElementById("stat-refuse");
+        if (refuses) refuses.textContent = stats.refuse;
     }
 }
 
