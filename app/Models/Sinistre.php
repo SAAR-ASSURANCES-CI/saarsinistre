@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class Sinistre extends Model
 {
@@ -85,6 +86,14 @@ class Sinistre extends Model
     public function messages()
     {
         return $this->hasMany(Message::class);
+    }
+
+    /**
+     * Relation avec les feedbacks
+     */
+    public function feedbacks()
+    {
+        return $this->hasMany(Feedback::class);
     }
 
     /**
@@ -276,5 +285,25 @@ class Sinistre extends Model
     public function getEstUrgentAttribute(): bool
     {
         return $this->jours_en_cours > 10 && !$this->en_retard;
+    }
+
+    /**
+     * Fermer le sinistre
+     */
+    public function fermerSinistre(): void
+    {
+        $this->update([
+            'statut' => 'clos',
+            'date_reglement' => $this->date_reglement ?? now()
+        ]);
+    }
+
+    /**
+     * Vérifier si le sinistre nécessite un feedback
+     */
+    public function necessiteFeedback(): bool
+    {
+        return in_array($this->statut, ['clos', 'regle']) && 
+               !$this->feedbacks()->where('assure_id', $this->assure_id)->exists();
     }
 }

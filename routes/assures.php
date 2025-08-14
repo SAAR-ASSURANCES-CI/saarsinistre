@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DeclarationController;
 use App\Http\Controllers\DasboardAssureController;
+use App\Http\Controllers\FeedbackController;
 
 //Authentification
 Route::middleware(['guest'])->group(function () {
@@ -26,6 +27,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/sinistres/{sinistre}/chat', [ChatController::class, 'index'])->name('assures.chat.index');
     Route::post('/sinistres/{sinistre}/chat', [ChatController::class, 'store'])->name('assures.chat.store');
     Route::get('/sinistres/{sinistre}/chat/fetch', [ChatController::class, 'fetch'])->name('assures.chat.fetch');
+    
+    // Feedback
+    Route::get('/sinistres/{sinistre}/feedback', [FeedbackController::class, 'showForm'])->name('assures.feedback.form');
+    Route::post('/sinistres/{sinistre}/feedback', [FeedbackController::class, 'store'])->name('assures.feedback.store');
     
 });
 

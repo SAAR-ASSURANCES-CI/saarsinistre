@@ -7,6 +7,7 @@ use App\Services\PdfGenerationService;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\FeedbackController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
@@ -61,6 +62,13 @@ Route::middleware(['auth', 'role:admin,gestionnaire'])->group(function () {
             Route::get('/', [MediaController::class, 'index'])->name('index');
             Route::post('/upload', [MediaController::class, 'store'])->name('store');
             Route::delete('/{document}', [MediaController::class, 'destroy'])->name('destroy');
+        });
+
+        // Feedback
+        Route::prefix('feedback')->name('feedback.')->group(function () {
+            Route::get('/', [FeedbackController::class, 'index'])->name('index');
+            Route::get('/{feedback}', [FeedbackController::class, 'show'])->name('show');
+            Route::get('/export/csv', [FeedbackController::class, 'export'])->name('export');
         });
     });
 
