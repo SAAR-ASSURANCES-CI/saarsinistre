@@ -19,9 +19,12 @@ class MessageSent implements ShouldBroadcast
 
     public function __construct(Message $message)
     {
-        $this->message = $message->load(['sender' => function($q) {
-            $q->select('id', 'nom_complet');
-        }]);
+        $this->message = $message->load([
+            'sender' => function($q) {
+                $q->select('id', 'nom_complet');
+            },
+            'attachments'
+        ]);
     }
 
     public function broadcastOn()
@@ -48,7 +51,16 @@ class MessageSent implements ShouldBroadcast
             'sender' => [
                 'id' => $this->message->sender->id,
                 'nom_complet' => $this->message->sender->nom_complet,
-            ]
+            ],
+            'attachments' => $this->message->attachments->map(function ($att) {
+                return [
+                    'id' => $att->id,
+                    'nom_fichier' => $att->nom_fichier,
+                    'type_mime' => $att->type_mime,
+                    'taille' => $att->taille,
+                    'url' => $att->url,
+                ];
+            })
         ];
     }
 }

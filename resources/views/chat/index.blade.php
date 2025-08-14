@@ -82,17 +82,25 @@
                 <!-- Messages chargé via JavaScript -->
             </div>
 
-            <form id="chat-form" class="flex gap-2 mt-2">
-                <input type="text" id="chat-input" name="contenu" 
-                       class="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 text-sm shadow-sm bg-white transition-all duration-200 hover:border-gray-400" 
-                       placeholder="Écrire un message..." 
-                       autocomplete="off" 
-                       required 
-                       maxlength="2000">
-                <button type="submit" 
-                        class="min-w-[80px] md:min-w-[100px] px-4 md:px-6 py-2 bg-red-600 text-white rounded-full font-semibold shadow-lg hover:bg-red-700 transition-all focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 animate-bounce-in text-sm md:text-base">
-                    Envoyer
-                </button>
+            <form id="chat-form" class="flex flex-col gap-2 mt-2" enctype="multipart/form-data">
+                <div class="flex gap-2">
+                    <input type="text" id="chat-input" name="contenu" 
+                           class="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 text-sm shadow-sm bg-white transition-all duration-200 hover:border-gray-400" 
+                           placeholder="Écrire un message..." 
+                           autocomplete="off"
+                           maxlength="2000">
+                    <label for="file-input" class="cursor-pointer inline-flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-full bg-white hover:bg-gray-50 text-sm text-gray-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M8 12a4 4 0 118 0v3a5 5 0 01-10 0V7a3 3 0 016 0v6a2 2 0 11-4 0V7h2v6a1 1 0 002 0V7a4 4 0 10-8 0v8a6 6 0 0012 0v-3h-2v3a4 4 0 11-8 0V7a2 2 0 114 0v6a3 3 0 106 0V7a6 6 0 10-12 0v8a8 8 0 0016 0v-3a6 6 0 00-12 0v3a6 6 0 0012 0v-3h-2v3a4 4 0 11-8 0V7h2v6a2 2 0 104 0V7a3 3 0 10-6 0v8a5 5 0 0010 0v-3h-2v3a3 3 0 11-6 0V7h2v5z"/></svg>
+                        Joindre
+                    </label>
+                    <input id="file-input" name="fichiers[]" type="file" class="hidden" multiple>
+                    
+                    <button type="submit" 
+                            class="min-w-[80px] md:min-w-[100px] px-4 md:px-6 py-2 bg-red-600 text-white rounded-full font-semibold shadow-lg hover:bg-red-700 transition-all focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 animate-bounce-in text-sm md:text-base">
+                        Envoyer
+                    </button>
+                </div>
+                <div id="selected-files" class="flex flex-wrap gap-2 text-xs text-gray-600"></div>
             </form>
         </div>
     </div>
@@ -202,10 +210,26 @@
                 `;
             }
             
+            let attachmentsHtml = '';
+            if (message.attachments && message.attachments.length) {
+                const items = message.attachments.map(att => {
+                    const isImage = att.type_mime && att.type_mime.startsWith('image/');
+                    const preview = isImage
+                        ? `<a href="${att.url}" target="_blank" class="block"><img src="${att.url}" alt="${att.nom_fichier}" class="max-h-40 rounded-lg border border-gray-200"/></a>`
+                        : `<a href="${att.url}" target="_blank" class="inline-flex items-center gap-2 px-2 py-1 bg-white border rounded hover:bg-gray-50">
+                               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M8 2a2 2 0 00-2 2v7a4 4 0 108 0V7h-2v4a2 2 0 11-4 0V4a1 1 0 112 0v7a3 3 0 106 0V4a6 6 0 10-12 0v9a6 6 0 0012 0V7h-2v6a4 4 0 11-8 0V4a2 2 0 114 0v7a1 1 0 11-2 0V4a3 3 0 106 0v7a5 5 0 11-10 0V4a6 6 0 0012 0v7a7 7 0 11-14 0V4a8 8 0 0016 0v7h-2V4a6 6 0 10-12 0v7a5 5 0 1010 0V4a3 3 0 10-6 0v7a2 2 0 104 0V4a1 1 0 10-2 0v7a3 3 0 106 0V4a4 4 0 10-8 0v7a5 5 0 1010 0V4a6 6 0 10-12 0v7a7 7 0 1014 0V4a8 8 0 10-16 0v7h2z"/></svg>
+                               <span>${att.nom_fichier}</span>
+                           </a>`;
+                    return `<div class="mt-2">${preview}</div>`;
+                }).join('');
+                attachmentsHtml = `<div class="mt-2 flex flex-col gap-2">${items}</div>`;
+            }
+
             messageEl.innerHTML += `
                 <div class="max-w-xs md:max-w-md px-4 py-2 rounded-2xl shadow ${bg} border-l-4 ${border} ${isMine ? 'text-right' : 'text-left'} transition-all duration-200 hover:shadow-md">
                     <div class="text-xs text-gray-500 mb-1 font-semibold">${message.sender.nom_complet}</div>
-                    <div class="whitespace-pre-line text-sm message-content">${message.contenu}</div>
+                    ${message.contenu ? `<div class="whitespace-pre-line text-sm message-content">${message.contenu}</div>` : ''}
+                    ${attachmentsHtml}
                     <div class="text-[11px] text-gray-400 mt-1">${formatDate(message.created_at)}</div>
                 </div>
             `;
@@ -247,18 +271,30 @@
         function handleMessageSubmit(e) {
             e.preventDefault();
             const contenu = chatInput.value.trim();
-            if (!contenu) return;
+            const filesInput = document.getElementById('file-input');
+            const hasFiles = filesInput.files && filesInput.files.length > 0;
+            if (!contenu && !hasFiles) return;
             
             const submitBtn = chatForm.querySelector('button[type="submit"]');
             submitBtn.disabled = true;
             submitBtn.classList.add('opacity-75');
             
             setLoading(true);
-            
-            axios.post(`/sinistres/${sinistreId}/chat`, { contenu })
+
+            const formData = new FormData();
+            if (contenu) formData.append('contenu', contenu);
+            if (hasFiles) {
+                Array.from(filesInput.files).forEach(f => formData.append('fichiers[]', f));
+            }
+
+            axios.post(`/sinistres/${sinistreId}/chat`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            })
                 .then(response => {
                     // Le message sera ajouté automatiquement via l'événement broadcast
                     chatInput.value = '';
+                    filesInput.value = '';
+                    document.getElementById('selected-files').innerHTML = '';
                 })
                 .catch(error => {
                     console.error('Erreur d\'envoi:', error);
@@ -275,6 +311,30 @@
             console.log('Initialisation du chat...');
             
             chatForm.addEventListener('submit', handleMessageSubmit);
+
+            const fileInput = document.getElementById('file-input');
+            const selectedFiles = document.getElementById('selected-files');
+            const submitBtn = chatForm.querySelector('button[type="submit"]');
+
+            function updateSubmitState() {
+                const hasText = !!chatInput.value.trim();
+                const hasFiles = fileInput.files && fileInput.files.length > 0;
+                submitBtn.disabled = !(hasText || hasFiles);
+            }
+
+            chatInput.addEventListener('input', updateSubmitState);
+
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length === 0) {
+                    selectedFiles.innerHTML = '';
+                } else {
+                    const names = Array.from(fileInput.files).map(f => `• ${f.name}`);
+                    selectedFiles.innerHTML = names.join('<br/>');
+                }
+                updateSubmitState();
+            });
+
+            updateSubmitState();
             
             chatInput.addEventListener('input', function() {
                 const submitBtn = chatForm.querySelector('button[type="submit"]');
