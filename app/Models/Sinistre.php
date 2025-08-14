@@ -154,7 +154,7 @@ class Sinistre extends Model
     {
         $createdAt = $this->getAttribute('created_at');
         $this->jours_en_cours = $createdAt ? $createdAt->diffInDays(now()) : 0;
-        $this->en_retard = $this->jours_en_cours > 15; // Seuil de 15 jours
+        $this->en_retard = $this->jours_en_cours > 15;
         $this->save();
     }
 
