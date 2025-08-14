@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Sinistre;
 use App\Models\User;
+use App\Models\Feedback;
+use App\Models\Sinistre;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -20,6 +21,8 @@ class DashboardController extends Controller
             'en_retard' => Sinistre::where('en_retard', true)->count(),
             'en_attente_documents' => Sinistre::where('statut', 'en_attente_documents')->count(),
             'refuse' => Sinistre::where('statut', 'refuse')->count(),
+            'feedbacks' => Feedback::count(),
+            'feedbacks_completes' => Feedback::whereNotNull('note_service')->count(),
         ];
 
         $gestionnaires = User::gestionnaires()
