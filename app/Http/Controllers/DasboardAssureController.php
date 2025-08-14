@@ -3,13 +3,18 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DasboardAssureController extends Controller
 {
     public function index()
     {
-        $user = auth()->user();
-        $sinistres = $user->sinistresAssure()->orderByDesc('created_at')->paginate(10);
+        $user = Auth::user();
+        $sinistres = $user
+            ->sinistresAssure()
+            ->with(['gestionnaire:id,nom_complet,email'])
+            ->orderByDesc('created_at')
+            ->paginate(10);
         return view('assures.dashboard', compact('sinistres'));
     }
 }

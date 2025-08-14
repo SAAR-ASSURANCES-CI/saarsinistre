@@ -248,6 +248,7 @@
                                     'date_sinistre' => $sinistre->date_sinistre ? $sinistre->date_sinistre->format('d/m/Y') : '-',
                                     'statut_libelle' => $sinistre->statut_libelle,
                                     'gestionnaire' => $sinistre->gestionnaire->nom_complet ?? 'Non assigné',
+                                    'gestionnaire_email' => $sinistre->gestionnaire->email ?? null,
                                     'lieu_sinistre' => $sinistre->lieu_sinistre,
                                     'circonstances' => $sinistre->circonstances,
                                     'dommages_releves' => $sinistre->dommages_releves,
@@ -261,7 +262,7 @@
                                 elseif ($sinistre->statut === 'regle' || $sinistre->statut === 'clos') $badgeColor = 'bg-green-100 text-green-800';
                                 elseif ($sinistre->statut === 'expertise_requise') $badgeColor = 'bg-red-100 text-red-800';
                             @endphp
-                            <tr class="sinistre-row" data-statut="{{ $sinistre->statut }}">
+                            <tr class="sinistre-row" data-statut="{{ $sinistre->statut }}" data-gestionnaire="{{ $sinistre->gestionnaire->nom_complet ?? '' }}">
                                 <td class="px-3 sm:px-4 py-3 whitespace-nowrap font-medium text-sm">{{ $sinistre->numero_sinistre }}</td>
                                 <td class="px-3 sm:px-4 py-3 whitespace-nowrap text-sm">{{ $sinistre->date_sinistre ? $sinistre->date_sinistre->format('d/m/Y') : '-' }}</td>
                                 <td class="px-3 sm:px-4 py-3 whitespace-nowrap">
@@ -269,7 +270,16 @@
                                         {{ $sinistre->statut_libelle }}
                                     </span>
                                 </td>
-                                <td class="px-3 sm:px-4 py-3 whitespace-nowrap text-sm">{{ $sinistre->gestionnaire->nom_complet ?? 'Non assigné' }}</td>
+                                <td class="px-3 sm:px-4 py-3 whitespace-nowrap text-sm">
+                                    @if($sinistre->gestionnaire)
+                                        <div class="flex flex-col">
+                                            <span class="font-medium">{{ $sinistre->gestionnaire->nom_complet }}</span>
+                                            <span class="text-gray-500 text-xs">{{ $sinistre->gestionnaire->email }}</span>
+                                        </div>
+                                    @else
+                                        <span>Non assigné</span>
+                                    @endif
+                                </td>
                                 <td class="px-3 sm:px-4 py-3 whitespace-nowrap text-center text-sm">
                                     <div class="flex justify-center space-x-2">
                                         <button type="button" class="details-btn text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-50" data-sinistre='@json($sinistreData)' title="Détails">
@@ -349,7 +359,7 @@
             document.querySelectorAll('.sinistre-row').forEach(function(row) {
                 const text = row.textContent.toLowerCase();
                 const rowStatut = row.getAttribute('data-statut') || '';
-                const rowGestionnaire = row.querySelector('td:nth-child(4)').textContent.trim();
+                const rowGestionnaire = (row.getAttribute('data-gestionnaire') || '').trim();
                 
                 let visible = text.includes(search);
                 if (statut && rowStatut !== statut) visible = false;
@@ -409,7 +419,7 @@
                             </div>
                             <div>
                                 <p class="text-gray-500 font-medium">Gestionnaire</p>
-                                <p class="font-semibold">${sinistre.gestionnaire}</p>
+                                <p class="font-semibold">${sinistre.gestionnaire}${sinistre.gestionnaire_email ? ' — ' + sinistre.gestionnaire_email : ''}</p>
                             </div>
                         </div>
                         

@@ -33,10 +33,16 @@
             </div>
             <div class="ml-3">
                 <h4 class="text-lg font-semibold text-saar-blue mb-2">Information importante</h4>
-                <p class="text-sm text-blue-700 leading-relaxed">
+                <p class="text-sm text-blue-700 leading-relaxed mb-3">
                     En soumettant ce formulaire, vous confirmez que toutes les informations fournies sont exactes et complètes.
                     Vous recevrez un email de confirmation avec votre numéro de sinistre dans les minutes qui suivent.
                 </p>
+                <ul class="list-disc pl-5 space-y-2 text-sm text-blue-800">
+                    <li>1) Je certifie que les informations suivantes sont sincères et fiables</li>
+                    <li>2) Je m'engage à communiquer toutes autres informations à l'assureur au besoin pour la prise en charge du sinistre</li>
+                    <li>3) J'accepte qu'en cas de fausses déclarations, le sinistre peut faire l'objet d'une non prise en charge et même de poursuites judiciaires pour tentative d'escroquerie à l'assurance</li>
+                    <li>4) J'atteste avoir pris connaissance des conditions générales automobiles ainsi que des articles 13, 18 et 42 du Code CIMA</li>
+                </ul>
             </div>
         </div>
     </div>
@@ -44,7 +50,7 @@
         <div class="flex items-start">
             <input type="checkbox" id="accept-conditions" required class="h-5 w-5 text-saar-blue focus:ring-blue-500 border-gray-300 rounded mt-1">
             <label for="accept-conditions" class="ml-3 text-sm text-gray-700 leading-relaxed">
-                <strong>J'accepte les conditions générales</strong> et je certifie sur l'honneur que toutes les informations fournies dans cette déclaration sont exactes et complètes. Je comprends que toute fausse déclaration peut entraîner la nullité de mon contrat d'assurance. *
+                <strong>J'accepte les conditions générales</strong> et je certifie sur l'honneur que toutes les informations fournies dans cette déclaration sont exactes et complètes. Je comprends que toute fausse déclaration peut entraîner la nullité de mon contrat d'assurance.
             </label>
         </div>
     </div>

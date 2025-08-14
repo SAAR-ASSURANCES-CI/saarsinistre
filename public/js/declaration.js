@@ -208,6 +208,7 @@ function updateNavigation() {
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
     const submitBtn = document.getElementById('submit-btn');
+    const accept = document.getElementById('accept-conditions');
     if (currentStep > 1) {
         prevBtn.classList.remove('hidden');
     } else {
@@ -219,6 +220,9 @@ function updateNavigation() {
     } else {
         nextBtn.classList.add('hidden');
         submitBtn.classList.remove('hidden');
+        if (accept) {
+            submitBtn.disabled = !accept.checked;
+        }
     }
 }
 
@@ -240,7 +244,7 @@ function handleSubmit(e) {
     const submitText = submitBtn.querySelector('.submit-text');
     const loadingText = submitBtn.querySelector('.loading-text');
     const acceptConditions = document.getElementById('accept-conditions');
-    if (!acceptConditions.checked) {
+    if (!acceptConditions || !acceptConditions.checked) {
         alert('Veuillez accepter les conditions générales pour continuer.');
         return;
     }
@@ -311,6 +315,15 @@ function handleSubmit(e) {
             submitBtn.classList.remove('animate-pulse');
         });
 }
+
+document.addEventListener('change', function(e) {
+    if (e.target && e.target.id === 'accept-conditions') {
+        const submitBtn = document.getElementById('submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = !e.target.checked;
+        }
+    }
+});
 
 function showSuccessPage(data) {
     document.body.innerHTML = `
