@@ -85,11 +85,37 @@
                     Le sinistre implique un tiers ?
                 </label>
             </div>
+            
+            <!-- Nombre de tiers -->
+            <div id="nombre-tiers-group" class="hidden mt-4">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Nombre de tiers impliqués
+                </label>
+                <select name="nombre_tiers" id="nombre_tiers" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-saar-blue focus:ring-4 focus:ring-blue-100 transition-all duration-300">
+                    <option value="">Sélectionnez le nombre de tiers</option>
+                    <option value="1">1 tiers</option>
+                    <option value="2">2 tiers</option>
+                    <option value="3">3 tiers</option>
+                    <option value="4">4 tiers</option>
+                    <option value="5">5 tiers</option>
+                    <option value="6">6 tiers</option>
+                    <option value="7">7 tiers</option>
+                    <option value="8">8 tiers</option>
+                    <option value="9">9 tiers</option>
+                    <option value="10+">10 tiers ou plus</option>
+                </select>
+            </div>
+
+            <!-- Formulaires des tiers -->
+            <div id="tiers-forms-container" class="hidden mt-6 space-y-6">
+                <!-- Les formulaires seront générés dynamiquement par JavaScript -->
+            </div>
+
             <div id="details-tiers-group" class="hidden mt-4">
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    Détails sur le(s) tiers impliqué(s)
+                    Détails généraux sur le(s) tiers impliqué(s)
                 </label>
-                <textarea name="details_tiers" id="details_tiers" rows="3" class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-saar-blue focus:ring-4 focus:ring-blue-100 transition-all duration-300 resize-none" placeholder="Décrivez les informations sur le(s) tiers impliqué(s)..."></textarea>
+                <textarea name="details_tiers" id="details_tiers" rows="3" class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-saar-blue focus:ring-4 focus:ring-blue-100 transition-all duration-300 resize-none" placeholder="Informations complémentaires sur les tiers..."></textarea>
             </div>
         </div>
         <div class="form-group">

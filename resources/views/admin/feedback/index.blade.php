@@ -72,9 +72,18 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Note de service</label>
                     <select name="note_service" class="w-full border border-gray-300 rounded-md px-3 py-2">
                         <option value="">Toutes les notes</option>
+                        @php
+                            $noteLabels = [
+                                1 => 'Très mécontent',
+                                2 => 'Mécontent', 
+                                3 => 'Neutre',
+                                4 => 'Satisfait',
+                                5 => 'Très satisfait'
+                            ];
+                        @endphp
                         @for($i = 1; $i <= 5; $i++)
                             <option value="{{ $i }}" {{ request('note_service') == $i ? 'selected' : '' }}>
-                                {{ $i }} - {{ $i === 1 ? 'Très mauvais' : ($i === 5 ? 'Excellent' : '') }}
+                                {{ $i }} - {{ $noteLabels[$i] }}
                             </option>
                         @endfor
                     </select>
@@ -175,8 +184,18 @@
                                                 {{ $feedback->note_service }}/5
                                             </span>
                                             <div class="flex">
+                                                @php
+                                                    $starColor = 'text-gray-300';
+                                                    if ($feedback->note_service >= 4) {
+                                                        $starColor = 'text-green-400'; 
+                                                    } elseif ($feedback->note_service == 3) {
+                                                        $starColor = 'text-yellow-400';
+                                                    } elseif ($feedback->note_service <= 2) {
+                                                        $starColor = 'text-red-400';
+                                                    }
+                                                @endphp
                                                 @for($i = 1; $i <= 5; $i++)
-                                                    <svg class="w-4 h-4 {{ $i <= $feedback->note_service ? 'text-yellow-400' : 'text-gray-300' }}" 
+                                                    <svg class="w-4 h-4 {{ $i <= $feedback->note_service ? $starColor : 'text-gray-300' }}" 
                                                          fill="currentColor" viewBox="0 0 20 20">
                                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                                                     </svg>

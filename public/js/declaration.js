@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
     updateProgressBar();
 
-    // Animation focus/blur sur tous les champs
+
     const inputs = document.querySelectorAll('input, textarea');
     inputs.forEach(input => {
         input.addEventListener('focus', function() {
@@ -42,11 +42,34 @@ function setupEventListeners() {
         }
     });
     document.getElementById('implique_tiers').addEventListener('change', function() {
+        const nombreTiersGroup = document.getElementById('nombre-tiers-group');
+        const tiersFormsContainer = document.getElementById('tiers-forms-container');
         const detailsGroup = document.getElementById('details-tiers-group');
+        
         if (this.checked) {
+            nombreTiersGroup.classList.remove('hidden');
             detailsGroup.classList.remove('hidden');
         } else {
+            nombreTiersGroup.classList.add('hidden');
+            tiersFormsContainer.classList.add('hidden');
             detailsGroup.classList.add('hidden');
+          
+            document.getElementById('nombre_tiers').value = '';
+           
+            tiersFormsContainer.innerHTML = '';
+        }
+    });
+
+    document.getElementById('nombre_tiers').addEventListener('change', function() {
+        const nombreTiers = this.value;
+        const tiersFormsContainer = document.getElementById('tiers-forms-container');
+        
+        if (nombreTiers) {
+            generateTiersForms(nombreTiers);
+            tiersFormsContainer.classList.remove('hidden');
+        } else {
+            tiersFormsContainer.classList.add('hidden');
+            tiersFormsContainer.innerHTML = '';
         }
     });
     setupFileUploads();
@@ -387,4 +410,209 @@ function showErrorMessage(message) {
             errorDiv.parentNode.removeChild(errorDiv);
         }
     }, 8000);
+}
+
+function generateTiersForms(nombreTiers) {
+    const container = document.getElementById('tiers-forms-container');
+    container.innerHTML = '';
+    
+    const count = nombreTiers === '10+' ? 10 : parseInt(nombreTiers);
+    
+    for (let i = 1; i <= count; i++) {
+        const tiersForm = createTiersForm(i);
+        container.appendChild(tiersForm);
+    }
+}
+
+function createTiersForm(numero) {
+    const formDiv = document.createElement('div');
+    formDiv.className = 'bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200';
+    
+    formDiv.innerHTML = `
+        <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Tiers ${numero}
+        </h4>
+        
+        <div class="grid md:grid-cols-2 gap-4 mb-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Nom du conducteur
+                </label>
+                <input type="text" name="tiers[${numero}][nom_conducteur]" 
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-saar-blue focus:ring-2 focus:ring-blue-100 transition-all">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Prénom du conducteur
+                </label>
+                <input type="text" name="tiers[${numero}][prenom_conducteur]" 
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-saar-blue focus:ring-2 focus:ring-blue-100 transition-all">
+            </div>
+        </div>
+        
+        <div class="grid md:grid-cols-2 gap-4 mb-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Téléphone
+                </label>
+                <input type="tel" name="tiers[${numero}][telephone]" 
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-saar-blue focus:ring-2 focus:ring-blue-100 transition-all">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Email
+                </label>
+                <input type="email" name="tiers[${numero}][email]" 
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-saar-blue focus:ring-2 focus:ring-blue-100 transition-all">
+            </div>
+        </div>
+        
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+                Adresse
+            </label>
+            <textarea name="tiers[${numero}][adresse]" rows="2" 
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-saar-blue focus:ring-2 focus:ring-blue-100 transition-all resize-none"
+                placeholder="Adresse complète du tiers..."></textarea>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-4 mb-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Marque du véhicule
+                </label>
+                <input type="text" name="tiers[${numero}][marque_vehicule]" 
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-saar-blue focus:ring-2 focus:ring-blue-100 transition-all">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Modèle du véhicule
+                </label>
+                <input type="text" name="tiers[${numero}][modele_vehicule]" 
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-saar-blue focus:ring-2 focus:ring-blue-100 transition-all">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Immatriculation
+                </label>
+                <input type="text" name="tiers[${numero}][immatriculation]" 
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-saar-blue focus:ring-2 focus:ring-blue-100 transition-all">
+            </div>
+        </div>
+        
+        <div class="grid md:grid-cols-2 gap-4 mb-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Compagnie d'assurance
+                </label>
+                <input type="text" name="tiers[${numero}][compagnie_assurance]" 
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-saar-blue focus:ring-2 focus:ring-blue-100 transition-all">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    N° Police d'assurance
+                </label>
+                <input type="text" name="tiers[${numero}][numero_police_assurance]" 
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-saar-blue focus:ring-2 focus:ring-blue-100 transition-all">
+            </div>
+        </div>
+        
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+                Détails supplémentaires
+            </label>
+            <textarea name="tiers[${numero}][details_supplementaires]" rows="3" 
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-saar-blue focus:ring-2 focus:ring-blue-100 transition-all resize-none"
+                placeholder="Informations complémentaires sur ce tiers..."></textarea>
+        </div>
+        
+        <div class="grid md:grid-cols-2 gap-4">
+            <div class="upload-zone" data-field="tiers_photos_${numero}">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Photos du véhicule du tiers (optionnel)
+                </label>
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-saar-blue transition-colors">
+                    <div class="upload-content">
+                        <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        <p class="text-sm text-gray-600">Cliquez ou glissez les photos ici</p>
+                        <p class="text-xs text-gray-500">JPG, PNG, PDF (max. 5MB)</p>
+                    </div>
+                    <div class="upload-success hidden">
+                        <svg class="w-8 h-8 mx-auto text-green-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <p class="text-sm text-green-600 font-medium">Photos téléchargées</p>
+                    </div>
+                </div>
+                <input type="file" name="tiers_photos_${numero}[]" multiple accept="image/*,.pdf" class="hidden">
+            </div>
+            
+            <div class="upload-zone" data-field="tiers_attestation_${numero}">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Attestation d'assurance (optionnel)
+                </label>
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-saar-blue transition-colors">
+                    <div class="upload-content">
+                        <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <p class="text-sm text-gray-600">Cliquez ou glissez le document ici</p>
+                        <p class="text-xs text-gray-500">JPG, PNG, PDF (max. 5MB)</p>
+                    </div>
+                    <div class="upload-success hidden">
+                        <svg class="w-8 h-8 mx-auto text-green-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <p class="text-sm text-green-600 font-medium">Attestation téléchargée</p>
+                    </div>
+                </div>
+                <input type="file" name="tiers_attestation_${numero}" accept="image/*,.pdf" class="hidden">
+            </div>
+        </div>
+    `;
+    
+    setupFileUploadsForTiers(formDiv);
+    
+    return formDiv;
+}
+
+function setupFileUploadsForTiers(formDiv) {
+    const uploadZones = formDiv.querySelectorAll('.upload-zone');
+    uploadZones.forEach(zone => {
+        const input = zone.querySelector('input[type="file"]');
+        const uploadArea = zone.querySelector('.border-dashed');
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('border-saar-blue', 'bg-blue-50');
+        });
+        
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('border-saar-blue', 'bg-blue-50');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('border-saar-blue', 'bg-blue-50');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                input.files = files;
+                handleFileUpload(zone, files);
+            }
+        });
+        
+        uploadArea.addEventListener('click', () => {
+            input.click();
+        });
+        
+        input.addEventListener('change', (e) => {
+            handleFileUpload(zone, e.target.files);
+        });
+    });
 } 

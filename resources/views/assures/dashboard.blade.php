@@ -252,7 +252,24 @@
                                     'lieu_sinistre' => $sinistre->lieu_sinistre,
                                     'circonstances' => $sinistre->circonstances,
                                     'dommages_releves' => $sinistre->dommages_releves,
-                                    'statut' => $sinistre->statut
+                                    'statut' => $sinistre->statut,
+                                    'implique_tiers' => $sinistre->implique_tiers,
+                                    'nombre_tiers' => $sinistre->nombre_tiers,
+                                    'details_tiers' => $sinistre->details_tiers,
+                                    'tiers' => $sinistre->tiers->map(function($tiers) {
+                                        return [
+                                            'numero_tiers' => $tiers->numero_tiers,
+                                            'nom_complet' => $tiers->nom_complet,
+                                            'telephone' => $tiers->telephone,
+                                            'email' => $tiers->email,
+                                            'designation_vehicule' => $tiers->designation_vehicule,
+                                            'immatriculation' => $tiers->immatriculation,
+                                            'compagnie_assurance' => $tiers->compagnie_assurance,
+                                            'numero_police_assurance' => $tiers->numero_police_assurance,
+                                            'adresse' => $tiers->adresse,
+                                            'details_supplementaires' => $tiers->details_supplementaires
+                                        ];
+                                    })->toArray()
                                 ];
                                 
                                 // Couleur du badge selon le statut
@@ -446,6 +463,74 @@
                             <p class="text-gray-500 font-medium">Dommages relevés</p>
                             <p class="font-semibold whitespace-pre-line">${sinistre.dommages_releves || '-'}</p>
                         </div>
+                        
+                        ${sinistre.implique_tiers ? `
+                            <div class="border-t pt-4">
+                                <h4 class="text-gray-700 font-semibold mb-3 flex items-center">
+                                    <svg class="w-4 h-4 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                    </svg>
+                                    Tiers impliqués ${sinistre.nombre_tiers ? '(' + sinistre.nombre_tiers + ')' : ''}
+                                </h4>
+                                
+                                ${sinistre.tiers && sinistre.tiers.length > 0 ? 
+                                    sinistre.tiers.map(tiers => `
+                                        <div class="bg-orange-50 p-3 rounded-lg mb-3 border border-orange-200">
+                                            <div class="font-medium text-orange-900 mb-2">Tiers ${tiers.numero_tiers}</div>
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                                                ${tiers.nom_complet ? `
+                                                    <div>
+                                                        <span class="text-gray-600">Nom:</span>
+                                                        <span class="ml-1 font-medium">${tiers.nom_complet}</span>
+                                                    </div>
+                                                ` : ''}
+                                                ${tiers.telephone ? `
+                                                    <div>
+                                                        <span class="text-gray-600">Téléphone:</span>
+                                                        <span class="ml-1">${tiers.telephone}</span>
+                                                    </div>
+                                                ` : ''}
+                                                ${tiers.designation_vehicule ? `
+                                                    <div>
+                                                        <span class="text-gray-600">Véhicule:</span>
+                                                        <span class="ml-1">${tiers.designation_vehicule}</span>
+                                                    </div>
+                                                ` : ''}
+                                                ${tiers.immatriculation ? `
+                                                    <div>
+                                                        <span class="text-gray-600">Immatriculation:</span>
+                                                        <span class="ml-1">${tiers.immatriculation}</span>
+                                                    </div>
+                                                ` : ''}
+                                                ${tiers.compagnie_assurance ? `
+                                                    <div class="sm:col-span-2">
+                                                        <span class="text-gray-600">Assurance:</span>
+                                                        <span class="ml-1">${tiers.compagnie_assurance}</span>
+                                                        ${tiers.numero_police_assurance ? ' (N° ' + tiers.numero_police_assurance + ')' : ''}
+                                                    </div>
+                                                ` : ''}
+                                            </div>
+                                            ${tiers.adresse ? `
+                                                <div class="mt-2 text-sm">
+                                                    <span class="text-gray-600">Adresse:</span>
+                                                    <p class="text-gray-700 mt-1">${tiers.adresse}</p>
+                                                </div>
+                                            ` : ''}
+                                            ${tiers.details_supplementaires ? `
+                                                <div class="mt-2 text-sm">
+                                                    <span class="text-gray-600">Détails:</span>
+                                                    <p class="text-gray-700 mt-1">${tiers.details_supplementaires}</p>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    `).join('') : 
+                                    `<div class="bg-orange-50 p-3 rounded-lg border border-orange-200">
+                                        <p class="text-sm text-orange-700">Tiers impliqué confirmé</p>
+                                        ${sinistre.details_tiers ? '<p class="text-sm text-gray-700 mt-1">' + sinistre.details_tiers + '</p>' : ''}
+                                    </div>`
+                                }
+                            </div>
+                        ` : ''}
                     </div>
                 `;
                 

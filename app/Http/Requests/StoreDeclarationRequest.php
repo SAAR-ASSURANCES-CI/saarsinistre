@@ -27,7 +27,21 @@ class StoreDeclarationRequest extends FormRequest
             'telephone_assure' => 'required|string|max:20',
             'numero_police' => 'required|string|max:50',
             'implique_tiers' => 'boolean',
-            'details_tiers' => 'nullable|required_if:implique_tiers,true|string|max:2000',
+            'nombre_tiers' => 'nullable|required_if:implique_tiers,true|string|in:1,2,3,4,5,6,7,8,9,10+',
+            'details_tiers' => 'nullable|string|max:2000',
+            
+            'tiers' => 'nullable|array',
+            'tiers.*.nom_conducteur' => 'nullable|string|max:255',
+            'tiers.*.prenom_conducteur' => 'nullable|string|max:255',
+            'tiers.*.telephone' => 'nullable|string|max:20',
+            'tiers.*.email' => 'nullable|email|max:255',
+            'tiers.*.adresse' => 'nullable|string|max:500',
+            'tiers.*.marque_vehicule' => 'nullable|string|max:100',
+            'tiers.*.modele_vehicule' => 'nullable|string|max:100',
+            'tiers.*.immatriculation' => 'nullable|string|max:20',
+            'tiers.*.compagnie_assurance' => 'nullable|string|max:255',
+            'tiers.*.numero_police_assurance' => 'nullable|string|max:50',
+            'tiers.*.details_supplementaires' => 'nullable|string|max:1000',
 
             'date_sinistre' => 'required|date|before_or_equal:today',
             'heure_sinistre' => 'nullable|date_format:H:i',
@@ -46,6 +60,10 @@ class StoreDeclarationRequest extends FormRequest
             'visite_technique_verso' => 'required|file|mimes:pdf,jpg,jpeg,png|max:1280',
             'attestation_assurance' => 'required|file|mimes:pdf,jpg,jpeg,png|max:1280',
             'permis_conduire' => 'required|file|mimes:pdf,jpg,jpeg,png|max:1280',
+            
+            'tiers_photos_*' => 'nullable|array',
+            'tiers_photos_*.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'tiers_attestation_*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
 
             'photos_vehicule' => 'nullable|array|max:100',
             'photos_vehicule.*' => 'file|mimes:jpg,jpeg,png|max:1280',

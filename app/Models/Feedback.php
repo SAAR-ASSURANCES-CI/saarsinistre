@@ -76,11 +76,11 @@ class Feedback extends Model
     public function getNoteServiceLibelleAttribute(): string
     {
         $notes = [
-            1 => 'Très mauvais',
-            2 => 'Mauvais',
-            3 => 'Moyen',
-            4 => 'Bon',
-            5 => 'Excellent'
+            1 => 'Très mécontent',
+            2 => 'Mécontent',
+            3 => 'Neutre',
+            4 => 'Satisfait',
+            5 => 'Très satisfait'
         ];
 
         return $notes[$this->note_service] ?? 'Non noté';

@@ -61,6 +61,15 @@
                             Comment évaluez-vous la qualité de nos services ? *
                         </label>
                         <div class="flex justify-between items-center">
+                            @php
+                                $noteLabels = [
+                                    1 => 'Très mécontent',
+                                    2 => 'Mécontent', 
+                                    3 => 'Neutre',
+                                    4 => 'Satisfait',
+                                    5 => 'Très satisfait'
+                                ];
+                            @endphp
                             @for($i = 1; $i <= 5; $i++)
                                 <label class="flex flex-col items-center cursor-pointer">
                                     <input type="radio" name="note_service" value="{{ $i }}" 
@@ -70,7 +79,7 @@
                                     <div class="w-12 h-12 rounded-full border-2 border-gray-300 flex items-center justify-center text-lg font-bold text-gray-500 hover:border-blue-500 hover:text-blue-500 transition-colors duration-200 feedback-option">
                                         {{ $i }}
                                     </div>
-                                    <span class="text-xs text-gray-500 mt-1">{{ $i === 1 ? 'Très mauvais' : ($i === 5 ? 'Excellent' : '') }}</span>
+                                    <span class="text-xs text-gray-500 mt-1 text-center px-1">{{ $noteLabels[$i] }}</span>
                                 </label>
                             @endfor
                         </div>
@@ -167,28 +176,125 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Gestion des options de feedback
-        const feedbackOptions = document.querySelectorAll('.feedback-option');
+        // Mapping entre notes et émoticons pour synchronisation
+        const noteToEmoticon = {
+            1: '😠', // Très mécontent
+            2: '😕', // Mécontent  
+            3: '😐', // Neutre
+            4: '🙂', // Satisfait
+            5: '😊'  // Très satisfait
+        };
         
-        feedbackOptions.forEach(option => {
-            const radio = option.previousElementSibling;
-            const div = option;
+        // Gestion des options de feedback avec couleurs selon la satisfaction
+        const noteOptions = document.querySelectorAll('input[name="note_service"]');
+        const emoticonOptions = document.querySelectorAll('input[name="humeur_emoticon"]');
+        
+        noteOptions.forEach(option => {
+            const div = option.nextElementSibling;
+            const value = parseInt(option.value);
             
-            radio.addEventListener('change', function() {
-                // Retirer la sélection de tous les autres
-                feedbackOptions.forEach(opt => {
-                    opt.classList.remove('border-blue-500', 'text-blue-600', 'scale-110');
+            // Couleurs selon le niveau de satisfaction
+            let borderColor = 'border-gray-300';
+            let textColor = 'text-gray-500';
+            let hoverBorder = 'hover:border-gray-400';
+            let activeBorder = '';
+            let activeText = '';
+            
+            if (value >= 4) {
+                // Satisfait/Très satisfait - Vert
+                hoverBorder = 'hover:border-green-500';
+                activeBorder = 'border-green-500';
+                activeText = 'text-green-600';
+            } else if (value === 3) {
+                // Neutre - Jaune/Orange
+                hoverBorder = 'hover:border-yellow-500';
+                activeBorder = 'border-yellow-500';
+                activeText = 'text-yellow-600';
+            } else {
+                // Mécontent/Très mécontent - Rouge
+                hoverBorder = 'hover:border-red-500';
+                activeBorder = 'border-red-500';
+                activeText = 'text-red-600';
+            }
+            
+            // Ajouter les classes de hover
+            div.classList.add(hoverBorder);
+            
+            option.addEventListener('change', function() {
+                // Retirer la sélection de tous les autres notes
+                noteOptions.forEach(opt => {
+                    const optDiv = opt.nextElementSibling;
+                    optDiv.classList.remove('border-blue-500', 'text-blue-600', 'scale-110', 
+                                          'border-green-500', 'text-green-600',
+                                          'border-yellow-500', 'text-yellow-600',
+                                          'border-red-500', 'text-red-600');
                 });
                 
                 // Ajouter la sélection à l'option choisie
                 if (this.checked) {
-                    div.classList.add('border-blue-500', 'text-blue-600', 'scale-110');
+                    div.classList.add(activeBorder, activeText, 'scale-110');
+                    
+                    // Synchroniser automatiquement l'émoticon
+                    const correspondingEmoticon = noteToEmoticon[value];
+                    if (correspondingEmoticon) {
+                        emoticonOptions.forEach(emoOption => {
+                            const emoDiv = emoOption.nextElementSibling;
+                            emoDiv.classList.remove('scale-110');
+                            emoOption.checked = false;
+                            
+                            if (emoOption.value === correspondingEmoticon) {
+                                emoOption.checked = true;
+                                emoDiv.classList.add('scale-110');
+                            }
+                        });
+                    }
                 }
             });
             
             // Appliquer le style initial si déjà sélectionné
-            if (radio.checked) {
-                div.classList.add('border-blue-500', 'text-blue-600', 'scale-110');
+            if (option.checked) {
+                div.classList.add(activeBorder, activeText, 'scale-110');
+            }
+        });
+        
+        // Gestion des émoticons (permettre la sélection manuelle qui synchronise la note)
+        emoticonOptions.forEach(option => {
+            const div = option.nextElementSibling;
+            
+            option.addEventListener('change', function() {
+                if (this.checked) {
+                    // Retirer la sélection de tous les autres émoticons
+                    emoticonOptions.forEach(opt => {
+                        const optDiv = opt.nextElementSibling;
+                        optDiv.classList.remove('scale-110');
+                    });
+                    
+                    // Ajouter la sélection à l'émoticon choisi
+                    div.classList.add('scale-110');
+                    
+                    // Synchroniser la note correspondante
+                    const emoticonToNote = {
+                        '😠': 1, // Très mécontent
+                        '😕': 2, // Mécontent  
+                        '😐': 3, // Neutre
+                        '🙂': 4, // Satisfait
+                        '😊': 5  // Très satisfait
+                    };
+                    
+                    const correspondingNote = emoticonToNote[this.value];
+                    if (correspondingNote) {
+                        const noteOption = document.querySelector(`input[name="note_service"][value="${correspondingNote}"]`);
+                        if (noteOption) {
+                            // Déclencher le changement de note pour synchroniser les couleurs
+                            noteOption.checked = true;
+                            noteOption.dispatchEvent(new Event('change'));
+                        }
+                    }
+                }
+            });
+            
+            if (option.checked) {
+                div.classList.add('scale-110');
             }
         });
     });
