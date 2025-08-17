@@ -36,6 +36,7 @@ class Sinistre extends Model
         'dommages_releves',
 
         'implique_tiers',
+        'nombre_tiers',
         'details_tiers',
 
         'statut',
@@ -89,6 +90,14 @@ class Sinistre extends Model
     public function messages()
     {
         return $this->hasMany(Message::class);
+    }
+
+    /**
+     * Relation avec les tiers impliqués
+     */
+    public function tiers(): HasMany
+    {
+        return $this->hasMany(Tiers::class);
     }
 
     /**

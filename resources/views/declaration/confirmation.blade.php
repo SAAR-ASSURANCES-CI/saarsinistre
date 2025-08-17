@@ -108,8 +108,32 @@
                                 </span>
                             </p>
                             <p><strong>Impliqué un tiers :</strong> {{ $sinistre->implique_tiers ? 'Oui' : 'Non' }}</p>
-                            @if($sinistre->implique_tiers && $sinistre->details_tiers)
-                                <p><strong>Détails tiers :</strong> {{ $sinistre->details_tiers }}</p>
+                            @if($sinistre->implique_tiers)
+                                @if($sinistre->nombre_tiers)
+                                    <p><strong>Nombre de tiers :</strong> {{ $sinistre->nombre_tiers }}</p>
+                                @endif
+                                @if($sinistre->details_tiers)
+                                    <p><strong>Détails généraux :</strong> {{ $sinistre->details_tiers }}</p>
+                                @endif
+                                @if($sinistre->tiers->count() > 0)
+                                    <div class="mt-4">
+                                        <p class="font-semibold text-gray-700 mb-2">Informations des tiers :</p>
+                                        @foreach($sinistre->tiers as $tiers)
+                                            <div class="bg-gray-50 p-3 rounded-lg mb-2">
+                                                <p class="font-medium text-sm">Tiers {{ $tiers->numero_tiers }}</p>
+                                                @if($tiers->nom_complet)
+                                                    <p class="text-sm"><strong>Nom :</strong> {{ $tiers->nom_complet }}</p>
+                                                @endif
+                                                @if($tiers->designation_vehicule)
+                                                    <p class="text-sm"><strong>Véhicule :</strong> {{ $tiers->designation_vehicule }}</p>
+                                                @endif
+                                                @if($tiers->compagnie_assurance)
+                                                    <p class="text-sm"><strong>Assurance :</strong> {{ $tiers->compagnie_assurance }}</p>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
                             @endif
                         </div>
                     </div>
