@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Changement de mot de passe - SAAR Assurance</title>
+    <title>Changement de mot de passe - SAAR Assurances</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -35,7 +35,7 @@
                     </svg>
                 </div>
                 <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-saar-red to-saar-green">
-                    SAAR ASSURANCE
+                    SAAR ASSURANCES
                 </h2>
                 <p class="mt-2 text-sm text-gray-600">
                     Changement de mot de passe

@@ -2,7 +2,7 @@
 <html lang="fr">
 
 <head>
-    @include('admin.partials.head', ['title' => 'Gestions des Utilisateurs - SAAR Assurance'])
+    @include('admin.partials.head', ['title' => 'Gestions des Utilisateurs - SAAR Assurances'])
     <style>
         a[disabled] {
             pointer-events: none;

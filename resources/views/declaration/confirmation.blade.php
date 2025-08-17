@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirmation de Déclaration - SAAR Assurance</title>
+    <title>Confirmation de Déclaration - SAAR Assurances</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
@@ -27,7 +27,7 @@
                     <div>
                         <h1
                             class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-green-600">
-                            SAAR ASSURANCE
+                            SAAR ASSURANCES
                         </h1>
                         <p class="text-sm text-gray-600">Confirmation de Déclaration</p>
                     </div>

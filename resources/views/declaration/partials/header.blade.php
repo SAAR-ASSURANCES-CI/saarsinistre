@@ -9,7 +9,7 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-saar-red to-saar-green">
-                        SAAR ASSURANCE
+                        SAAR ASSURANCES
                     </h1>
                     <p class="text-sm text-gray-600">Déclaration de Sinistre</p>
                 </div>

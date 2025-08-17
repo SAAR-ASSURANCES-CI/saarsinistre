@@ -40,30 +40,69 @@ class OrangeService
     private function fetchNewToken()
     {
         try {
+            if (!$this->validateConfiguration()) {
+                throw new \Exception('Configuration Orange SMS API invalide. Vérifiez les variables d\'environnement requises.');
+            }
+
+            $clientId = env('ORANGE_CLIENT_ID');
+            $clientSecret = env('ORANGE_CLIENT_SECRET');
+            $tokenUrl = env('ORANGE_SMS_API_TOKEN_URL');
+
+            if (empty($clientId) || empty($clientSecret)) {
+                throw new \Exception('Identifiants client Orange manquants (ORANGE_CLIENT_ID ou ORANGE_CLIENT_SECRET)');
+            }
+
+            if (empty($tokenUrl)) {
+                throw new \Exception('URL du token Orange non configurée (ORANGE_SMS_API_TOKEN_URL)');
+            }
+
             $client = new Client([
-                'verify' => false,
+                'verify' => false, 
+                'timeout' => 30, 
             ]);
-            $response = $client->post(env('ORANGE_SMS_API_TOKEN'), [
+
+            $credentials = base64_encode($clientId . ':' . $clientSecret);
+
+            $response = $client->post($tokenUrl, [
                 'headers' => [
-                    'Authorization' => 'Basic ' . env('ORANGE_SMS_API_AUTHORIZATION'),
+                    'Authorization' => 'Basic ' . $credentials,
                     'Content-Type'  => 'application/x-www-form-urlencoded',
-                    'Accept'        => 'application/json'
+                    'Accept'       => 'application/json'
                 ],
                 'form_params' => [
                     'grant_type' => 'client_credentials'
-                ]
+                ],
+                'http_errors' => false 
             ]);
 
-            $tokenData = json_decode($response->getBody(), true);
+            $statusCode = $response->getStatusCode();
+            $body = $response->getBody()->getContents();
+            $tokenData = json_decode($body, true);
+
+            if ($statusCode !== 200) {
+                $errorMsg = $tokenData['error_description'] ?? 'Erreur inconnue';
+                throw new \Exception("Erreur {$statusCode} lors de la récupération du token: {$errorMsg}");
+            }
 
             if (!isset($tokenData['access_token'])) {
-                throw new \Exception('Token d\'accès non reçu de l\'API Orange');
+                throw new \Exception('Token d\'accès non reçu dans la réponse de l\'API Orange');
+            }
+
+            $requiredKeys = ['access_token', 'token_type', 'expires_in'];
+            foreach ($requiredKeys as $key) {
+                if (!array_key_exists($key, $tokenData)) {
+                    throw new \Exception("Clé manquante dans la réponse du token: {$key}");
+                }
             }
 
             return $tokenData;
         } catch (\Exception $e) {
-            Log::error('Erreur lors de la récupération du token Orange SMS API', [
+            Log::error('Erreur critique lors de la récupération du token Orange SMS API', [
                 'error' => $e->getMessage(),
+                'client_id' => $clientId ?? 'non défini',
+                'token_url' => $tokenUrl ?? 'non défini',
+                'response_body' => $body ?? null,
+                'status_code' => $statusCode ?? null,
                 'trace' => $e->getTraceAsString()
             ]);
 
@@ -151,17 +190,19 @@ class OrangeService
         Cache::forget('orange_sms_api_token');
     }
 
-    public function validateConfiguration()
+    public function validateConfiguration(): bool
     {
         $requiredEnvVars = [
-            'ORANGE_SMS_API_TOKEN',
-            'ORANGE_SMS_API_AUTHORIZATION',
+            'ORANGE_CLIENT_ID',
+            'ORANGE_CLIENT_SECRET',
+            'ORANGE_SMS_API_TOKEN_URL',
+            'ORANGE_SMS_API_SEND_URL',
             'ORANGE_SMS_SENDER_ADDRESS'
         ];
 
         foreach ($requiredEnvVars as $var) {
             if (empty(env($var))) {
-                Log::warning("Variable d'environnement manquante: {$var}");
+                Log::error("Configuration Orange SMS API manquante: Variable d'environnement {$var} est requise");
                 return false;
             }
         }
@@ -260,8 +301,4 @@ class OrangeService
         }
     }
 
-    public function handle()
-    {
-        // Handle the service logic
-    }
 }

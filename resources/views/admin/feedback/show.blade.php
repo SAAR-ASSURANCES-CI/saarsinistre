@@ -2,7 +2,7 @@
 <html lang="fr">
 
 <head>
-    @include('admin.partials.head', ['title' => 'Détails du Feedback - SAAR Assurance'])
+    @include('admin.partials.head', ['title' => 'Détails du Feedback - SAAR Assurances'])
 </head>
 
 <body class="bg-gradient-to-br from-red-50 via-white to-green-50 min-h-screen">

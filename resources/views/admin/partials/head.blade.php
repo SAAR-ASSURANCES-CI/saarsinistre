@@ -1,6 +1,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title> {{ $title ?? 'SAAR Assurance' }}</title>
+<title> {{ $title ?? 'SAAR Assurances' }}</title>
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0d6efd">
