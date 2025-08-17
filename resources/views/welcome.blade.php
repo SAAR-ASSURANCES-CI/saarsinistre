@@ -297,7 +297,7 @@
         <!-- Footer -->
         <div class="text-center mt-16 pt-8 border-t border-gray-200">
             <p class="text-gray-600">
-                © 2025 SAAR Assurance Côte d'Ivoire - Tous droits réservés
+                © 2025 SAAR Assurances Côte d'Ivoire - Tous droits réservés
             </p>
         </div>
     </div>

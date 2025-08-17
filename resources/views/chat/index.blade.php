@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Messagerie Sinistre - SAAR Assurance</title>
+    <title>Messagerie Sinistre - SAAR Assurances</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @keyframes fadeIn {
