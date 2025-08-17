@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Events\MessageSent;
+use App\Jobs\SendChatMessageNotificationEmail;
 use App\Models\Message;
 use App\Models\MessageAttachment;
 use App\Models\Sinistre;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -46,7 +48,6 @@ class ChatController extends Controller
         $sinistre = Sinistre::findOrFail($sinistre_id);
         $user = Auth::user();
 
-        // Vérifier les permissions
         if ($user->id !== $sinistre->assure_id && $user->id !== $sinistre->gestionnaire_id) {
             abort(403);
         }
@@ -62,14 +63,12 @@ class ChatController extends Controller
             ])
             ->orderBy('created_at', 'asc');
 
-        // Si last_id est fourni, récupérer seulement les messages plus récents
         if ($lastMessageId > 0) {
             $query->where('id', '>', $lastMessageId);
         }
 
         $messages = $query->get();
 
-        // Marquer les messages comme lus pour l'utilisateur actuel
         Message::where('sinistre_id', $sinistre_id)
             ->where('receiver_id', $user->id)
             ->where('lu', false)
@@ -109,7 +108,6 @@ class ChatController extends Controller
             'lu' => false,
         ]);
 
-        // Gérer les pièces jointes
         if ($request->hasFile('fichiers')) {
             $files = $request->file('fichiers');
             foreach ((array)$files as $file) {
@@ -132,8 +130,15 @@ class ChatController extends Controller
             $q->select('id', 'nom_complet');
         }, 'attachments']);
 
-        // Déclencher l'événement de diffusion
         broadcast(new MessageSent($message));
+
+        if ($user->id === $sinistre->assure_id && $sinistre->gestionnaire_id) {
+            $gestionnaire = User::find($sinistre->gestionnaire_id);
+            if ($gestionnaire && $gestionnaire->email) {
+                SendChatMessageNotificationEmail::dispatch($message, $gestionnaire)
+                    ->delay(now()->addSeconds(5));
+            }
+        }
 
         return response()->json($message, 201);
     }
