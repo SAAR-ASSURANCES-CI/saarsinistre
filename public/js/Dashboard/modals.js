@@ -47,10 +47,105 @@ class ModalsManager {
                 
                 let tiersDetailsHTML = '';
                 if (sinistre.implique_tiers) {
+                    let tiersCardsHTML = '';
+                    
+                    // Affichage des tiers détaillés s'ils existent
+                    if (sinistre.tiers && sinistre.tiers.length > 0) {
+                        tiersCardsHTML = sinistre.tiers.map(tiers => `
+                            <div class="bg-white border border-gray-200 rounded-lg p-4 mb-3">
+                                <h6 class="font-medium text-gray-900 mb-3 flex items-center">
+                                    <svg class="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                    Tiers ${tiers.numero_tiers}
+                                </h6>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                                    ${tiers.nom_conducteur || tiers.prenom_conducteur ? `
+                                        <div>
+                                            <span class="font-medium text-gray-600">Conducteur:</span>
+                                            <span class="ml-1">${[tiers.prenom_conducteur, tiers.nom_conducteur].filter(Boolean).join(' ') || 'Non spécifié'}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${tiers.telephone ? `
+                                        <div>
+                                            <span class="font-medium text-gray-600">Téléphone:</span>
+                                            <span class="ml-1">${tiers.telephone}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${tiers.email ? `
+                                        <div>
+                                            <span class="font-medium text-gray-600">Email:</span>
+                                            <span class="ml-1">${tiers.email}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${tiers.marque_vehicule || tiers.modele_vehicule ? `
+                                        <div>
+                                            <span class="font-medium text-gray-600">Véhicule:</span>
+                                            <span class="ml-1">${[tiers.marque_vehicule, tiers.modele_vehicule].filter(Boolean).join(' ') || 'Non spécifié'}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${tiers.immatriculation ? `
+                                        <div>
+                                            <span class="font-medium text-gray-600">Immatriculation:</span>
+                                            <span class="ml-1">${tiers.immatriculation}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${tiers.compagnie_assurance ? `
+                                        <div>
+                                            <span class="font-medium text-gray-600">Assurance:</span>
+                                            <span class="ml-1">${tiers.compagnie_assurance}</span>
+                                        </div>
+                                    ` : ''}
+                                    ${tiers.numero_police_assurance ? `
+                                        <div>
+                                            <span class="font-medium text-gray-600">N° Police:</span>
+                                            <span class="ml-1">${tiers.numero_police_assurance}</span>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                ${tiers.adresse ? `
+                                    <div class="mt-2">
+                                        <span class="font-medium text-gray-600">Adresse:</span>
+                                        <p class="text-sm text-gray-700 mt-1">${tiers.adresse}</p>
+                                    </div>
+                                ` : ''}
+                                ${tiers.details_supplementaires ? `
+                                    <div class="mt-2">
+                                        <span class="font-medium text-gray-600">Détails supplémentaires:</span>
+                                        <p class="text-sm text-gray-700 mt-1">${tiers.details_supplementaires}</p>
+                                    </div>
+                                ` : ''}
+                                ${tiers.documents && tiers.documents.length > 0 ? `
+                                    <div class="mt-3">
+                                        <span class="font-medium text-gray-600">Documents:</span>
+                                        <div class="flex flex-wrap gap-2 mt-1">
+                                            ${tiers.documents.map(doc => `
+                                                <span class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                                                    ${this.getDocumentIcon(doc.type_mime)} ${doc.type_document || 'Document'}
+                                                </span>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `).join('');
+                    }
+                    
                     tiersDetailsHTML = `
                         <div class="mt-4">
-                            <h5 class="font-medium text-gray-900 mb-2">Détails du tiers impliqué</h5>
-                            <p class="text-sm text-gray-700">${sinistre.details_tiers || 'Aucun détail fourni'}</p>
+                            <h5 class="font-medium text-gray-900 mb-3 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                                Tiers impliqués ${sinistre.nombre_tiers ? `(${sinistre.nombre_tiers})` : ''}
+                            </h5>
+                            
+                            ${tiersCardsHTML || `
+                                <div class="bg-orange-50 p-3 rounded-lg">
+                                    <p class="text-sm text-orange-700">Tiers impliqué confirmé</p>
+                                    ${sinistre.details_tiers ? `<p class="text-sm text-gray-700 mt-1">${sinistre.details_tiers}</p>` : ''}
+                                </div>
+                            `}
                         </div>
                     `;
                 }

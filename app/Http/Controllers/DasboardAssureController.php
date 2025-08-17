@@ -13,7 +13,7 @@ class DasboardAssureController extends Controller
         $user = Auth::user();
         $sinistres = $user
             ->sinistresAssure()
-            ->with(['gestionnaire:id,nom_complet,email'])
+            ->with(['gestionnaire:id,nom_complet,email', 'tiers'])
             ->orderByDesc('created_at')
             ->paginate(10);
 
