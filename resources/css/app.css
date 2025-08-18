@@ -1,15 +1,13 @@
-@import 'tailwindcss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
-
-@theme {
+/* Variables CSS personnalisées */
+:root {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
-
-    /* Ajout des couleurs personnalisées pour le système de sinistres */
+    
+    /* Couleurs personnalisées pour le système de sinistres */
     --color-primary-50: #eff6ff;
     --color-primary-500: #3b82f6;
     --color-primary-600: #2563eb;

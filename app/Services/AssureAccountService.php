@@ -3,12 +3,13 @@
 namespace App\Services;
 
 use App\Models\User;
-use App\Jobs\SendAccountCreationSms;
+use App\Services\OrangeService;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class AssureAccountService
 {
-    public function createAssureAccount(array $data): User
+    public function createAssureAccount(array $data, OrangeService $orangeService): User
     {
         $numeroAssure = $this->generateAssureNumber();
         $motDePasseTemporaire = $this->generateTemporaryPassword();
@@ -25,7 +26,23 @@ class AssureAccountService
             'role' => 'assure',
         ]);
 
-        SendAccountCreationSms::dispatch($user, $data['telephone_assure']);
+        try {
+            $nomFormate = strtoupper(explode(' ', trim($user->nom_complet ?: 'CLIENT'))[0]);
+            
+            $message = "SAAR ASSURANCES\nCher(e) {$nomFormate}, votre espace client est pret :\nIdentifiant: {$user->username}\nCode: {$motDePasseTemporaire}\nValable 48h";
+
+            $telephoneSMS = $this->formatPhoneNumber($data['telephone_assure']);
+            $orangeService->sendSMS($telephoneSMS, $message, 'SAAR CI');
+
+            Log::info('SMS de création de compte envoyé avec succès', [
+                'user_id' => $user->id,
+                'username' => $user->username,
+                'telephone' => $data['telephone_assure']
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Erreur lors de l\'envoi du SMS de création de compte: ' . $e->getMessage());
+        }
 
         return $user;
     }
@@ -64,5 +81,27 @@ class AssureAccountService
             $i++;
         }
         return $username;
+    }
+
+    /**
+     * Formater le numéro de téléphone
+     */
+    private function formatPhoneNumber(string $phoneNumber): string
+    {
+        $cleanNumber = preg_replace('/[^0-9+]/', '', $phoneNumber);
+
+        if (str_starts_with($cleanNumber, '+225')) {
+            return $cleanNumber;
+        }
+
+        if (str_starts_with($cleanNumber, '225')) {
+            return '+' . $cleanNumber;
+        }
+
+        if (str_starts_with($cleanNumber, '0')) {
+            return '+225' . $cleanNumber;
+        }
+
+        return '+225' . $cleanNumber;
     }
 }
