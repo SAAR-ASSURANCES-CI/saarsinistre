@@ -304,7 +304,7 @@ class OrangeService
         return '+225' . $cleanNumber;
     }
 
-    public function sendSmsConfirmationSinistre(string $recipientPhone, string $nomAssure, string $numeroSinistre)
+    public function sendSmsConfirmationSinistre(string $recipientPhone, string $nomAssure, string $numeroSinistre, string $customMessage = null)
     {
         try {
             $token = $this->getToken();
@@ -318,12 +318,15 @@ class OrangeService
                 throw new \Exception("Numéro de téléphone invalide: {$recipientPhone} (formaté: {$formattedRecipient})");
             }
 
-            $nomFormate = strtoupper(explode(' ', trim($nomAssure))[0]);
+            if ($customMessage) {
+                $message = $customMessage;
+            } else {
+                $nomFormate = strtoupper(explode(' ', trim($nomAssure))[0]);
+                $message = "SAAR ASSURANCE\nCher(e) {$nomFormate}, votre sinistre N°{$numeroSinistre} a ete declare avec succes. Vous serez contacte(e) prochainement.";
 
-            $message = "SAAR ASSURANCE\nCher(e) {$nomFormate}, votre sinistre N°{$numeroSinistre} a ete declare avec succes. Vous serez contacte(e) prochainement.";
-
-            if (strlen($message) > 160) {
-                $message = "SAAR ASSURANCE\nSinistre N°{$numeroSinistre} declare avec succes. Vous serez contacte prochainement.";
+                if (strlen($message) > 160) {
+                    $message = "SAAR ASSURANCE\nSinistre N°{$numeroSinistre} declare avec succes. Vous serez contacte prochainement.";
+                }
             }
 
             $client = new Client($this->sslConfig);
