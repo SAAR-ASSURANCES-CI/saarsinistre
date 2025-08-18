@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion Assuré - SAAR Assurances</title>
+    <title>Mot de passe oublié - SAAR Assurances</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -30,12 +30,11 @@
                 <div class="mx-auto w-32 h-32 rounded-2xl flex items-center justify-center mb-4">
                     <img src="{{ asset('logo.png') }}" alt="SAAR Assurances" class="w-32 h-32 object-contain">
                 </div>
-                <h2
-                    class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-saar-red to-saar-green">
+                <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-saar-red to-saar-green">
                     SAAR ASSURANCES
                 </h2>
                 <p class="mt-2 text-sm text-gray-600">
-                    Espace assuré - Connexion
+                    Réinitialisation de mot de passe
                 </p>
             </div>
 
@@ -56,43 +55,29 @@
                 </div>
             @endif
 
-            <!-- Formulaire de connexion -->
-            <form class="mt-8 space-y-6" action="{{ route('login.assure.post') }}" method="POST">
+            <!-- Instructions -->
+            <div class="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg">
+                <p class="text-sm">
+                    <strong>Instructions :</strong> Entrez le numéro de téléphone que vous avez utilisé lors de votre déclaration de sinistre. 
+                    Un code de vérification à 6 chiffres vous sera envoyé par SMS.
+                </p>
+            </div>
+
+            <!-- Formulaire de demande -->
+            <form class="mt-8 space-y-6" action="{{ route('password.reset.send') }}" method="POST">
                 @csrf
                 <div class="space-y-4">
                     <div>
-                        <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
-                            Nom d'utilisateur
+                        <label for="telephone" class="block text-sm font-medium text-gray-700 mb-2">
+                            Numéro de téléphone
                         </label>
-                        <input id="username" name="username" type="text" autocomplete="username" required
-                            value="{{ old('username') }}"
+                        <input id="telephone" name="telephone" type="tel" autocomplete="tel" required
+                            value="{{ old('telephone') }}"
                             class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-saar-blue focus:border-saar-blue focus:z-10 sm:text-sm"
-                            placeholder="Votre nom d'utilisateur">
-                    </div>
-
-                    <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                            Mot de passe
-                        </label>
-                        <input id="password" name="password" type="password" autocomplete="current-password" required
-                            class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-saar-blue focus:border-saar-blue focus:z-10 sm:text-sm"
-                            placeholder="Votre mot de passe">
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <input id="remember-me" name="remember" type="checkbox"
-                            class="h-4 w-4 text-saar-blue focus:ring-saar-blue border-gray-300 rounded">
-                        <label for="remember-me" class="ml-2 block text-sm text-gray-900">
-                            Se souvenir de moi
-                        </label>
-                    </div>
-                    <div class="text-sm">
-                        <a href="{{ route('password.reset.request') }}" 
-                           class="text-saar-blue hover:text-blue-700 font-medium">
-                            Mot de passe oublié ?
-                        </a>
+                            placeholder="Ex: 0701234567 ou +225701234567">
+                        <p class="mt-1 text-xs text-gray-500">
+                            Format: 0701234567, 225701234567 ou +225701234567
+                        </p>
                     </div>
                 </div>
 
@@ -108,8 +93,16 @@
                                     clip-rule="evenodd" />
                             </svg>
                         </span>
-                        Se connecter
+                        Envoyer le code de vérification
                     </button>
+                </div>
+
+                <!-- Lien de retour -->
+                <div class="text-center">
+                    <a href="{{ route('login.assure') }}" 
+                       class="text-saar-blue hover:text-blue-700 text-sm font-medium">
+                        ← Retour à la connexion
+                    </a>
                 </div>
             </form>
         </div>
