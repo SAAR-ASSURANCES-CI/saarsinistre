@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Services\NotificationService;
 use App\Services\AssureAccountService;
+use App\Services\OrangeService;
 use App\Services\PdfGenerationService;
 use App\Services\SinistreDocumentService;
 use App\Http\Requests\StoreDeclarationRequest;
@@ -64,7 +65,7 @@ class DeclarationController extends Controller
 
             if (!$user) {
                 
-                $user = $this->accountService->createAssureAccount($data);
+                $user = $this->accountService->createAssureAccount($data, app(OrangeService::class));
             }
             
             $sinistre = $this->createSinistre($data + ['assure_id' => $user->id]);

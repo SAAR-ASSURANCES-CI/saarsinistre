@@ -25,21 +25,15 @@ class SendAccountCreationSms implements ShouldQueue
         try {
             $nomFormate = strtoupper(explode(' ', trim($this->user->nom_complet ?: 'CLIENT'))[0]);
             
-            $message = "SAAR ASSURANCE\n";
-            $message .= "Cher(e) {$nomFormate}, votre espace client est pret :\n";
-            $message .= "Identifiant: {$this->user->username}\n";
-            $message .= "Code: {$this->user->password_temp}\n";
-            $message .= "Valable 48h";
-
-            $orangeService->sendSmsConfirmationSinistre(
-                $this->telephone,
-                $this->user->nom_complet ?: 'CLIENT',
-                'COMPTE-' . $this->user->username,
-                $message
-            );
+            Log::info('Compte assuré créé avec succès', [
+                'user_id' => $this->user->id,
+                'username' => $this->user->username,
+                'nom_complet' => $this->user->nom_complet,
+                'telephone' => $this->telephone,
+                'numero_assure' => $this->user->numero_assure
+            ]);
         } catch (\Exception $e) {
-            Log::error('Erreur lors de l\'envoi du SMS de connexion: ' . $e->getMessage());
+            Log::error('Erreur lors de la création du compte assuré: ' . $e->getMessage());
         }
     }
-
 }
