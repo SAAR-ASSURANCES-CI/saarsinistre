@@ -64,6 +64,9 @@
     <!-- Sticky Header -->
     <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-gray-200 shadow-sm flex items-center justify-between px-4 py-3 md:px-8">
         <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 rounded-lg flex items-center justify-center">
+                <img src="{{ asset('logo.png') }}" alt="SAAR Assurances" class="w-12 h-12 object-contain">
+            </div>
             <span class="text-red-700 font-bold text-lg md:text-xl">SAAR ASSURANCES</span>
         </div>
         <div class="flex items-center space-x-2 md:space-x-4">
