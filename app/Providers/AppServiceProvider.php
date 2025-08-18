@@ -11,7 +11,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Enregistrer OrangeService comme singleton pour garantir une configuration SSL cohérente
+        $this->app->singleton(\App\Services\OrangeService::class, function ($app) {
+            return new \App\Services\OrangeService();
+        });
     }
 
     /**

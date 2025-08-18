@@ -11,10 +11,24 @@ use Illuminate\Support\Facades\Cache;
 class OrangeService
 {
     protected $client;
+    protected $sslConfig;
 
     public function __construct()
     {
-        $this->client = new Client();
+        $this->ensureCaCertificateExists();
+        
+        $this->sslConfig = [
+            'verify' => app()->environment('production') ? storage_path('app/cacert.pem') : false,
+            'timeout' => 30,
+            'curl' => [
+                CURLOPT_CAINFO => storage_path('app/cacert.pem'),
+                CURLOPT_CAPATH => storage_path('app/'),
+                CURLOPT_SSL_VERIFYPEER => app()->environment('production'),
+                CURLOPT_SSL_VERIFYHOST => app()->environment('production') ? 2 : 0,
+            ]
+        ];
+        
+        $this->client = new Client($this->sslConfig);
     }
 
     public function getToken()
@@ -56,10 +70,7 @@ class OrangeService
                 throw new \Exception('URL du token Orange non configurée (ORANGE_SMS_API_TOKEN_URL)');
             }
 
-            $client = new Client([
-                'verify' => false, 
-                'timeout' => 30, 
-            ]);
+            $client = new Client($this->sslConfig);
 
             $credentials = base64_encode($clientId . ':' . $clientSecret);
 
@@ -124,38 +135,63 @@ class OrangeService
     {
         try {
             $token = $this->getToken();
+            $senderNumber = env('ORANGE_SMS_SENDER_NUMBER', '2250000');
 
-            $payload = [
-                'outboundSMSMessageRequest' => [
-                    'address' => 'tel:+' . ltrim($recipient, '+'),
-                    'senderAddress' => 'tel:+' . env('ORANGE_SMS_SENDER_ADDRESS'),
-                    'outboundSMSTextMessage' => [
-                        'message' => $message
-                    ]
-                ]
-            ];
+            $formattedRecipient = $this->formatPhoneNumber($recipient);
+            $recipientWithoutPlus = ltrim($formattedRecipient, '+');
 
-            if ($senderName) {
-                $payload['outboundSMSMessageRequest']['senderName'] = $senderName;
+            if (!preg_match('/^2250[0-9]{8,10}$/', $recipientWithoutPlus)) {
+                throw new \Exception("Numéro de téléphone invalide: {$recipient} (formaté: {$formattedRecipient})");
             }
 
-            $response = $this->client->post(env('ORANGE_SMS_API_SEND_URL'), [
+            $client = new Client($this->sslConfig);
+            
+            $response = $client->post('https://api.orange.com/smsmessaging/v1/outbound/tel%3A%2B' . $senderNumber . '/requests', [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $token['access_token'],
                     'Content-Type' => 'application/json',
                     'Accept' => 'application/json'
                 ],
-                'json' => $payload
+                'json' => [
+                    'outboundSMSMessageRequest' => [
+                        'address' => 'tel:+' . $recipientWithoutPlus,
+                        'senderAddress' => 'tel:+' . $senderNumber,
+                        'senderName' => $senderName ?: 'SAAR CI',
+                        'outboundSMSTextMessage' => [
+                            'message' => $message,
+                        ],
+                    ],
+                ],
+                'http_errors' => false
             ]);
 
-            $result = json_decode($response->getBody(), true);
+            $statusCode = $response->getStatusCode();
+            $body = $response->getBody()->getContents();
+            $result = json_decode($body, true);
+
+            Log::info('Réponse API Orange pour sendSMS', [
+                'status_code' => $statusCode,
+                'response_body' => $body,
+                'recipient_formatted' => $formattedRecipient,
+                'recipient_final' => 'tel:+' . $recipientWithoutPlus,
+                'sender_number' => $senderNumber
+            ]);
+
+            if ($statusCode !== 201 && $statusCode !== 200) {
+                $errorMsg = $result['error_description'] ?? $result['error'] ?? 'Erreur inconnue';
+                throw new \Exception("Erreur {$statusCode} lors de l'envoi du SMS: {$errorMsg}");
+            }
 
             return $result;
         } catch (\Exception $e) {
             Log::error('Erreur lors de l\'envoi du SMS Orange', [
                 'recipient' => $recipient,
                 'message' => $message,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'ssl_config' => $this->sslConfig,
+                'environment' => app()->environment(),
+                'api_url' => env('ORANGE_SMS_API_SEND_URL'),
+                'trace' => $e->getTraceAsString()
             ]);
 
             throw new \Exception('Impossible d\'envoyer le SMS: ' . $e->getMessage());
@@ -167,14 +203,26 @@ class OrangeService
         try {
             $token = $this->getToken();
 
-            $response = $this->client->get(env('ORANGE_SMS_API_STATUS_URL') . '/' . $requestId, [
+            $client = new Client($this->sslConfig);
+
+            $response = $client->get(env('ORANGE_SMS_API_STATUS_URL') . '/' . $requestId, [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $token['access_token'],
                     'Accept' => 'application/json'
-                ]
+                ],
+                'http_errors' => false
             ]);
 
-            return json_decode($response->getBody(), true);
+            $statusCode = $response->getStatusCode();
+            $body = $response->getBody()->getContents();
+            $result = json_decode($body, true);
+
+            if ($statusCode !== 200) {
+                $errorMsg = $result['error_description'] ?? $result['error'] ?? 'Erreur inconnue';
+                throw new \Exception("Erreur {$statusCode} lors de la vérification du statut: {$errorMsg}");
+            }
+
+            return $result;
         } catch (\Exception $e) {
             Log::error('Erreur lors de la vérification du statut SMS', [
                 'request_id' => $requestId,
@@ -210,6 +258,33 @@ class OrangeService
         return true;
     }
 
+    private function ensureCaCertificateExists(): void
+    {
+        $certPath = storage_path('app/cacert.pem');
+        
+        if (!file_exists($certPath) || (time() - filemtime($certPath)) > (30 * 24 * 60 * 60)) {
+            try {
+                Log::info('Téléchargement du certificat CA racine...');
+                
+                $storageDir = storage_path('app');
+                if (!is_dir($storageDir)) {
+                    mkdir($storageDir, 0755, true);
+                }
+                
+                $certContent = file_get_contents('https://curl.se/ca/cacert.pem');
+                
+                if ($certContent !== false) {
+                    file_put_contents($certPath, $certContent);
+                    Log::info('Certificat CA téléchargé avec succès', ['path' => $certPath]);
+                } else {
+                    Log::warning('Impossible de télécharger le certificat CA, utilisation de la configuration sans vérification SSL');
+                }
+            } catch (\Exception $e) {
+                Log::warning('Erreur lors du téléchargement du certificat CA: ' . $e->getMessage());
+            }
+        }
+    }
+
     private function formatPhoneNumber(string $phoneNumber): string
     {
         $cleanNumber = preg_replace('/[^0-9+]/', '', $phoneNumber);
@@ -229,7 +304,7 @@ class OrangeService
         return '+225' . $cleanNumber;
     }
 
-    public function sendSmsConfirmationSinistre(string $recipientPhone, string $nomAssure, string $numeroSinistre)
+    public function sendSmsConfirmationSinistre(string $recipientPhone, string $nomAssure, string $numeroSinistre, string $customMessage = null)
     {
         try {
             $token = $this->getToken();
@@ -243,31 +318,43 @@ class OrangeService
                 throw new \Exception("Numéro de téléphone invalide: {$recipientPhone} (formaté: {$formattedRecipient})");
             }
 
-            $nomFormate = strtoupper(explode(' ', trim($nomAssure))[0]);
+            if ($customMessage) {
+                $message = $customMessage;
+            } else {
+                $nomFormate = strtoupper(explode(' ', trim($nomAssure))[0]);
+                $message = "SAAR ASSURANCE\nCher(e) {$nomFormate}, votre sinistre N°{$numeroSinistre} a ete declare avec succes. Vous serez contacte(e) prochainement.";
 
-            $message = "SAAR ASSURANCE\nCher(e) {$nomFormate}, votre sinistre N°{$numeroSinistre} a ete declare avec succes. Vous serez contacte(e) prochainement.";
-
-            if (strlen($message) > 160) {
-                $message = "SAAR ASSURANCE\nSinistre N°{$numeroSinistre} declare avec succes. Vous serez contacte prochainement.";
+                if (strlen($message) > 160) {
+                    $message = "SAAR ASSURANCE\nSinistre N°{$numeroSinistre} declare avec succes. Vous serez contacte prochainement.";
+                }
             }
 
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $token['access_token'],
-                'Content-Type' => 'application/json',
-            ])->post('https://api.orange.com/smsmessaging/v1/outbound/tel%3A%2B' . $countrySenderNumber . '/requests', [
-                'outboundSMSMessageRequest' => [
-                    'address' => 'tel:+' . $recipientWithoutPlus,
-                    'senderAddress' => 'tel:+' . $countrySenderNumber,
-                    'senderName' => 'SAAR CI',
-                    'outboundSMSTextMessage' => [
-                        'message' => $message,
+            $client = new Client($this->sslConfig);
+            
+            $response = $client->post('https://api.orange.com/smsmessaging/v1/outbound/tel%3A%2B' . $countrySenderNumber . '/requests', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $token['access_token'],
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json'
+                ],
+                'json' => [
+                    'outboundSMSMessageRequest' => [
+                        'address' => 'tel:+' . $recipientWithoutPlus,
+                        'senderAddress' => 'tel:+' . $countrySenderNumber,
+                        'senderName' => 'SAAR CI',
+                        'outboundSMSTextMessage' => [
+                            'message' => $message,
+                        ],
                     ],
                 ],
+                'http_errors' => false
             ]);
 
-            $result = $response->json();
+            $statusCode = $response->getStatusCode();
+            $body = $response->getBody()->getContents();
+            $result = json_decode($body, true);
 
-            if ($response->successful()) {
+            if ($statusCode === 201 || $statusCode === 200) {
                 Log::info('SMS de confirmation sinistre envoyé avec succès', [
                     'recipient_original' => $recipientPhone,
                     'recipient_formatted' => $formattedRecipient,
@@ -277,16 +364,18 @@ class OrangeService
                     'response' => $result
                 ]);
             } else {
+                $errorMsg = $result['error_description'] ?? $result['error']['message'] ?? $result['error'] ?? 'Erreur inconnue';
                 Log::error('Erreur lors de l\'envoi du SMS de confirmation sinistre', [
                     'recipient_original' => $recipientPhone,
                     'recipient_formatted' => $formattedRecipient,
                     'recipient_final' => 'tel:+' . $recipientWithoutPlus,
                     'numero_sinistre' => $numeroSinistre,
-                    'status' => $response->status(),
-                    'response' => $result
+                    'status_code' => $statusCode,
+                    'response_body' => $body,
+                    'error_message' => $errorMsg
                 ]);
 
-                throw new \Exception('Erreur API Orange: ' . ($result['error']['message'] ?? 'Erreur inconnue'));
+                throw new \Exception("Erreur {$statusCode} lors de l'envoi du SMS de confirmation: {$errorMsg}");
             }
 
             return $result;
