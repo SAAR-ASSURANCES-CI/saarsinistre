@@ -95,12 +95,8 @@
             <div class="inline-flex items-center justify-center mb-8">
                 <div class="relative">
                     <div
-                        class="w-24 h-24 bg-gradient-to-r from-saar-orange to-red-400 rounded-2xl shadow-2xl flex items-center justify-center transform rotate-3 hover:rotate-0 transition-transform duration-500">
-                        <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
-                            </path>
-                        </svg>
+                        class="w-32 h-32 bg-white rounded-2xl shadow-2xl flex items-center justify-center transform rotate-3 hover:rotate-0 transition-transform duration-500">
+                        <img src="{{ asset('logo.png') }}" alt="SAAR Assurances" class="w-32 h-32 object-contain">
                     </div>
                     <div class="absolute -top-2 -right-2 w-6 h-6 bg-green-400 rounded-full animate-pulse-slow"></div>
                 </div>
@@ -227,11 +223,7 @@
                         <div class="group text-center hover:transform hover:scale-105 transition-all duration-300">
                             <div
                                 class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl shadow-lg mb-4 group-hover:shadow-xl">
-                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
+                                <img src="{{ asset('logo.png') }}" alt="SAAR Assurances" class="w-8 h-8 object-contain">
                             </div>
                             <h3 class="font-bold text-gray-900 mb-2 text-lg">Sécurité Garantie</h3>
                             <p class="text-gray-600">Protection maximale de vos données</p>
