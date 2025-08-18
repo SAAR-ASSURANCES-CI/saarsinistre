@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hors ligne - SAAR Sinistre</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .animate-pulse-slow {
+            animation: pulse 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-red-50 via-white to-blue-50 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full text-center">
+        <!-- Icône hors ligne -->
+        <div class="mb-8">
+            <div class="w-24 h-24 mx-auto bg-gradient-to-br from-red-500 to-blue-600 rounded-full flex items-center justify-center animate-pulse-slow">
+                <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5z"></path>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Message principal -->
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">
+            Vous êtes hors ligne
+        </h1>
+        
+        <p class="text-gray-600 mb-8 leading-relaxed">
+            Il semble que vous ayez perdu votre connexion internet. 
+            Certaines fonctionnalités de SAAR Sinistre nécessitent une connexion active.
+        </p>
+
+        <!-- Actions disponibles -->
+        <div class="bg-white rounded-lg p-6 shadow-lg mb-6">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">
+                Fonctionnalités disponibles hors ligne
+            </h2>
+            
+            <div class="space-y-3 text-left">
+                <div class="flex items-center space-x-3">
+                    <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="text-gray-700">Consulter les sinistres en cache</span>
+                </div>
+                
+                <div class="flex items-center space-x-3">
+                    <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="text-gray-700">Préparer les documents</span>
+                </div>
+                
+                <div class="flex items-center space-x-3">
+                    <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="text-gray-700">Accéder à l'historique</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Boutons d'action -->
+        <div class="space-y-3">
+            <button onclick="window.location.reload()" class="w-full bg-gradient-to-r from-red-600 to-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:from-red-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105">
+                <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                Réessayer
+            </button>
+            
+            <button onclick="goHome()" class="w-full bg-gray-200 text-gray-700 py-3 px-6 rounded-lg font-medium hover:bg-gray-300 transition-colors">
+                <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+                Retour à l'accueil
+            </button>
+        </div>
+
+        <!-- Informations techniques -->
+        <div class="mt-8 text-xs text-gray-500">
+            <p>Cette page est mise en cache pour un accès hors ligne.</p>
+            <p class="mt-1">Vérifiez votre connexion internet et réessayez.</p>
+        </div>
+    </div>
+
+    <script>
+        function goHome() {
+            if (navigator.onLine) {
+                window.location.href = '/';
+            } else {
+               
+                window.location.reload();
+            }
+        }
+
+        setInterval(() => {
+            if (navigator.onLine) {
+                const returnUrl = new URLSearchParams(window.location.search).get('return');
+                if (returnUrl) {
+                    window.location.href = returnUrl;
+                } else {
+                    window.location.href = '/';
+                }
+            }
+        }, 5000);
+
+        window.addEventListener('online', () => {
+            setTimeout(() => {
+                const returnUrl = new URLSearchParams(window.location.search).get('return');
+                if (returnUrl) {
+                    window.location.href = returnUrl;
+                } else {
+                    window.location.href = '/';
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

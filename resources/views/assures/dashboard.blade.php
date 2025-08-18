@@ -6,6 +6,23 @@
     <title>Dashboard Assuré - SAAR Assurances</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#dc2626">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="SAAR Sinistre">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.svg">
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js');
+            });
+        }
+    </script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -553,5 +570,8 @@
 
     <!-- Popup de feedback -->
     @include('assures.partials.feedback-popup')
+    
+    <!-- PWA Script -->
+    <script src="{{ asset('js/pwa.js') }}"></script>
 </body>
 </html>
