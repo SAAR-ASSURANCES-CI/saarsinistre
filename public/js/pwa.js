@@ -10,50 +10,101 @@ class SAARSinistrePWA {
     }
     
     async init() {
-        // Vérifie si l'app est déjà installée
         this.checkInstallationStatus();
         
-        // Écoute les événements d'installation
         this.setupInstallListeners();
         
-        // Écoute les changements de connectivité
         this.setupConnectivityListeners();
         
-        // Initialise le service worker
         await this.initServiceWorker();
         
-        // Affiche l'interface PWA
         this.showPWAInterface();
     }
     
     checkInstallationStatus() {
-        // Vérifie si l'app est en mode standalone (installée)
-        this.isInstalled = window.matchMedia('(display-mode: standalone)').matches ||
-                           window.navigator.standalone === true;
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+        const isIOSStandalone = window.navigator.standalone === true;
+        const wasAccepted = localStorage.getItem('pwa-installation-accepted') === 'true';
+        const wasDismissed = localStorage.getItem('pwa-installation-dismissed') === 'true';
+        const dismissedTimestamp = localStorage.getItem('pwa-installation-dismissed-timestamp');
         
-        // Vérifie si l'app est installée via l'API
+        const reallyInstalled = isStandalone || isIOSStandalone;
+        
+        if (wasAccepted && !reallyInstalled) {
+            console.log('PWA: Désinstallation détectée - nettoyage des données');
+            localStorage.removeItem('pwa-installation-accepted');
+            localStorage.removeItem('pwa-installation-dismissed');
+            localStorage.removeItem('pwa-installation-dismissed-timestamp');
+            this.isInstalled = false;
+            return;
+        }
+        
+        if (wasDismissed && dismissedTimestamp) {
+            const now = Date.now();
+            const dismissedTime = parseInt(dismissedTimestamp);
+            const oneDayInMs = 24 * 60 * 60 * 1000;
+            
+            if (now - dismissedTime > oneDayInMs) {
+                console.log('PWA: Refus expiré - nettoyage des données');
+                localStorage.removeItem('pwa-installation-dismissed');
+                localStorage.removeItem('pwa-installation-dismissed-timestamp');
+                this.isInstalled = false;
+                return;
+            }
+        }
+        
+        this.isInstalled = reallyInstalled || wasAccepted;
+        
+        if (wasDismissed && !this.isInstalled) {
+            this.isInstalled = true;
+        }
+        
         if ('getInstalledRelatedApps' in navigator) {
             navigator.getInstalledRelatedApps().then(relatedApps => {
-                this.isInstalled = relatedApps.length > 0;
+                if (relatedApps.length > 0) {
+                    this.isInstalled = true;
+                    localStorage.setItem('pwa-installation-accepted', 'true');
+                }
             });
         }
+        
+        console.log('PWA: État d\'installation -', {
+            isStandalone,
+            isIOSStandalone,
+            wasAccepted,
+            wasDismissed,
+            dismissedTimestamp,
+            reallyInstalled,
+            finalIsInstalled: this.isInstalled
+        });
     }
     
     setupInstallListeners() {
-        // Écoute l'événement beforeinstallprompt
         window.addEventListener('beforeinstallprompt', (e) => {
             console.log('PWA: Événement d\'installation détecté');
             e.preventDefault();
             this.deferredPrompt = e;
             
-            // Affiche le bouton d'installation
-            this.showInstallButton();
+            const wasDismissed = localStorage.getItem('pwa-installation-dismissed') === 'true';
+            const wasAccepted = localStorage.getItem('pwa-installation-accepted') === 'true';
+            
+            const dismissalExpired = this.checkDismissalExpiration();
+            
+            if (!wasDismissed && !wasAccepted && !dismissalExpired) {
+                this.showInstallButton();
+            } else {
+                console.log('PWA: Installation déjà gérée par l\'utilisateur - bouton non affiché');
+            }
         });
         
-        // Écoute l'événement appinstalled
         window.addEventListener('appinstalled', (e) => {
             console.log('PWA: Application installée avec succès');
             this.isInstalled = true;
+            
+            localStorage.setItem('pwa-installation-accepted', 'true');
+            localStorage.removeItem('pwa-installation-dismissed');
+            localStorage.removeItem('pwa-installation-dismissed-timestamp');
+            
             this.hideInstallButton();
             this.showInstallationSuccess();
         });
@@ -78,7 +129,6 @@ class SAARSinistrePWA {
                 this.registration = await navigator.serviceWorker.register('/sw.js');
                 console.log('PWA: Service Worker enregistré:', this.registration);
                 
-                // Écoute les mises à jour du service worker
                 this.registration.addEventListener('updatefound', () => {
                     const newWorker = this.registration.installing;
                     newWorker.addEventListener('statechange', () => {
@@ -89,7 +139,6 @@ class SAARSinistrePWA {
                     });
                 });
                 
-                // Écoute les messages du service worker
                 navigator.serviceWorker.addEventListener('message', (event) => {
                     if (event.data && event.data.type === 'UPDATE_AVAILABLE') {
                         this.updateAvailable = true;
@@ -104,16 +153,12 @@ class SAARSinistrePWA {
     }
     
     showPWAInterface() {
-        // Crée la barre PWA
         this.createPWABar();
         
-        // Crée le bouton d'installation
         this.createInstallButton();
         
-        // Crée l'indicateur offline
         this.createOfflineIndicator();
         
-        // Crée la notification de mise à jour
         this.createUpdateNotification();
     }
     
@@ -148,12 +193,10 @@ class SAARSinistrePWA {
         
         document.body.appendChild(pwaBar);
         
-        // Affiche la barre après un délai
         setTimeout(() => {
             pwaBar.style.transform = 'translateY(0)';
         }, 2000);
         
-        // Gère les clics
         document.getElementById('pwa-install-btn').addEventListener('click', () => {
             this.installApp();
         });
@@ -231,7 +274,6 @@ class SAARSinistrePWA {
         
         document.body.appendChild(updateNotification);
         
-        // Gérer les clics
         document.getElementById('pwa-update-btn').addEventListener('click', () => {
             this.updateApp();
         });
@@ -261,6 +303,10 @@ class SAARSinistrePWA {
             pwaBar.style.transform = 'translateY(-100%)';
             setTimeout(() => pwaBar.remove(), 300);
         }
+        
+        localStorage.setItem('pwa-installation-dismissed', 'true');
+        localStorage.setItem('pwa-installation-dismissed-timestamp', Date.now().toString());
+        console.log('PWA: Installation refusée - mémorisé avec timestamp');
     }
     
     showOfflineIndicator() {
@@ -304,10 +350,8 @@ class SAARSinistrePWA {
         }
         
         try {
-            // Afficher l'invite d'installation
             this.deferredPrompt.prompt();
             
-            // Attendre la réponse de l'utilisateur
             const { outcome } = await this.deferredPrompt.userChoice;
             
             if (outcome === 'accepted') {
@@ -317,7 +361,6 @@ class SAARSinistrePWA {
                 console.log('PWA: Installation refusée par l\'utilisateur');
             }
             
-            // Réinitialiser l'invite
             this.deferredPrompt = null;
             
         } catch (error) {
@@ -326,7 +369,6 @@ class SAARSinistrePWA {
     }
     
     showInstallationSuccess() {
-        // Crée une notification de succès
         const successNotification = document.createElement('div');
         successNotification.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-600 text-white p-6 rounded-lg shadow-xl z-50';
         successNotification.innerHTML = `
@@ -341,22 +383,22 @@ class SAARSinistrePWA {
         
         document.body.appendChild(successNotification);
         
-        // Supprime après 3 secondes
         setTimeout(() => {
             successNotification.remove();
         }, 3000);
         
-        // Masque tous les éléments d'installation
+        localStorage.setItem('pwa-installation-accepted', 'true');
+        localStorage.removeItem('pwa-installation-dismissed');
+        console.log('PWA: Installation acceptée - mémorisé dans localStorage');
+        
         this.hideInstallButton();
         this.hidePWABar();
     }
     
     async updateApp() {
         if (this.registration && this.registration.waiting) {
-            // Envoie un message au service worker pour forcer la mise à jour
             this.registration.waiting.postMessage({ type: 'SKIP_WAITING' });
             
-            // Recharge la page après la mise à jour
             setTimeout(() => {
                 window.location.reload();
             }, 1000);
@@ -373,7 +415,6 @@ class SAARSinistrePWA {
         }
     }
     
-    // Méthodes utilitaires pour le débogage
     static isSupported() {
         return 'serviceWorker' in navigator && 'PushManager' in window;
     }
@@ -382,9 +423,64 @@ class SAARSinistrePWA {
         return window.matchMedia('(display-mode: standalone)').matches ||
                window.navigator.standalone === true;
     }
+    
+    checkDismissalExpiration() {
+        const wasDismissed = localStorage.getItem('pwa-installation-dismissed') === 'true';
+        const dismissedTimestamp = localStorage.getItem('pwa-installation-dismissed-timestamp');
+        
+        if (wasDismissed && dismissedTimestamp) {
+            const now = Date.now();
+            const dismissedTime = parseInt(dismissedTimestamp);
+            const oneDayInMs = 24 * 60 * 60 * 1000;
+            
+            if (now - dismissedTime > oneDayInMs) {
+                localStorage.removeItem('pwa-installation-dismissed');
+                localStorage.removeItem('pwa-installation-dismissed-timestamp');
+                console.log('PWA: Refus expiré - données nettoyées');
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    resetInstallationState() {
+        localStorage.removeItem('pwa-installation-dismissed');
+        localStorage.removeItem('pwa-installation-dismissed-timestamp');
+        localStorage.removeItem('pwa-installation-accepted');
+        this.isInstalled = false;
+        this.checkInstallationStatus();
+        console.log('PWA: État d\'installation réinitialisé');
+    }
+    
+    forceResetInstallationState() {
+        localStorage.removeItem('pwa-installation-dismissed');
+        localStorage.removeItem('pwa-installation-dismissed-timestamp');
+        localStorage.removeItem('pwa-installation-accepted');
+        this.isInstalled = false;
+        this.checkInstallationStatus();
+        console.log('PWA: État d\'installation forcé à réinitialiser');
+    }
+    
+    getInstallationState() {
+        const dismissedTimestamp = localStorage.getItem('pwa-installation-dismissed-timestamp');
+        const dismissedTime = dismissedTimestamp ? parseInt(dismissedTimestamp) : null;
+        const now = Date.now();
+        const oneDayInMs = 24 * 60 * 60 * 1000;
+        
+        return {
+            isInstalled: this.isInstalled,
+            wasDismissed: localStorage.getItem('pwa-installation-dismissed') === 'true',
+            wasAccepted: localStorage.getItem('pwa-installation-accepted') === 'true',
+            isStandalone: window.matchMedia('(display-mode: standalone)').matches,
+            isIOSStandalone: window.navigator.standalone === true,
+            dismissedTimestamp: dismissedTime,
+            dismissedTimeRemaining: dismissedTime ? Math.max(0, oneDayInMs - (now - dismissedTime)) : 0,
+            dismissalExpired: this.checkDismissalExpiration()
+        };
+    }
 }
 
-// Initialise la PWA quand le DOM est prêt
 document.addEventListener('DOMContentLoaded', () => {
     if (SAARSinistrePWA.isSupported()) {
         window.saarSinistrePWA = new SAARSinistrePWA();
@@ -393,5 +489,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Expose la classe globalement pour le débogage
 window.SAARSinistrePWA = SAARSinistrePWA; 
