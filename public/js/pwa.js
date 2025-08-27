@@ -53,10 +53,11 @@ class SAARSinistrePWA {
             }
         }
         
-        this.isInstalled = reallyInstalled || wasAccepted;
         
+        this.isInstalled = reallyInstalled || wasAccepted;
+
         if (wasDismissed && !this.isInstalled) {
-            this.isInstalled = true;
+            this.isInstalled = true; 
         }
         
         if ('getInstalledRelatedApps' in navigator) {
@@ -75,7 +76,8 @@ class SAARSinistrePWA {
             wasDismissed,
             dismissedTimestamp,
             reallyInstalled,
-            finalIsInstalled: this.isInstalled
+            finalIsInstalled: this.isInstalled,
+            willShowModal: !this.isInstalled
         });
     }
     
@@ -153,12 +155,14 @@ class SAARSinistrePWA {
     }
     
     showPWAInterface() {
-        this.createPWABar();
         
-        this.createInstallButton();
+        if (!this.isInstalled) {
+            this.createPWABar();
+            this.createInstallButton();
+        }
+        
         
         this.createOfflineIndicator();
-        
         this.createUpdateNotification();
     }
     
