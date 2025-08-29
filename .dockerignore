@@ -1,25 +1,42 @@
-
+# Node.js
 node_modules
 npm-debug.log
+
+# Git
 .git
 .gitignore
-README.md
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
 
+# Documentation
+README.md
+
+# Fichiers d'environnement
+.env
+.env.*
+!.env.example
+
+# Laravel - Logs et cache
 storage/logs/*
 storage/framework/cache/*
 storage/framework/sessions/*
 storage/framework/views/*
 bootstrap/cache/*
+!storage/logs/.gitignore
+!storage/framework/cache/.gitignore
+!storage/framework/sessions/.gitignore
+!storage/framework/views/.gitignore
+!bootstrap/cache/.gitignore
 
+# Laravel - Lien symbolique problématique
+public/storage
+/public/hot
+/public/build
+
+# Tests
 tests
 phpunit.xml
 .phpunit.result.cache
 
+# Outils de développement
 .editorconfig
 .styleci.yml
 .php_cs.cache
@@ -30,15 +47,27 @@ Dockerfile
 docker-compose.yml
 .dockerignore
 
+# IDE
 .vscode
 .idea
+.phpstorm.meta.php
+_ide_helper.php
+_ide_helper_models.php
+
+# Fichiers temporaires
 *.swp
 *.swo
-
 *.tmp
 *.temp
 .DS_Store
 Thumbs.db
 
+# Sauvegardes
 *.bak
 *.backup
+
+# Clés de stockage
+/storage/*.key
+
+# Auth.json
+/auth.json
