@@ -44,24 +44,39 @@ class SendSinistreNotificationEmail implements ShouldQueue
                     'address' => 'Abidjan, Côte d\'Ivoire'
                 ]
             ];
-
-            foreach ($this->gestionnaires as $gestionnaire) {
+            if (is_string($this->gestionnaires)) {
                 try {
-                    Mail::send('emails.nouveau-sinistre', $dataEmail, function ($message) use ($gestionnaire) {
-                        $message->to($gestionnaire->email, $gestionnaire->nom_complet)
+                    Mail::send('emails.nouveau-sinistre', $dataEmail, function ($message) {
+                        $message->to($this->gestionnaires, 'Service Sinistres')
                             ->subject('Nouveau sinistre déclaré - N° ' . $this->sinistre->numero_sinistre)
                             ->from(config('mail.from.address'), config('mail.from.name'));
                     });
                 } catch (Exception $e) {
-                    Log::error('Erreur lors de l\'envoi d\'email à un gestionnaire', [
-                        'gestionnaire_email' => $gestionnaire->email,
+                    Log::error('Erreur lors de l\'envoi d\'email au service sinistres', [
+                        'email_destination' => $this->gestionnaires,
                         'sinistre_id' => $this->sinistre->id,
                         'numero_sinistre' => $this->sinistre->numero_sinistre,
                         'error' => $e->getMessage()
                     ]);
-
-
                     throw $e;
+                }
+            } else {
+                foreach ($this->gestionnaires as $gestionnaire) {
+                    try {
+                        Mail::send('emails.nouveau-sinistre', $dataEmail, function ($message) use ($gestionnaire) {
+                            $message->to($gestionnaire->email, $gestionnaire->nom_complet)
+                                ->subject('Nouveau sinistre déclaré - N° ' . $this->sinistre->numero_sinistre)
+                                ->from(config('mail.from.address'), config('mail.from.name'));
+                        });
+                    } catch (Exception $e) {
+                        Log::error('Erreur lors de l\'envoi d\'email à un gestionnaire', [
+                            'gestionnaire_email' => $gestionnaire->email,
+                            'sinistre_id' => $this->sinistre->id,
+                            'numero_sinistre' => $this->sinistre->numero_sinistre,
+                            'error' => $e->getMessage()
+                        ]);
+                        throw $e;
+                    }
                 }
             }
         } catch (Exception $e) {
