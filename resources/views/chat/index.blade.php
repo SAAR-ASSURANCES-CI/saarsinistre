@@ -169,11 +169,10 @@
         const selectedFiles = document.getElementById('selected-files');
         const loadMoreBtn = document.getElementById('load-more-btn');
         const paginationInfo = document.getElementById('pagination-info');
-
-        // URLs pour le chat - utiliser les routes des gestionnaires qui fonctionnent
+        // URLs pour le chat - utiliser les routes unifiées
         const chatUrls = {
-            fetch: `/sinistres/{{ $sinistre->id }}/chat/fetch`,
-            store: `/sinistres/{{ $sinistre->id }}/chat`
+            fetch: `{{ route('chat.fetch', $sinistre->id) }}`,
+            store: `{{ route('chat.store', $sinistre->id) }}`
         };
 
         let isLoading = false;

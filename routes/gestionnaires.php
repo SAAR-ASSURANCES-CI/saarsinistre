@@ -83,12 +83,7 @@ Route::middleware(['auth', 'role:admin,gestionnaire'])->group(function () {
     })->where('filename', '.*')->name('sinistre.document');
 });
 
-Route::middleware(['auth'])->group(function () {
-    // Chat sinistre
-    Route::get('/sinistres/{sinistre}/chat', [ChatController::class, 'index'])->name('chat.index');
-    Route::get('/sinistres/{sinistre}/chat/fetch', [ChatController::class, 'fetch'])->name('chat.fetch');
-    Route::post('/sinistres/{sinistre}/chat', [ChatController::class, 'store'])->name('chat.store');
-
+Route::middleware(['auth', 'role:admin,gestionnaire'])->group(function () {
     // Notifications non lues
     Route::get('/notifications/unread-messages', [NotificationController::class, 'unreadMessages']);
     Route::get('/notifications/unread-messages/count', [NotificationController::class, 'unreadMessagesCount']);

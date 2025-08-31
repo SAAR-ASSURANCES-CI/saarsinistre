@@ -81,6 +81,12 @@ Route::get('/test-email-notification', function () {
     ]);
 });
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/sinistres/{sinistre}/chat', [ChatController::class, 'index'])->name('chat.index');
+    Route::post('/sinistres/{sinistre}/chat', [ChatController::class, 'store'])->name('chat.store');
+    Route::get('/sinistres/{sinistre}/chat/fetch', [ChatController::class, 'fetch'])->name('chat.fetch');
+});
+
 // Inclusion des routes spécifiques
 require __DIR__.'/assures.php';
 require __DIR__.'/gestionnaires.php';
