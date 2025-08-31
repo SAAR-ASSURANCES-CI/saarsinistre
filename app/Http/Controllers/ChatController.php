@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\MessageSent;
 use App\Jobs\SendChatMessageNotificationEmail;
 use App\Models\Message;
 use App\Models\MessageAttachment;
@@ -22,7 +21,7 @@ class ChatController extends Controller
                     $q->select('id', 'nom_complet');
                 },
                 'attachments'
-            ])->orderBy('created_at', 'asc');
+            ])->orderBy('created_at', 'desc');
         }])->findOrFail($sinistre_id);
 
         $user = Auth::user();
@@ -61,13 +60,13 @@ class ChatController extends Controller
                 },
                 'attachments'
             ])
-            ->orderBy('created_at', 'asc');
+            ->orderBy('created_at', 'desc');
 
         if ($lastMessageId > 0) {
             $query->where('id', '>', $lastMessageId);
         }
 
-        $messages = $query->get();
+        $messages = $query->paginate(10);
 
         Message::where('sinistre_id', $sinistre_id)
             ->where('receiver_id', $user->id)
@@ -112,7 +111,7 @@ class ChatController extends Controller
             $files = $request->file('fichiers');
             foreach ((array)$files as $file) {
                 $storedPath = $file->storeAs(
-                    "sinistres/{$sinistre->id}/chat",
+                    "sinistres/{$sinistre->id}/media",
                     time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension(),
                     'public'
                 );
@@ -130,8 +129,7 @@ class ChatController extends Controller
             $q->select('id', 'nom_complet');
         }, 'attachments']);
 
-        broadcast(new MessageSent($message));
-
+        // Envoyer une notification par email si c'est l'assuré qui envoie
         if ($user->id === $sinistre->assure_id && $sinistre->gestionnaire_id) {
             $gestionnaire = User::find($sinistre->gestionnaire_id);
             if ($gestionnaire && $gestionnaire->email) {
