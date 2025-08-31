@@ -59,18 +59,14 @@
     <!-- Sticky Header -->
     <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-gray-200 shadow-sm flex items-center justify-between px-4 py-3 md:px-8">
         <div class="flex items-center space-x-3">
-            <a href="#" class="text-red-700 hover:text-red-900 mr-2 transition-colors duration-200" title="Retour">
+            <a href="{{ url()->previous() }}" class="text-red-700 hover:text-red-900 mr-2 transition-colors duration-200" title="Retour">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
             </a>
             <span class="text-red-700 font-bold text-lg md:text-2xl">Messagerie Sinistre</span>
         </div>
-        <div class="flex items-center space-x-2 md:space-x-4">
-            <!-- Status de connexion -->
-            <div id="connection-status" class="flex items-center space-x-2">
-                <div id="status-indicator" class="w-3 h-3 rounded-full bg-gray-400"></div>
-                <span id="status-text" class="text-sm text-gray-600">Connexion...</span>
-            </div>
-        </div>
+        {{-- <div class="flex items-center space-x-2 md:space-x-4">
+            <span class="text-sm text-gray-600">Messagerie simple</span>
+        </div> --}}
     </header>
 
     <div class="container mx-auto px-4 py-8 chat-container">
@@ -87,30 +83,69 @@
                 </div>
             </div>
 
-            <div id="chat-box" class="chat-box h-96 md:h-80 overflow-y-auto flex flex-col gap-3 mb-4 bg-gray-50 rounded-lg p-3 border border-gray-200">
-                <!-- Messages chargé via JavaScript -->
-            </div>
-
-            <form id="chat-form" class="flex flex-col gap-2 mt-2" enctype="multipart/form-data">
-                <div class="flex gap-2">
-                    <input type="text" id="chat-input" name="contenu" 
-                           class="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 text-sm shadow-sm bg-white transition-all duration-200 hover:border-gray-400" 
-                           placeholder="Écrire un message..." 
-                           autocomplete="off"
-                           maxlength="2000">
-                    <label for="file-input" class="cursor-pointer inline-flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-full bg-white hover:bg-gray-50 text-sm text-gray-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M8 12a4 4 0 118 0v3a5 5 0 01-10 0V7a3 3 0 016 0v6a2 2 0 11-4 0V7h2v6a1 1 0 002 0V7a4 4 0 10-8 0v8a6 6 0 0012 0v-3h-2v3a4 4 0 11-8 0V7a2 2 0 114 0v6a3 3 0 106 0V7a6 6 0 10-12 0v8a8 8 0 0016 0v-3a6 6 0 00-12 0v3a6 6 0 0012 0v-3h-2v3a4 4 0 11-8 0V7h2v6a2 2 0 104 0V7a3 3 0 10-6 0v8a5 5 0 0010 0v-3h-2v3a3 3 0 11-6 0V7h2v5z"/></svg>
-                        Joindre
+            <!-- Formulaire d'envoi de message -->
+            <form id="message-form" class="mb-6 bg-gray-50 rounded-lg p-4 border border-gray-200" enctype="multipart/form-data">
+                <div class="mb-4">
+                    <label for="message-content" class="block text-sm font-medium text-gray-700 mb-2">
+                        Votre message
                     </label>
-                    <input id="file-input" name="fichiers[]" type="file" class="hidden" multiple>
-                    
+                    <textarea id="message-content" name="contenu" rows="4" 
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                              placeholder="Écrivez votre message ici..."
+                              maxlength="2000"></textarea>
+                    <div class="text-xs text-gray-500 mt-1">
+                        <span id="char-count">0</span>/2000 caractères
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="file-input" class="block text-sm font-medium text-gray-700 mb-2">
+                        Joindre un fichier (optionnel)
+                    </label>
+                    <div class="flex items-center gap-3">
+                        <input id="file-input" name="fichiers[]" type="file" class="hidden" multiple>
+                        <button type="button" id="file-button" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-sm text-gray-700 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                            </svg>
+                            Choisir des fichiers
+                        </button>
+                        <span id="file-info" class="text-sm text-gray-500"></span>
+                    </div>
+                    <div id="selected-files" class="mt-2 flex flex-wrap gap-2"></div>
+                </div>
+                
+                <div class="flex justify-end">
                     <button type="submit" 
-                            class="min-w-[80px] md:min-w-[100px] px-4 md:px-6 py-2 bg-red-600 text-white rounded-full font-semibold shadow-lg hover:bg-red-700 transition-all focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 animate-bounce-in text-sm md:text-base">
-                        Envoyer
+                            class="px-6 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                        Envoyer le message
                     </button>
                 </div>
-                <div id="selected-files" class="flex flex-wrap gap-2 text-xs text-gray-600"></div>
             </form>
+
+            <!-- Liste des conversations -->
+            <div class="bg-white rounded-lg border border-gray-200">
+                <div class="px-4 py-3 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-800">Historique des échanges</h3>
+                </div>
+                <div id="conversations-list" class="divide-y divide-gray-200">
+                    <!-- Les conversations seront chargées ici -->
+                </div>
+                
+                <!-- Contrôles de pagination -->
+                <div id="pagination-controls" class="px-4 py-3 border-t border-gray-200 bg-gray-50">
+                    <div class="flex items-center justify-between">
+                        <div id="pagination-info" class="text-sm text-gray-600">
+                            <!-- Informations de pagination -->
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button id="load-more-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm">
+                                Charger plus de messages
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -123,78 +158,104 @@
     <script>
         const userId = {{ Auth::id() }};
         const sinistreId = {{ $sinistre->id }};
-        const chatBox = document.getElementById('chat-box');
-        const chatForm = document.getElementById('chat-form');
-        const chatInput = document.getElementById('chat-input');
-        const statusIndicator = document.getElementById('status-indicator');
-        const statusText = document.getElementById('status-text');
-        
+        const userRole = '{{ Auth::user()->role }}';
+        const messageForm = document.getElementById('message-form');
+        const messageContent = document.getElementById('message-content');
+        const conversationsList = document.getElementById('conversations-list');
+        const charCount = document.getElementById('char-count');
+        const fileInput = document.getElementById('file-input');
+        const fileButton = document.getElementById('file-button');
+        const fileInfo = document.getElementById('file-info');
+        const selectedFiles = document.getElementById('selected-files');
+        const loadMoreBtn = document.getElementById('load-more-btn');
+        const paginationInfo = document.getElementById('pagination-info');
+
+        // URLs pour le chat - utiliser les routes des gestionnaires qui fonctionnent
+        const chatUrls = {
+            fetch: `/sinistres/{{ $sinistre->id }}/chat/fetch`,
+            store: `/sinistres/{{ $sinistre->id }}/chat`
+        };
+
         let isLoading = false;
-        let lastMessageId = 0;
         let messagesLoaded = false;
+        let currentPage = 1;
+        let hasMorePages = true;
 
         // Configuration CSRF pour axios
         axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        function updateConnectionStatus(connected) {
-            if (connected) {
-                statusIndicator.className = 'w-3 h-3 rounded-full bg-green-500 animate-pulse';
-                statusText.textContent = 'Connecté';
-                statusText.className = 'text-sm text-green-600';
-            } else {
-                statusIndicator.className = 'w-3 h-3 rounded-full bg-red-500';
-                statusText.textContent = 'Déconnecté';
-                statusText.className = 'text-sm text-red-600';
-            }
-        }
 
-        function scrollToBottom() {
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
 
         function setLoading(state) {
             isLoading = state;
-            chatBox.classList.toggle('opacity-60', state);
+            const submitBtn = messageForm.querySelector('button[type="submit"]');
+            submitBtn.disabled = state;
+            submitBtn.textContent = state ? 'Envoi en cours...' : 'Envoyer le message';
         }
 
-        // Fonction pour charger tous les messages existants
-        function loadAllMessages() {
-            if (isLoading || messagesLoaded) return;
+        // Fonction pour charger les messages avec pagination
+        function loadConversations(page = 1, append = false) {
+            if (isLoading) return;
             
             setLoading(true);
             
-            axios.get(`/sinistres/${sinistreId}/chat/fetch`)
+            axios.get(`${chatUrls.fetch}?page=${page}`)
                 .then(response => {
-                    const messages = response.data;
+                    const data = response.data;
+                    const messages = data.data || data; // Gérer les deux formats (paginé ou non)
+                    
                     console.log('Messages chargés:', messages.length);
                     
-                    // Vider le chat box
-                    // chatBox.innerHTML = '';
+                    // Si c'est la première page, vider la liste
+                    if (!append) {
+                        conversationsList.innerHTML = '';
+                    }
                     
-                    // Ajouter tous les messages
+                    // Ajouter les messages
                     messages.forEach(msg => {
-                        appendMessage(msg, false);
+                        appendConversation(msg);
                     });
                     
-                    // Mettre à jour le dernier ID de message
-                    if (messages.length > 0) {
-                        lastMessageId = messages[messages.length - 1].id;
+                    // Mettre à jour les informations de pagination
+                    if (data.current_page !== undefined) {
+                        currentPage = data.current_page;
+                        hasMorePages = data.next_page_url !== null;
+                        updatePaginationInfo(data);
+                    } else {
+                        hasMorePages = false;
+                        updatePaginationInfo({ total: messages.length, current_page: 1, last_page: 1 });
                     }
                     
                     messagesLoaded = true;
-                    scrollToBottom();
                 })
                 .catch(error => {
                     console.error('Erreur de chargement des messages:', error);
-                    // Réessayer après un délai
-                    setTimeout(loadAllMessages, 2000);
+                    if (!append) {
+                        conversationsList.innerHTML = '<div class="p-4 text-center text-gray-500">Erreur lors du chargement des messages</div>';
+                    }
                 })
                 .finally(() => {
                     setLoading(false);
                 });
         }
 
-        function appendMessage(message, animate = true) {
+        function updatePaginationInfo(data) {
+            const total = data.total || 0;
+            const current = data.current_page || 1;
+            const last = data.last_page || 1;
+            
+            paginationInfo.textContent = `Page ${current} sur ${last} - ${total} message(s) au total`;
+            
+            // Afficher/masquer le bouton "Charger plus"
+            if (hasMorePages) {
+                loadMoreBtn.style.display = 'block';
+                loadMoreBtn.textContent = 'Charger plus de messages';
+            } else {
+                loadMoreBtn.style.display = 'none';
+            }
+        }
+
+        function appendConversation(message) {
             const existingMessage = document.querySelector(`[data-message-id="${message.id}"]`);
             if (existingMessage) {
                 return;
@@ -202,21 +263,16 @@
 
             const isMine = message.sender_id === userId;
             const initiale = message.sender.nom_complet ? message.sender.nom_complet.charAt(0).toUpperCase() : '?';
-            const bg = isMine ? 'bg-red-100' : 'bg-blue-100';
-            const border = isMine ? 'border-red-500' : 'border-blue-500';
-            const align = isMine ? 'justify-end' : 'justify-start';
             const avatarBg = isMine ? 'bg-red-600' : 'bg-blue-600';
+            const borderColor = isMine ? 'border-l-red-500' : 'border-l-blue-500';
 
-            const messageEl = document.createElement('div');
-            messageEl.className = `flex items-end ${align} message-enter`;
-            messageEl.dataset.messageId = message.id;
+            const conversationEl = document.createElement('div');
+            conversationEl.className = `p-4 hover:bg-gray-50 transition-colors cursor-pointer border-l-4 ${borderColor}`;
+            conversationEl.dataset.messageId = message.id;
             
+            // Si ce n'est pas mon message, ajouter la fonctionnalité de réponse
             if (!isMine) {
-                messageEl.innerHTML += `
-                    <div class="flex-shrink-0 w-8 h-8 rounded-full ${avatarBg} flex items-center justify-center text-white font-bold shadow mr-2 transition-transform hover:scale-110">
-                        ${initiale}
-                    </div>
-                `;
+                conversationEl.addEventListener('click', () => replyToMessage(message));
             }
             
             let attachmentsHtml = '';
@@ -234,36 +290,41 @@
                 attachmentsHtml = `<div class="mt-2 flex flex-col gap-2">${items}</div>`;
             }
 
-            messageEl.innerHTML += `
-                <div class="max-w-xs md:max-w-md px-4 py-2 rounded-2xl shadow ${bg} border-l-4 ${border} ${isMine ? 'text-right' : 'text-left'} transition-all duration-200 hover:shadow-md">
-                    <div class="text-xs text-gray-500 mb-1 font-semibold">${message.sender.nom_complet}</div>
-                    ${message.contenu ? `<div class="whitespace-pre-line text-sm message-content">${message.contenu}</div>` : ''}
-                    ${attachmentsHtml}
-                    <div class="text-[11px] text-gray-400 mt-1">${formatDate(message.created_at)}</div>
+            conversationEl.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <div class="flex-shrink-0 w-10 h-10 rounded-full ${avatarBg} flex items-center justify-center text-white font-bold shadow">
+                        ${initiale}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between mb-1">
+                            <h4 class="text-sm font-semibold text-gray-900">${message.sender.nom_complet}</h4>
+                            <span class="text-xs text-gray-500">${formatDate(message.created_at)}</span>
+                        </div>
+                        ${message.contenu ? `<div class="text-sm text-gray-700 whitespace-pre-line mb-2">${message.contenu}</div>` : ''}
+                        ${attachmentsHtml}
+                        ${!isMine ? '<div class="mt-2 text-xs text-blue-600">Cliquer pour répondre</div>' : ''}
+                    </div>
                 </div>
             `;
             
-            if (isMine) {
-                messageEl.innerHTML += `
-                    <div class="flex-shrink-0 w-8 h-8 rounded-full ${avatarBg} flex items-center justify-center text-white font-bold shadow ml-2 transition-transform hover:scale-110">
-                        ${initiale}
-                    </div>
-                `;
-            }
+            conversationsList.appendChild(conversationEl);
             
-            chatBox.appendChild(messageEl);
-            
-            if (animate) {
-                setTimeout(() => {
-                    messageEl.classList.add('message-enter-active');
-                }, 10);
-                scrollToBottom();
-            }
-            
-            // Mettre à jour le dernier ID de message
-            if (message.id > lastMessageId) {
-                lastMessageId = message.id;
-            }
+
+        }
+
+        function replyToMessage(originalMessage) {
+            // Pré-remplir le textarea avec une réponse
+            const replyText = `\n\n--- En réponse à ${originalMessage.sender.nom_complet} ---\n${originalMessage.contenu || '[Message avec fichier]'}\n\n`;
+            messageContent.value = replyText;
+            messageContent.focus();
+            messageContent.setSelectionRange(0, 0); // Placer le curseur au début
+            updateCharCount();
+        }
+
+        function updateCharCount() {
+            const count = messageContent.value.length;
+            charCount.textContent = count;
+            charCount.className = count > 1800 ? 'text-red-500' : 'text-gray-500';
         }
 
         function formatDate(dateString) {
@@ -277,130 +338,112 @@
             });
         }
 
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const icons = {
+                'doc': '📄', 'docx': '📄',
+                'xls': '📊', 'xlsx': '📊',
+                'ppt': '📽️', 'pptx': '📽️',
+                'txt': '📝',
+                'zip': '🗜️', 'rar': '🗜️', '7z': '🗜️',
+                'mp3': '🎵', 'wav': '🎵', 'flac': '🎵',
+                'mp4': '🎬', 'avi': '🎬', 'mov': '🎬',
+                'jpg': '🖼️', 'jpeg': '🖼️', 'png': '🖼️', 'gif': '🖼️',
+                'pdf': '📕'
+            };
+            return icons[ext] || '📎';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
         function handleMessageSubmit(e) {
             e.preventDefault();
-            const contenu = chatInput.value.trim();
-            const filesInput = document.getElementById('file-input');
-            const hasFiles = filesInput.files && filesInput.files.length > 0;
+            const contenu = messageContent.value.trim();
+            const hasFiles = fileInput.files && fileInput.files.length > 0;
             if (!contenu && !hasFiles) return;
-            
-            const submitBtn = chatForm.querySelector('button[type="submit"]');
-            submitBtn.disabled = true;
-            submitBtn.classList.add('opacity-75');
             
             setLoading(true);
 
             const formData = new FormData();
             if (contenu) formData.append('contenu', contenu);
             if (hasFiles) {
-                Array.from(filesInput.files).forEach(f => formData.append('fichiers[]', f));
+                Array.from(fileInput.files).forEach(f => formData.append('fichiers[]', f));
             }
 
-            axios.post(`/sinistres/${sinistreId}/chat`, formData, {
+            axios.post(chatUrls.store, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             })
                 .then(response => {
-                    // Le message sera ajouté automatiquement via l'événement broadcast
-                    chatInput.value = '';
-                    filesInput.value = '';
-                    document.getElementById('selected-files').innerHTML = '';
+                    // Ajouter le message envoyé à l'interface
+                    appendConversation(response.data);
+                    messageContent.value = '';
+                    fileInput.value = '';
+                    selectedFiles.innerHTML = '';
+                    fileInfo.textContent = '';
+                    updateCharCount();
                 })
                 .catch(error => {
                     console.error('Erreur d\'envoi:', error);
                     alert('Une erreur est survenue lors de l\'envoi du message.');
                 })
                 .finally(() => {
-                    submitBtn.disabled = false;
-                    submitBtn.classList.remove('opacity-75');
                     setLoading(false);
                 });
         }
 
         function initChat() {
-            console.log('Initialisation du chat...');
+            console.log('Initialisation du système de messages...');
             
-            chatForm.addEventListener('submit', handleMessageSubmit);
+            // Gestion du formulaire
+            messageForm.addEventListener('submit', handleMessageSubmit);
 
-            const fileInput = document.getElementById('file-input');
-            const selectedFiles = document.getElementById('selected-files');
-            const submitBtn = chatForm.querySelector('button[type="submit"]');
+            // Gestion du compteur de caractères
+            messageContent.addEventListener('input', updateCharCount);
 
-            function updateSubmitState() {
-                const hasText = !!chatInput.value.trim();
-                const hasFiles = fileInput.files && fileInput.files.length > 0;
-                submitBtn.disabled = !(hasText || hasFiles);
-            }
-
-            chatInput.addEventListener('input', updateSubmitState);
-
+            // Gestion des fichiers
+            fileButton.addEventListener('click', () => fileInput.click());
+            
             fileInput.addEventListener('change', () => {
                 if (fileInput.files.length === 0) {
                     selectedFiles.innerHTML = '';
+                    fileInfo.textContent = '';
                 } else {
-                    const names = Array.from(fileInput.files).map(f => `• ${f.name}`);
-                    selectedFiles.innerHTML = names.join('<br/>');
+                    const files = Array.from(fileInput.files);
+                    fileInfo.textContent = `${files.length} fichier(s) sélectionné(s)`;
+                    
+                    selectedFiles.innerHTML = files.map(file => `
+                        <div class="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                            <span>${getFileIcon(file.name)}</span>
+                            <span>${file.name}</span>
+                            <span class="text-blue-600">(${formatFileSize(file.size)})</span>
+                        </div>
+                    `).join('');
                 }
-                updateSubmitState();
             });
-
-            updateSubmitState();
             
-            chatInput.addEventListener('input', function() {
-                const submitBtn = chatForm.querySelector('button[type="submit"]');
-                submitBtn.disabled = !chatInput.value.trim();
+            // Gestion du bouton "Charger plus"
+            loadMoreBtn.addEventListener('click', () => {
+                if (hasMorePages && !isLoading) {
+                    loadConversations(currentPage + 1, true);
+                }
             });
-            chatInput.dispatchEvent(new Event('input'));
             
-            // Charger tous les messages existants en premier
-            loadAllMessages();
+            loadConversations();
             
-            chatInput.focus();
-
-            // Écouter les messages entrants via Laravel Echo
-            window.Echo.private(`sinistre.${sinistreId}`)
-                .listen('.message.sent', (data) => {
-                    console.log('Nouveau message reçu:', data);
-                    // Vérifier si le message n'est pas déjà affiché
-                    if (data.id > lastMessageId) {
-                        appendMessage(data, true);
-                    }
-                })
-                .error((error) => {
-                    console.error('Erreur Echo:', error);
-                    updateConnectionStatus(false);
-                });
-
-            // Gestion de la connexion/déconnexion
-            window.Echo.connector.pusher.connection.bind('connected', () => {
-                console.log('WebSocket connecté');
-                updateConnectionStatus(true);
-            });
-
-            window.Echo.connector.pusher.connection.bind('disconnected', () => {
-                console.log('WebSocket déconnecté');
-                updateConnectionStatus(false);
-            });
-
-            window.Echo.connector.pusher.connection.bind('failed', () => {
-                console.log('Connexion WebSocket échouée');
-                updateConnectionStatus(false);
-            });
+            messageContent.focus();
         }
 
-        // Attendre que Echo soit disponible
-        function waitForEcho() {
-            if (typeof window.Echo !== 'undefined') {
-                initChat();
-            } else {
-                console.log('En attente de Laravel Echo...');
-                setTimeout(waitForEcho, 100);
-            }
-        }
-
+        // Initialiser le chat directement
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', waitForEcho);
+            document.addEventListener('DOMContentLoaded', initChat);
         } else {
-            waitForEcho();
+            initChat();
         }
     </script>
     
