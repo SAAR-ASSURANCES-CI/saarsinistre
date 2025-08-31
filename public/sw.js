@@ -8,7 +8,10 @@ const STATIC_ASSETS = [
     '/js/pwa.js',
     '/js/tailwindConfig.js',
     '/logo.png',
-    '/favicon.ico'
+    '/favicon.ico',
+    '/css/app.css',
+    '/offline.html',
+    'https://cdn.tailwindcss.com',
 ];
 
 const ROUTES_TO_CACHE = [
