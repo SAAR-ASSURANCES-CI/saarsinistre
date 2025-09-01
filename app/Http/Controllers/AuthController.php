@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
+use App\Jobs\SendPasswordResetEmail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
 
 class AuthController extends Controller
 {
@@ -57,6 +58,12 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             $user = Auth::user();
+            
+            if ($user->password_expire_at && $user->password_expire_at->isFuture()) {
+                return redirect()->route('gestionnaire.password.change')
+                    ->with('info', 'Veuillez changer votre mot de passe temporaire.');
+            }
+            
             return redirect()->route('dashboard');
         }
         return back()->withErrors([
@@ -199,5 +206,70 @@ class AuthController extends Controller
         $user->password_temp = null;
         $user->save();
         return redirect()->route('assures.dashboard')->with('success', 'Votre mot de passe a été changé avec succès.');
+    }
+
+    /**
+     * Affiche le formulaire de changement de mot de passe pour les gestionnaires
+     */
+    public function showChangePasswordForm()
+    {
+        return view('auth.change_password');
+    }
+
+    /**
+     * Traite le changement de mot de passe pour les gestionnaires
+     */
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'password' => 'required|min:8|confirmed',
+        ], [
+            'password.required' => 'Le nouveau mot de passe est obligatoire.',
+            'password.min' => 'Le mot de passe doit contenir au moins 8 caractères.',
+            'password.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
+        ]);
+
+        $user = Auth::user();
+        $user->password = Hash::make($request->password);
+        $user->password_expire_at = null;
+        $user->password_temp = null;
+        $user->save();
+
+        return redirect()->route('dashboard')->with('success', 'Votre mot de passe a été changé avec succès.');
+    }
+
+    /**
+     * Affiche le formulaire de demande de réinitialisation
+     */
+    public function showForgotPasswordForm()
+    {
+        return view('auth.forgot_password');
+    }
+
+    /**
+     * Traite la demande de réinitialisation de mot de passe
+     */
+    public function sendResetLink(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ], [
+            'email.required' => 'L\'adresse email est obligatoire.',
+            'email.email' => 'L\'adresse email doit être valide.',
+            'email.exists' => 'Aucun compte trouvé avec cette adresse email.',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+        
+        $motDePasseTemporaire = str_pad(rand(100000, 999999), 6, '0', STR_PAD_LEFT);
+        
+        $user->password = Hash::make($motDePasseTemporaire);
+        $user->password_temp = $motDePasseTemporaire;
+        $user->password_expire_at = now()->addHours(24);
+        $user->save();
+
+        SendPasswordResetEmail::dispatch($user, $motDePasseTemporaire);
+
+        return back()->with('success', 'Un nouveau mot de passe temporaire a été envoyé à votre adresse email.');
     }
 }
