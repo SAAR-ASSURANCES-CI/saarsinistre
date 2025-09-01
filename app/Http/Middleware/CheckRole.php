@@ -17,6 +17,10 @@ class CheckRole
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
         if (!Auth::check()) {
+
+            if ($request->is('assures/*') || $request->is('sinistres/*')) {
+                return redirect()->route('login.assure');
+            }
             return redirect()->route('login');
         }
 
@@ -27,11 +31,17 @@ class CheckRole
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
+            if ($user->role === 'assure') {
+                return redirect()->route('login.assure')->withErrors([
+                    'username' => 'Accès non autorisé. Vous avez été déconnecté.',
+                ]);
+            }
+
             return redirect()->route('login')->withErrors([
                 'email' => 'Accès non autorisé. Vous avez été déconnecté.',
             ]);
         }
-        
+
         return $next($request);
     }
 }

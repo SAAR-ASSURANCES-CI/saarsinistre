@@ -31,6 +31,10 @@ Route::middleware(['auth'])->group(function () {
     // Changement de mot de passe pour assuré
     Route::get('/assure/password/change', [AuthController::class, 'showChangePasswordFormAssure'])->name('assure.password.change');
     Route::post('/assure/password/change', [AuthController::class, 'changePasswordAssure'])->name('assure.password.change.post');
+
+    Route::get('/sinistres/{sinistre}/chat', [ChatController::class, 'index'])->name('chat.index');
+    Route::post('/sinistres/{sinistre}/chat', [ChatController::class, 'store'])->name('chat.store');
+    Route::get('/sinistres/{sinistre}/chat/fetch', [ChatController::class, 'fetch'])->name('chat.fetch');
     
     // Feedback
     Route::get('/sinistres/{sinistre}/feedback', [FeedbackController::class, 'showForm'])->name('assures.feedback.form');
