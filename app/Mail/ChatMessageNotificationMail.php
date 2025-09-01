@@ -30,7 +30,7 @@ class ChatMessageNotificationMail extends Mailable
         $this->gestionnaire = $gestionnaire;
         $this->assure = $message->sender;
         $this->sinistre = $message->sinistre;
-        $this->url_chat = route('chat.index', $message->sinistre->id);
+        $this->url_chat = url('/gestionnaires/sinistres/' . $message->sinistre->id . '/chat');
         $this->company = [
             'name' => 'SAAR ASSURANCES',
             'phone' => '+225 20 30 30 30',

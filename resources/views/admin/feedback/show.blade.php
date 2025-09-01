@@ -21,7 +21,7 @@
                     <h1 class="text-3xl font-bold text-gray-900 mb-2">Détails du Feedback</h1>
                     <p class="text-gray-600">Feedback pour le sinistre {{ $feedback->sinistre->numero_sinistre }}</p>
                 </div>
-                <a href="{{ route('dashboard.feedback.index') }}" 
+                <a href="{{ route('gestionnaires.dashboard.feedback.index') }}" 
                    class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 flex items-center">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>

@@ -28,10 +28,11 @@ Route::middleware('auth')->group(function () {
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Routes accessibles uniquement aux gestionnaires et admins authentifiés
-Route::middleware(['auth', 'role:admin,gestionnaire', \App\Http\Middleware\CheckPasswordExpiry::class])->group(function () {
+Route::middleware(['auth', 'role:admin,gestionnaire', \App\Http\Middleware\CheckPasswordExpiry::class])->prefix('gestionnaires')->name('gestionnaires.')->group(function () {
     // Dashboard principal
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
+    // Chat/Discussion de sinistre
     Route::get('/sinistres/{sinistre}/chat', [ChatController::class, 'index'])->name('chat.index');
     Route::post('/sinistres/{sinistre}/chat', [ChatController::class, 'store'])->name('chat.store');
     Route::get('/sinistres/{sinistre}/chat/fetch', [ChatController::class, 'fetch'])->name('chat.fetch');
@@ -86,19 +87,40 @@ Route::middleware(['auth', 'role:admin,gestionnaire', \App\Http\Middleware\Check
         });
     });
 
-    Route::get('/storage/sinistres/{sinistreId}/{filename}', function ($sinistreId, $filename) {
-        $path = "sinistres/{$sinistreId}/{$filename}";
-
-        if (!Storage::disk('public')->exists($path)) {
-            abort(404);
-        }
-
-        return response()->file(storage_path("app/public/{$path}"));
-    })->where('filename', '.*')->name('sinistre.document');
 });
+
+// Route d'accès aux fichiers de storage (en dehors du groupe gestionnaires)
+Route::get('/storage/sinistres/{sinistreId}/{filename}', function ($sinistreId, $filename) {
+    $path = "sinistres/{$sinistreId}/{$filename}";
+
+    if (!Storage::disk('public')->exists($path)) {
+        abort(404);
+    }
+
+    return response()->file(storage_path("app/public/{$path}"));
+})->where('filename', '.*')->name('sinistre.document');
 
 Route::middleware(['auth', 'role:admin,gestionnaire'])->group(function () {
     // Notifications non lues
     Route::get('/notifications/unread-messages', [NotificationController::class, 'unreadMessages']);
     Route::get('/notifications/unread-messages/count', [NotificationController::class, 'unreadMessagesCount']);
 });
+
+// Route de debug pour vérifier les données de sinistre
+Route::get('/debug/sinistre/{id}', function ($id) {
+    $sinistre = \App\Models\Sinistre::find($id);
+    if (!$sinistre) {
+        return response()->json(['error' => 'Sinistre non trouvé'], 404);
+    }
+    
+    return response()->json([
+        'sinistre_id' => $sinistre->id,
+        'numero_sinistre' => $sinistre->numero_sinistre,
+        'telephone_assure' => $sinistre->telephone_assure,
+        'telephone_assure_length' => strlen($sinistre->telephone_assure ?? ''),
+        'telephone_assure_is_empty' => empty($sinistre->telephone_assure),
+        'telephone_assure_is_null' => is_null($sinistre->telephone_assure),
+        'telephone_assure_trimmed' => trim($sinistre->telephone_assure ?? ''),
+        'all_attributes' => $sinistre->toArray()
+    ]);
+})->name('debug.sinistre');

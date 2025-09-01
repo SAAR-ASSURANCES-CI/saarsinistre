@@ -94,7 +94,7 @@ class UserController extends Controller
 
         SendUserCredentialsEmail::dispatch($user, $motDePasseTemporaire);
 
-        return redirect()->route('dashboard.users.index')->with('success', 'Utilisateur créé avec succès. Les informations de connexion ont été envoyées par email.');
+        return redirect()->route('gestionnaires.dashboard.users.index')->with('success', 'Utilisateur créé avec succès. Les informations de connexion ont été envoyées par email.');
     }
 
     /**
@@ -127,7 +127,7 @@ class UserController extends Controller
     public function destroy(User $user): RedirectResponse
     {
         $user->delete();
-        return redirect()->route('dashboard.users.index')->with('success', 'Utilisateur supprimé avec succès');
+        return redirect()->route('gestionnaires.dashboard.users.index')->with('success', 'Utilisateur supprimé avec succès');
     }
 
     public function toggleStatus(User $user): RedirectResponse

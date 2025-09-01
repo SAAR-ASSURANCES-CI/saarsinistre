@@ -127,7 +127,7 @@ class SinistresManager {
                             </svg>
                         </button>
 
-                        <a href="/dashboard/sinistres/${sinistre.id}/fiche" target="_blank"
+                        <a href="/gestionnaires/dashboard/sinistres/${sinistre.id}/fiche" target="_blank"
                            class="text-red-600 hover:text-red-800 transition-colors"
                            title="Télécharger la fiche sinistre">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,7 +137,7 @@ class SinistresManager {
                     </div>
                 </td>
                 <td class="px-6 py-4 text-center">
-                    <a href="/sinistres/${sinistre.id}/chat" class="inline-block text-saar-blue hover:text-saar-red transition-transform duration-200 rounded-full p-2 shadow-sm hover:scale-110 focus:outline-none focus:ring-2 focus:ring-saar-red animate-bounce-in" title="Ouvrir la discussion">
+                    <a href="/gestionnaires/sinistres/${sinistre.id}/chat" class="inline-block text-saar-blue hover:text-saar-red transition-transform duration-200 rounded-full p-2 shadow-sm hover:scale-110 focus:outline-none focus:ring-2 focus:ring-saar-red animate-bounce-in" title="Ouvrir la discussion">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m-2 8a9 9 0 100-18 9 9 0 000 18z" />
                         </svg>

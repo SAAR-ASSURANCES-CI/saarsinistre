@@ -259,14 +259,14 @@ class ModalsManager {
     getDocumentActionButton(doc) {
         if (doc.type_mime && doc.type_mime.includes('image/')) {
             return `
-                <button onclick="Modals.showImagePreview('${doc.chemin_fichier}', '${doc.libelle_document || 'Image'}')"
+                <button onclick="Modals.showImagePreview('${doc.url || doc.chemin_fichier}', '${doc.libelle_document || 'Image'}')"
                     class="text-saar-blue hover:text-blue-700 cursor-pointer">
                     Prévisualiser
                 </button>
             `;
         }
         return `
-            <a href="/storage/${doc.chemin_fichier}" target="_blank" download
+            <a href="${doc.url || '/storage/' + doc.chemin_fichier}" target="_blank" download
                class="text-saar-blue hover:text-blue-700">
                 Télécharger
             </a>
@@ -288,14 +288,14 @@ class ModalsManager {
                     </button>
                 </div>
                 <div class="flex-1 overflow-auto p-4 flex items-center justify-center">
-                    <img src="/storage/${imagePath}" alt="${title}" class="max-w-full max-h-[70vh] object-contain">
+                    <img src="${imagePath.startsWith('http') || imagePath.startsWith('/') ? imagePath : '/storage/' + imagePath}" alt="${title}" class="max-w-full max-h-[70vh] object-contain">
                 </div>
                 <div class="p-4 border-t flex justify-end gap-3">
                     <button onclick="this.parentElement.parentElement.parentElement.remove()"
                             class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
                         Fermer
                     </button>
-                    <a href="/storage/${imagePath}" download 
+                    <a href="${imagePath.startsWith('http') || imagePath.startsWith('/') ? imagePath : '/storage/' + imagePath}" download 
                        class="px-4 py-2 bg-saar-blue text-white rounded-lg hover:bg-blue-700">
                         Télécharger
                     </a>

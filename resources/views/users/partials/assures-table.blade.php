@@ -71,7 +71,7 @@
                             </svg>
                         </button>
                        
-                        <form action="{{ route('dashboard.users.destroy', $user->id) }}" method="POST" class="inline">
+                        <form action="{{ route('gestionnaires.dashboard.users.destroy', $user->id) }}" method="POST" class="inline">
                             @csrf
                             @method('DELETE')
                             <button type="submit"

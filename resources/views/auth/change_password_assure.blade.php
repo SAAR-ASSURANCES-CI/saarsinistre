@@ -70,7 +70,7 @@
             @endif
 
             <!-- Formulaire de changement de mot de passe -->
-            <form class="mt-8 space-y-6" action="{{ route('assure.password.change.post') }}" method="POST">
+            <form class="mt-8 space-y-6" action="{{ route('assures.password.change.post') }}" method="POST">
                 @csrf
                 <div class="space-y-4">
                     <div>
