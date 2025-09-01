@@ -50,4 +50,9 @@ Route::prefix('declaration')->name('declaration.')->group(function () {
     Route::get('/confirmation/{sinistre}', [DeclarationController::class, 'confirmation'])->name('confirmation');
     Route::get('/statut/{numeroSinistre}', [DeclarationController::class, 'statut'])->name('statut');
     Route::get('/{sinistre}/recu', [DeclarationController::class, 'downloadRecu'])->name('recu');
+    
+    // Routes pour upload progressif
+    Route::post('/upload-file', [App\Http\Controllers\FileUploadController::class, 'uploadFile'])->name('upload.file');
+    Route::delete('/delete-file', [App\Http\Controllers\FileUploadController::class, 'deleteFile'])->name('delete.file');
+    Route::post('/cleanup-session', [App\Http\Controllers\FileUploadController::class, 'cleanupSession'])->name('cleanup.session');
 }); 
