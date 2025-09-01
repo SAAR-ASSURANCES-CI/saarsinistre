@@ -36,7 +36,7 @@ class SendSinistreNotificationEmail implements ShouldQueue
         try {
             $dataEmail = [
                 'sinistre' => $this->sinistre,
-                'url_sinistre' => route('dashboard'),
+                'url_sinistre' => route('gestionnaires.dashboard'),
                 'company' => [
                     'name' => 'SAAR ASSURANCE',
                     'phone' => '+225 20 30 30 30',

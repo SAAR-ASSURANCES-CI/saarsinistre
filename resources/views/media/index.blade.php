@@ -85,7 +85,7 @@
                                 
                                 let taille = doc.taille_formatee ? `(${doc.taille_formatee})` : '';
                                 
-                                let url = doc.chemin_fichier && doc.chemin_fichier.startsWith('http') ? doc.chemin_fichier : ('/storage/' + (doc.chemin_fichier ?? ''));
+                                let url = doc.url || (doc.chemin_fichier && doc.chemin_fichier.startsWith('http') ? doc.chemin_fichier : ('/storage/' + (doc.chemin_fichier ?? '')));
                                 // Extension
                                 let ext = '';
                                 if (doc.nom_fichier && doc.nom_fichier.includes('.')) {

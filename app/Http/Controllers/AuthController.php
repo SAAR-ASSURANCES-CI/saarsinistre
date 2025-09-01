@@ -64,7 +64,7 @@ class AuthController extends Controller
                     ->with('info', 'Veuillez changer votre mot de passe temporaire.');
             }
             
-            return redirect()->route('dashboard');
+            return redirect()->route('gestionnaires.dashboard');
         }
         return back()->withErrors([
             'email' => 'Les identifiants fournis ne correspondent pas à nos enregistrements.',
@@ -142,7 +142,7 @@ class AuthController extends Controller
     private function handleSuccessfulLogin(User $user)
     {
         if ($user->password_expire_at && $user->password_expire_at->isFuture()) {
-            return redirect()->route('assure.password.change')
+            return redirect()->route('assures.password.change')
                 ->with('info', 'Veuillez changer votre mot de passe temporaire.');
         }
 
@@ -235,7 +235,7 @@ class AuthController extends Controller
         $user->password_temp = null;
         $user->save();
 
-        return redirect()->route('dashboard')->with('success', 'Votre mot de passe a été changé avec succès.');
+        return redirect()->route('gestionnaires.dashboard')->with('success', 'Votre mot de passe a été changé avec succès.');
     }
 
     /**

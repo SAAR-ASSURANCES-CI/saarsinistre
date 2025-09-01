@@ -36,18 +36,18 @@ class DashboardAPI {
 
     async getSinistres(params = {}) {
         const query = new URLSearchParams(params).toString();
-        return this.request(`${this.API_BASE}/dashboard/sinistres?${query}`);
+        return this.request(`${this.API_BASE}/gestionnaires/dashboard/sinistres?${query}`);
     }
 
     async getSinistreDetails(id) {
         return this.request(
-            `${this.API_BASE}/dashboard/sinistres/${id}/details`
+            `${this.API_BASE}/gestionnaires/dashboard/sinistres/${id}/details`
         );
     }
 
     async assignGestionnaire(sinistreId, gestionnaireId) {
         return this.request(
-            `${this.API_BASE}/dashboard/sinistres/${sinistreId}/assign`,
+            `${this.API_BASE}/gestionnaires/dashboard/sinistres/${sinistreId}/assign`,
             {
                 method: "POST",
                 body: JSON.stringify({ gestionnaire_id: gestionnaireId }),
@@ -57,7 +57,7 @@ class DashboardAPI {
 
     async updateStatus(sinistreId, status, comment = "") {
         return this.request(
-            `${this.API_BASE}/dashboard/sinistres/${sinistreId}/status`,
+            `${this.API_BASE}/gestionnaires/dashboard/sinistres/${sinistreId}/status`,
             {
                 method: "POST",
                 body: JSON.stringify({ statut: status, commentaire: comment }),
@@ -66,12 +66,12 @@ class DashboardAPI {
     }
 
     async getNotifications() {
-        return this.request(`${this.API_BASE}/dashboard/notifications`);
+        return this.request(`${this.API_BASE}/gestionnaires/dashboard/notifications`);
     }
 
     async markNotificationsAsRead() {
         return this.request(
-            `${this.API_BASE}/dashboard/notifications/mark-read`,
+            `${this.API_BASE}/gestionnaires/dashboard/notifications/mark-read`,
             {
                 method: "POST",
             }
@@ -79,7 +79,7 @@ class DashboardAPI {
     }
 
     async getStats() {
-        return this.request(`${this.API_BASE}/dashboard/stats`);
+        return this.request(`${this.API_BASE}/gestionnaires/dashboard/stats`);
     }
 }
 

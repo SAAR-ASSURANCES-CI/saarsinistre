@@ -23,7 +23,7 @@ class UserCreationTest extends TestCase
             'role' => 'gestionnaire',
         ];
 
-        $response = $this->post(route('dashboard.users.store'), $userData);
+        $response = $this->post(route('gestionnaires.dashboard.users.store'), $userData);
 
         // Vérifier que l'utilisateur a été créé
         $this->assertDatabaseHas('users', [
@@ -44,7 +44,7 @@ class UserCreationTest extends TestCase
             return $job->user->id === $user->id;
         });
 
-        $response->assertRedirect(route('dashboard.users.index'));
+        $response->assertRedirect(route('gestionnaires.dashboard.users.index'));
         $response->assertSessionHas('success');
     }
 

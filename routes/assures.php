@@ -24,21 +24,22 @@ Route::middleware(['guest'])->group(function () {
 Route::post('/assure/logout', [AuthController::class, 'logoutAssure'])->name('logout.assure');
 
 // Routes accessibles uniquement aux assurés authentifiés
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth'])->prefix('assures')->name('assures.')->group(function () {
     // Dashboard assuré
-    Route::get('/assures/dashboard', [DasboardAssureController::class, 'index'])->name('assures.dashboard');
+    Route::get('/dashboard', [DasboardAssureController::class, 'index'])->name('dashboard');
 
     // Changement de mot de passe pour assuré
-    Route::get('/assure/password/change', [AuthController::class, 'showChangePasswordFormAssure'])->name('assure.password.change');
-    Route::post('/assure/password/change', [AuthController::class, 'changePasswordAssure'])->name('assure.password.change.post');
+    Route::get('/password/change', [AuthController::class, 'showChangePasswordFormAssure'])->name('password.change');
+    Route::post('/password/change', [AuthController::class, 'changePasswordAssure'])->name('password.change.post');
 
+    // Chat/Discussion de sinistre
     Route::get('/sinistres/{sinistre}/chat', [ChatController::class, 'index'])->name('chat.index');
     Route::post('/sinistres/{sinistre}/chat', [ChatController::class, 'store'])->name('chat.store');
     Route::get('/sinistres/{sinistre}/chat/fetch', [ChatController::class, 'fetch'])->name('chat.fetch');
     
     // Feedback
-    Route::get('/sinistres/{sinistre}/feedback', [FeedbackController::class, 'showForm'])->name('assures.feedback.form');
-    Route::post('/sinistres/{sinistre}/feedback', [FeedbackController::class, 'store'])->name('assures.feedback.store');
+    Route::get('/sinistres/{sinistre}/feedback', [FeedbackController::class, 'showForm'])->name('feedback.form');
+    Route::post('/sinistres/{sinistre}/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
     
 });
 

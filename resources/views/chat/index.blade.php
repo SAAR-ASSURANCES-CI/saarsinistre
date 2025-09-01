@@ -210,10 +210,15 @@
         const selectedFiles = document.getElementById('selected-files');
         const loadMoreBtn = document.getElementById('load-more-btn');
         const paginationInfo = document.getElementById('pagination-info');
-        // URLs pour le chat - utiliser les routes unifiées
+        // URLs pour le chat - utiliser les routes selon le type d'utilisateur
         const chatUrls = {
-            fetch: `{{ route('chat.fetch', $sinistre->id) }}`,
-            store: `{{ route('chat.store', $sinistre->id) }}`
+            @if(auth()->user()->role === 'assure')
+            fetch: `{{ route('assures.chat.fetch', $sinistre->id) }}`,
+            store: `{{ route('assures.chat.store', $sinistre->id) }}`
+            @else
+            fetch: `{{ route('gestionnaires.chat.fetch', $sinistre->id) }}`,
+            store: `{{ route('gestionnaires.chat.store', $sinistre->id) }}`
+            @endif
         };
 
         let isLoading = false;
