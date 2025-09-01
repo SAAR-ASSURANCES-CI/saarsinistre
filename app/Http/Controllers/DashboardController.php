@@ -7,6 +7,7 @@ use App\Models\Feedback;
 use App\Models\Sinistre;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Jobs\SendSinistreStatusUpdateSms;
 
 class DashboardController extends Controller
 {
@@ -152,9 +153,8 @@ class DashboardController extends Controller
             $sinistre->reglerSinistre($request->montant_regle);
         }
 
-        // Envoyer un SMS à l'assuré si le statut a changé
         if ($ancienStatut !== $request->statut) {
-            \App\Jobs\SendSinistreStatusUpdateSms::dispatch($sinistre, $ancienStatut)
+            SendSinistreStatusUpdateSms::dispatch($sinistre, $ancienStatut)
                 ->delay(now()->addSeconds(10));
         }
 
@@ -244,8 +244,6 @@ class DashboardController extends Controller
 
     public function markNotificationsAsRead(Request $request)
     {
-        //TODO: mark notifications as read
-
         return response()->json([
             'success' => true,
             'message' => 'Notifications marquées comme lues'

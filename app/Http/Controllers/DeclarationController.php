@@ -9,6 +9,7 @@ use App\Models\Tiers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use App\Services\NotificationService;
 use App\Services\AssureAccountService;
 use App\Services\OrangeService;
@@ -87,13 +88,17 @@ class DeclarationController extends Controller
             $sinistre = $this->createSinistre($data + ['assure_id' => $user->id]);
             $sinistre->refresh();
 
-            $this->documentService->handleDocuments($request, $sinistre);
+            // Traiter les fichiers uploadés progressivement ou classiquement
+            $this->handleUploadedFiles($request, $sinistre);
 
             if (!empty($data['implique_tiers']) && !empty($data['tiers'])) {
                 $this->handleTiers($request, $sinistre, $data['tiers']);
             }
             
             $this->notificationService->triggerSinistreNotifications($sinistre);
+
+            // Nettoyer les fichiers temporaires si ils existent
+            $this->cleanupTempFiles($request);
 
             DB::commit();
 
@@ -260,5 +265,139 @@ class DeclarationController extends Controller
                 'derniere_maj' => $sinistre->updated_at->format('d/m/Y H:i')
             ]
         ]);
+    }
+
+    /**
+     * Traiter les fichiers uploadés (progressif ou classique)
+     */
+    protected function handleUploadedFiles($request, Sinistre $sinistre): void
+    {
+
+        if ($request->has('uploaded_files')) {
+            $this->handleProgressiveUpload($request, $sinistre);
+        } else {
+
+            $this->documentService->handleDocuments($request, $sinistre);
+        }
+    }
+
+    /**
+     * Traiter les fichiers uploadés progressivement
+     */
+    protected function handleProgressiveUpload($request, Sinistre $sinistre): void
+    {
+        $uploadedFiles = json_decode($request->input('uploaded_files'), true);
+        
+        if (!$uploadedFiles) {
+            return;
+        }
+
+        foreach ($uploadedFiles as $fileInfo) {
+            if (!isset($fileInfo['stored_path']) || !isset($fileInfo['type'])) {
+                continue;
+            }
+
+            $tempPath = $fileInfo['stored_path'];
+            
+            if (!Storage::disk('public')->exists($tempPath)) {
+                Log::warning("Fichier temporaire introuvable: {$tempPath}");
+                continue;
+            }
+
+            
+            $finalPath = $this->moveToFinalLocation($tempPath, $sinistre, $fileInfo['type']);
+            
+            if ($finalPath) {
+                
+                $this->createDocumentRecord($sinistre, $fileInfo, $finalPath);
+            }
+        }
+    }
+
+    /**
+     * Déplacer un fichier temporaire vers son emplacement final
+     */
+    protected function moveToFinalLocation(string $tempPath, Sinistre $sinistre, string $type): ?string
+    {
+        try {
+            $filename = basename($tempPath);
+            $finalDirectory = "sinistres/{$sinistre->id}";
+            $finalPath = "{$finalDirectory}/{$filename}";
+
+            
+            if (!Storage::disk('public')->exists($finalDirectory)) {
+                Storage::disk('public')->makeDirectory($finalDirectory);
+            }
+
+            
+            if (Storage::disk('public')->move($tempPath, $finalPath)) {
+                return $finalPath;
+            }
+        } catch (Exception $e) {
+            Log::error("Erreur déplacement fichier {$tempPath}: " . $e->getMessage());
+        }
+
+        return null;
+    }
+
+    /**
+     * Create the document record in the database
+     */
+    protected function createDocumentRecord(Sinistre $sinistre, array $fileInfo, string $finalPath): void
+    {
+        try {
+            $sinistre->documents()->create([
+                'type_document' => $fileInfo['type'],
+                'libelle_document' => $this->getDocumentLabel($fileInfo['type']),
+                'nom_fichier' => $fileInfo['original_name'] ?? basename($finalPath),
+                'nom_fichier_stocke' => basename($finalPath),
+                'chemin_fichier' => $finalPath,
+                'type_mime' => $fileInfo['mime_type'] ?? 'application/octet-stream',
+                'taille_fichier' => $fileInfo['size'] ?? 0,
+            ]);
+        } catch (Exception $e) {
+            Log::error("Erreur création document pour {$fileInfo['type']}: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get the label of a document type
+     */
+    protected function getDocumentLabel(string $type): string
+    {
+        $labels = [
+            'carte_grise_recto' => 'Carte grise (Recto)',
+            'carte_grise_verso' => 'Carte grise (Verso)',
+            'visite_technique_recto' => 'Visite technique (Recto)',
+            'visite_technique_verso' => 'Visite technique (Verso)',
+            'attestation_assurance' => 'Attestation d\'assurance',
+            'permis_conduire' => 'Permis de conduire',
+            'photo_vehicule' => 'Photo véhicule',
+            'tiers_photo' => 'Photo tiers',
+            'tiers_attestation' => 'Attestation tiers'
+        ];
+
+        return $labels[$type] ?? 'Document';
+    }
+
+    /**
+     * Nettoyer les fichiers temporaires après traitement
+     */
+    protected function cleanupTempFiles($request): void
+    {
+        try {
+            $sessionId = $request->input('session_id');
+            
+            if ($sessionId) {
+                $tempPath = "temp_uploads/{$sessionId}";
+                
+                if (Storage::disk('public')->exists($tempPath)) {
+                    Storage::disk('public')->deleteDirectory($tempPath);
+                    Log::info("Fichiers temporaires nettoyés pour session: {$sessionId}");
+                }
+            }
+        } catch (Exception $e) {
+            Log::warning("Erreur nettoyage fichiers temporaires: " . $e->getMessage());
+        }
     }
 }

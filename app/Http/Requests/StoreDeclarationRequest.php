@@ -15,12 +15,27 @@ class StoreDeclarationRequest extends FormRequest
     }
 
     /**
+     * Détermine si la requête provient d'un appareil mobile
+     */
+    protected function isMobileDevice(): bool
+    {
+        $userAgent = $this->server('HTTP_USER_AGENT', '');
+        return preg_match('/Mobile|Android|iPhone|iPad|iPod|BlackBerry|Windows Phone/i', $userAgent);
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
+        // Définir les limites de taille selon le type d'appareil
+        $isMobile = $this->isMobileDevice();
+        $maxFileSize = $isMobile ? 10240 : 5120; // 10MB mobile, 5MB desktop
+        $maxPhotoSize = $isMobile ? 8192 : 1280; // 8MB mobile, 1.28MB desktop
+        $supportedMimes = $isMobile ? 'pdf,jpg,jpeg,png,heic,webp' : 'pdf,jpg,jpeg,png';
+        
         return [
             'nom_assure' => 'required|string|max:255',
             'email_assure' => 'nullable|email|max:255',
@@ -54,19 +69,19 @@ class StoreDeclarationRequest extends FormRequest
             'commissariat' => 'nullable|required_if:constat_autorite,true|string|max:255',
             'dommages_releves' => 'nullable|string|max:1000',
 
-            'carte_grise_recto' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'carte_grise_verso' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'visite_technique_recto' => 'required|file|mimes:pdf,jpg,jpeg,png|max:1280',
-            'visite_technique_verso' => 'required|file|mimes:pdf,jpg,jpeg,png|max:1280',
-            'attestation_assurance' => 'required|file|mimes:pdf,jpg,jpeg,png|max:1280',
-            'permis_conduire' => 'required|file|mimes:pdf,jpg,jpeg,png|max:1280',
+            'carte_grise_recto' => "required|file|mimes:{$supportedMimes}|max:{$maxFileSize}",
+            'carte_grise_verso' => "required|file|mimes:{$supportedMimes}|max:{$maxFileSize}",
+            'visite_technique_recto' => "required|file|mimes:{$supportedMimes}|max:{$maxPhotoSize}",
+            'visite_technique_verso' => "required|file|mimes:{$supportedMimes}|max:{$maxPhotoSize}",
+            'attestation_assurance' => "required|file|mimes:{$supportedMimes}|max:{$maxPhotoSize}",
+            'permis_conduire' => "required|file|mimes:{$supportedMimes}|max:{$maxPhotoSize}",
             
             'tiers_photos_*' => 'nullable|array',
-            'tiers_photos_*.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'tiers_attestation_*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'tiers_photos_*.*' => "nullable|file|mimes:{$supportedMimes}|max:{$maxFileSize}",
+            'tiers_attestation_*' => "nullable|file|mimes:{$supportedMimes}|max:{$maxFileSize}",
 
             'photos_vehicule' => 'nullable|array|max:100',
-            'photos_vehicule.*' => 'file|mimes:jpg,jpeg,png|max:1280',
+            'photos_vehicule.*' => "file|mimes:jpg,jpeg,png,heic,webp|max:{$maxPhotoSize}",
         ];
     }
 
@@ -104,8 +119,8 @@ class StoreDeclarationRequest extends FormRequest
             'visite_technique_verso.required' => 'La visite technique (verso) est obligatoire.',
             'attestation_assurance.required' => 'L\'attestation d\'assurance est obligatoire.',
             'permis_conduire.required' => 'Le permis de conduire est obligatoire.',
-            '*.mimes' => 'Format de fichier non autorisé. Utilisez PDF, JPG, JPEG ou PNG.',
-            '*.max' => 'La taille du fichier ne doit pas dépasser 5MB.',
+            '*.mimes' => 'Format de fichier non autorisé. Utilisez PDF, JPG, JPEG, PNG' . ($this->isMobileDevice() ? ', HEIC ou WEBP.' : '.'),
+            '*.max' => 'La taille du fichier ne doit pas dépasser ' . ($this->isMobileDevice() ? '10MB.' : '5MB.'),
             'photos_vehicule.max' => 'Vous ne pouvez télécharger que 100 photos maximum.',
         ];
     }
