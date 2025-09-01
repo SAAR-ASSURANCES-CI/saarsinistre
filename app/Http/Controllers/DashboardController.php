@@ -152,8 +152,11 @@ class DashboardController extends Controller
             $sinistre->reglerSinistre($request->montant_regle);
         }
 
-        //TODO: send sms after status (en cours) change
-        //TODOD: save history of status change
+        // Envoyer un SMS à l'assuré si le statut a changé
+        if ($ancienStatut !== $request->statut) {
+            \App\Jobs\SendSinistreStatusUpdateSms::dispatch($sinistre, $ancienStatut)
+                ->delay(now()->addSeconds(10));
+        }
 
         return response()->json([
             'success' => true,

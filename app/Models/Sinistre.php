@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Eloquent\Model;
+use App\Jobs\SendGestionnaireAssignmentSms;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Sinistre extends Model
 {
@@ -184,6 +185,8 @@ class Sinistre extends Model
      */
     public function assignerGestionnaire($gestionnaireId): void
     {
+        $ancienGestionnaireId = $this->gestionnaire_id;
+        
         $attributes = [
             'gestionnaire_id' => $gestionnaireId,
             'date_affectation' => now(),
@@ -196,6 +199,11 @@ class Sinistre extends Model
         }
 
         $this->update($attributes);
+
+        if ($gestionnaireId && $gestionnaireId !== $ancienGestionnaireId) {
+            SendGestionnaireAssignmentSms::dispatch($this)
+                ->delay(now()->addSeconds(5));
+        }
     }
 
     /**
