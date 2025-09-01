@@ -21,6 +21,10 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware(['auth', 'role:admin,gestionnaire'])->group(function () {
     // Dashboard principal
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
+    Route::get('/sinistres/{sinistre}/chat', [ChatController::class, 'index'])->name('chat.index');
+    Route::post('/sinistres/{sinistre}/chat', [ChatController::class, 'store'])->name('chat.store');
+    Route::get('/sinistres/{sinistre}/chat/fetch', [ChatController::class, 'fetch'])->name('chat.fetch');
 
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         // Sinistres
