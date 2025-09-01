@@ -27,31 +27,23 @@
                 <div>
                     <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Rôle</label>
                     <select name="role" id="role" required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-saar-blue focus:border-transparent"
-                        onchange="toggleAssureField()">
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-saar-blue focus:border-transparent">
                         <option value="">Sélectionner un rôle</option>
                         <option value="admin">Administrateur</option>
                         <option value="gestionnaire">Gestionnaire</option>
-                        <option value="assure">Assuré</option>
                     </select>
                 </div>
-                <div id="numero-assure-container" class="hidden">
-                    <label for="numero_assure" class="block text-sm font-medium text-gray-700 mb-1">Numéro
-                        d'assuré</label>
-                    <input type="text" name="numero_assure" id="numero_assure"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-saar-blue focus:border-transparent">
-                </div>
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Mot de
-                        passe</label>
-                    <input type="password" name="password" id="password" required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-saar-blue focus:border-transparent">
-                </div>
-                <div>
-                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirmer le
-                        mot de passe</label>
-                    <input type="password" name="password_confirmation" id="password_confirmation" required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-saar-blue focus:border-transparent">
+                <div class="md:col-span-2">
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div class="text-sm text-blue-800">
+                                <strong>Information :</strong> Un mot de passe temporaire sera généré automatiquement et envoyé par email à l'utilisateur.
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="flex justify-end space-x-3">

@@ -22,33 +22,6 @@ class UserSeeder extends Seeder
             'actif' => true,
         ]);
 
-        User::firstOrCreate([
-            'email' => 'AKOMPISSI@saar-assurances.com'
-        ], [
-            'nom_complet' => 'Awouatsa Kompissi',
-            'password' => Hash::make('password'),
-            'role' => 'gestionnaire',
-            'actif' => true,
-        ]);
-
-        User::firstOrCreate([
-            'email' => 'karimkompissi@gmail.com'
-        ], [
-            'nom_complet' => 'Karim kompissi',
-            'password' => Hash::make('password'),
-            'role' => 'gestionnaire',
-            'actif' => true,
-        ]);
-
-        User::firstOrCreate([
-            'email' => 'k.kompissi@saarvie.ci'
-        ], [
-            'nom_complet' => 'Gestionnaire Principal',
-            'password' => Hash::make('password'),
-            'role' => 'gestionnaire',
-            'actif' => true,
-        ]);
-
         $this->command->info('Utilisateurs de test créés avec succès !');
     }
 }

@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
+use App\Jobs\SendUserCredentialsEmail;
 
 class UserController extends Controller
 {
@@ -76,21 +77,32 @@ class UserController extends Controller
         $request->validate([
             'nom_complet' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'role' => 'required|in:admin,gestionnaire,assure',
-            'numero_assure' => 'nullable|string|max:50|unique:users',
-            'password' => ['required', Rules\Password::defaults()],
+            'role' => 'required|in:admin,gestionnaire',
         ]);
 
-        User::create([
+        $motDePasseTemporaire = $this->generateTemporaryPassword();
+        
+        $user = User::create([
             'nom_complet' => $request->input('nom_complet'),
             'email' => $request->input('email'),
             'role' => $request->input('role'),
-            'numero_assure' => $request->input('numero_assure'),
-            'password' => Hash::make($request->input('password')),
+            'password' => Hash::make($motDePasseTemporaire),
+            'password_temp' => $motDePasseTemporaire,
+            'password_expire_at' => now()->addHours(48),
             'actif' => true,
         ]);
 
-        return redirect()->route('dashboard.users.index')->with('success', 'Utilisateur créé avec succès');
+        SendUserCredentialsEmail::dispatch($user, $motDePasseTemporaire);
+
+        return redirect()->route('dashboard.users.index')->with('success', 'Utilisateur créé avec succès. Les informations de connexion ont été envoyées par email.');
+    }
+
+    /**
+     * Génère un mot de passe temporaire
+     */
+    private function generateTemporaryPassword(): string
+    {
+        return str_pad(rand(100000, 999999), 6, '0', STR_PAD_LEFT);
     }
 
     public function update(Request $request, User $user)

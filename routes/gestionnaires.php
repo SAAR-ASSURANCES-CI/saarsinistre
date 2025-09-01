@@ -15,10 +15,20 @@ use Illuminate\Support\Facades\Storage;
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
+// Réinitialisation de mot de passe
+Route::get('/password/forgot', [AuthController::class, 'showForgotPasswordForm'])->name('password.forgot');
+Route::post('/password/reset', [AuthController::class, 'sendResetLink'])->name('password.reset.send');
+
+// Changement de mot de passe (pour utilisateurs connectés)
+Route::middleware('auth')->group(function () {
+    Route::get('/password/change', [AuthController::class, 'showChangePasswordForm'])->name('gestionnaire.password.change');
+    Route::post('/password/change', [AuthController::class, 'changePassword'])->name('gestionnaire.password.change.post');
+});
+
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Routes accessibles uniquement aux gestionnaires et admins authentifiés
-Route::middleware(['auth', 'role:admin,gestionnaire'])->group(function () {
+Route::middleware(['auth', 'role:admin,gestionnaire', \App\Http\Middleware\CheckPasswordExpiry::class])->group(function () {
     // Dashboard principal
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
