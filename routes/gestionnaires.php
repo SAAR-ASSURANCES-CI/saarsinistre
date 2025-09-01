@@ -105,3 +105,22 @@ Route::middleware(['auth', 'role:admin,gestionnaire'])->group(function () {
     Route::get('/notifications/unread-messages', [NotificationController::class, 'unreadMessages']);
     Route::get('/notifications/unread-messages/count', [NotificationController::class, 'unreadMessagesCount']);
 });
+
+// Route de debug pour vérifier les données de sinistre
+Route::get('/debug/sinistre/{id}', function ($id) {
+    $sinistre = \App\Models\Sinistre::find($id);
+    if (!$sinistre) {
+        return response()->json(['error' => 'Sinistre non trouvé'], 404);
+    }
+    
+    return response()->json([
+        'sinistre_id' => $sinistre->id,
+        'numero_sinistre' => $sinistre->numero_sinistre,
+        'telephone_assure' => $sinistre->telephone_assure,
+        'telephone_assure_length' => strlen($sinistre->telephone_assure ?? ''),
+        'telephone_assure_is_empty' => empty($sinistre->telephone_assure),
+        'telephone_assure_is_null' => is_null($sinistre->telephone_assure),
+        'telephone_assure_trimmed' => trim($sinistre->telephone_assure ?? ''),
+        'all_attributes' => $sinistre->toArray()
+    ]);
+})->name('debug.sinistre');

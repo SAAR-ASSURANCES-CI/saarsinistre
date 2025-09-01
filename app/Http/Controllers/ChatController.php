@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\SendChatMessageNotificationEmail;
+use App\Jobs\SendChatMessageNotificationSms;
 use App\Models\Message;
 use App\Models\MessageAttachment;
 use App\Models\Sinistre;
@@ -129,12 +130,19 @@ class ChatController extends Controller
             $q->select('id', 'nom_complet');
         }, 'attachments']);
 
-        // Envoyer une notification par email si c'est l'assuré qui envoie
         if ($user->id === $sinistre->assure_id && $sinistre->gestionnaire_id) {
+           
             $gestionnaire = User::find($sinistre->gestionnaire_id);
             if ($gestionnaire && $gestionnaire->email) {
                 SendChatMessageNotificationEmail::dispatch($message, $gestionnaire)
                     ->delay(now()->addSeconds(5));
+            }
+        } elseif ($user->id === $sinistre->gestionnaire_id && $sinistre->assure_id) {
+            
+            $assure = User::find($sinistre->assure_id);
+            if ($assure) {
+                SendChatMessageNotificationSms::dispatch($message, $assure)
+                    ->delay(now()->addSeconds(10));
             }
         }
 
