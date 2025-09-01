@@ -60,7 +60,6 @@ class SendUserCredentialsEmail implements ShouldQueue
                 'error' => $e->getMessage()
             ]);
 
-            // Relancer le job en cas d'échec
             throw $e;
         }
     }

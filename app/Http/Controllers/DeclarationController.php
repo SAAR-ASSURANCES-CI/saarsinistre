@@ -48,24 +48,40 @@ class DeclarationController extends Controller
             $data = $request->validated();
             
             $user = null;
+            
             if (!empty($data['email_assure'])) {
-                $user = User::where('email', $data['email_assure'])->first();
+                $user = User::where('email', $data['email_assure'])
+                           ->where('role', 'assure')
+                           ->first();
             }
+        
             if (!$user && !empty($data['telephone_assure'])) {
-                $sinistre = Sinistre::where('telephone_assure', $data['telephone_assure'])->first();
-                if ($sinistre && $sinistre->assure_id) {
-                    $user = User::find($sinistre->assure_id);
+                $sinistreExistant = Sinistre::where('telephone_assure', $data['telephone_assure'])
+                                          ->where('nom_assure', $data['nom_assure'])
+                                          ->whereNotNull('assure_id')
+                                          ->first();
+                
+                if ($sinistreExistant && $sinistreExistant->assure_id) {
+                    $user = User::find($sinistreExistant->assure_id);
                 }
-            }
-            if (!$user) {
-               
-                $username = (new AssureAccountService)->generateUniqueUsername($data['nom_assure']);
-                $user = User::where('username', $username)->first();
             }
 
             if (!$user) {
-                
                 $user = $this->accountService->createAssureAccount($data, app(OrangeService::class));
+                
+                Log::info('Nouveau compte assuré créé', [
+                    'user_id' => $user->id,
+                    'nom_assure' => $data['nom_assure'],
+                    'email_assure' => $data['email_assure'] ?? 'non fourni',
+                    'telephone_assure' => $data['telephone_assure'] ?? 'non fourni'
+                ]);
+            } else {
+                Log::info('Compte assuré existant utilisé', [
+                    'user_id' => $user->id,
+                    'nom_assure' => $data['nom_assure'],
+                    'email_assure' => $data['email_assure'] ?? 'non fourni',
+                    'telephone_assure' => $data['telephone_assure'] ?? 'non fourni'
+                ]);
             }
             
             $sinistre = $this->createSinistre($data + ['assure_id' => $user->id]);
