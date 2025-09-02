@@ -71,15 +71,28 @@ class AssureAccountService
      */
     public function generateUniqueUsername(string $nomComplet): string
     {
-        $nomComplet = mb_strtolower($nomComplet, 'UTF-8');
-        
-        $base = strtolower(preg_replace('/[^a-z0-9]/', '', iconv('UTF-8', 'ASCII//TRANSLIT', $nomComplet)));
-        $username = $base;
-        $i = 1;
-        while (User::where('username', $username)->exists()) {
-            $username = $base . $i;
-            $i++;
-        }
+        $nomComplet = trim($nomComplet);
+        $asciiNom = iconv('UTF-8', 'ASCII//TRANSLIT', $nomComplet);
+        $premierMot = explode(' ', $asciiNom)[0] ?? 'client';
+
+        $base = strtolower(preg_replace('/[^a-zA-Z]/', '', $premierMot) ?: 'client');
+
+        $attempts = 0;
+        $suffixLength = 2;
+        do {
+            $max = (int) pow(10, $suffixLength) - 1;
+            $randomNumber = rand(0, $max);
+            $suffix = str_pad((string) $randomNumber, $suffixLength, '0', STR_PAD_LEFT);
+            $username = $base . $suffix;
+            $attempts++;
+
+            if ($attempts > 200 && $suffixLength < 3) {
+                $suffixLength = 3;
+            } elseif ($attempts > 1500 && $suffixLength < 4) {
+                $suffixLength = 4;
+            }
+        } while (User::where('username', $username)->exists());
+
         return $username;
     }
 

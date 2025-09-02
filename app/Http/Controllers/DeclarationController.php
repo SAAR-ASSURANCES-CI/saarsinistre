@@ -88,7 +88,6 @@ class DeclarationController extends Controller
             $sinistre = $this->createSinistre($data + ['assure_id' => $user->id]);
             $sinistre->refresh();
 
-            // Traiter les fichiers uploadés progressivement ou classiquement
             $this->handleUploadedFiles($request, $sinistre);
 
             if (!empty($data['implique_tiers']) && !empty($data['tiers'])) {
@@ -97,7 +96,6 @@ class DeclarationController extends Controller
             
             $this->notificationService->triggerSinistreNotifications($sinistre);
 
-            // Nettoyer les fichiers temporaires si ils existent
             $this->cleanupTempFiles($request);
 
             DB::commit();
