@@ -52,13 +52,7 @@ class SAARSinistrePWA {
                 return;
             }
         }
-        
-        
         this.isInstalled = reallyInstalled || wasAccepted;
-
-        if (wasDismissed && !this.isInstalled) {
-            this.isInstalled = true; 
-        }
         
         if ('getInstalledRelatedApps' in navigator) {
             navigator.getInstalledRelatedApps().then(relatedApps => {
@@ -91,8 +85,8 @@ class SAARSinistrePWA {
             const wasAccepted = localStorage.getItem('pwa-installation-accepted') === 'true';
             
             const dismissalExpired = this.checkDismissalExpiration();
-            
-            if (!wasDismissed && !wasAccepted && !dismissalExpired) {
+            const canShow = (!wasDismissed || dismissalExpired) && !wasAccepted;
+            if (canShow) {
                 this.showInstallButton();
             } else {
                 console.log('PWA: Installation déjà gérée par l\'utilisateur - bouton non affiché');
@@ -159,6 +153,16 @@ class SAARSinistrePWA {
         if (!this.isInstalled) {
             this.createPWABar();
             this.createInstallButton();
+            // Fallback iOS: pas d'événement beforeinstallprompt
+            if (this.isIOS() && !this.deferredPrompt) {
+                const wasDismissed = localStorage.getItem('pwa-installation-dismissed') === 'true';
+                const wasAccepted = localStorage.getItem('pwa-installation-accepted') === 'true';
+                const dismissalExpired = this.checkDismissalExpiration();
+                const canShow = (!wasDismissed || dismissalExpired) && !wasAccepted;
+                if (canShow) {
+                    this.showInstallButton();
+                }
+            }
         }
         
         
@@ -349,6 +353,11 @@ class SAARSinistrePWA {
     
     async installApp() {
         if (!this.deferredPrompt) {
+            // Fallback iOS: afficher les instructions A2HS
+            if (this.isIOS()) {
+                this.showIOSInstallInstructions();
+                return;
+            }
             console.log('PWA: Aucune invite d\'installation disponible');
             return;
         }
@@ -420,12 +429,59 @@ class SAARSinistrePWA {
     }
     
     static isSupported() {
-        return 'serviceWorker' in navigator && 'PushManager' in window;
+        // Ne pas exiger PushManager pour supporter l'UI PWA
+        return 'serviceWorker' in navigator;
     }
     
     static getInstallStatus() {
         return window.matchMedia('(display-mode: standalone)').matches ||
                window.navigator.standalone === true;
+    }
+
+    isIOS() {
+        const ua = window.navigator.userAgent;
+        const iOS = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        return iOS;
+    }
+
+    showIOSInstallInstructions() {
+        // Crée une modale avec instructions iOS: Partager -> Ajouter à l'écran d'accueil
+        const existing = document.getElementById('pwa-ios-instructions');
+        if (existing) return;
+        const modal = document.createElement('div');
+        modal.id = 'pwa-ios-instructions';
+        modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/50';
+        modal.innerHTML = `
+            <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 p-6">
+                <div class="flex items-start justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Installer l'application</h3>
+                    <button id="pwa-ios-instructions-close" class="text-gray-500 hover:text-gray-700">✕</button>
+                </div>
+                <div class="space-y-3 text-gray-700">
+                    <p>Sur iPhone, l'installation passe par le menu <strong>Partager</strong> de Safari/Chrome.</p>
+                    <ol class="list-decimal list-inside space-y-1">
+                        <li>Appuyez sur l'icône <strong>Partager</strong> en bas de l'écran.</li>
+                        <li>Sélectionnez <strong>Ajouter à l'écran d'accueil</strong>.</li>
+                        <li>Confirmez en appuyant sur <strong>Ajouter</strong>.</li>
+                    </ol>
+                </div>
+                <div class="mt-5 flex justify-end gap-2">
+                    <button id="pwa-ios-instructions-dismiss" class="px-4 py-2 rounded bg-gray-100 text-gray-700 hover:bg-gray-200">Ne plus afficher aujourd'hui</button>
+                    <button id="pwa-ios-instructions-ok" class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">OK</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        const close = () => {
+            modal.remove();
+        };
+        document.getElementById('pwa-ios-instructions-close').addEventListener('click', close);
+        document.getElementById('pwa-ios-instructions-ok').addEventListener('click', close);
+        document.getElementById('pwa-ios-instructions-dismiss').addEventListener('click', () => {
+            localStorage.setItem('pwa-installation-dismissed', 'true');
+            localStorage.setItem('pwa-installation-dismissed-timestamp', Date.now().toString());
+            close();
+        });
     }
     
     checkDismissalExpiration() {

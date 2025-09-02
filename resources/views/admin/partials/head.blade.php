@@ -4,6 +4,10 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0d6efd">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="SAAR Sinistre">
+<link rel="apple-touch-icon" sizes="180x180" href="/logo.png">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="{{ asset('js/tailwindConfig.js') }}"></script>
