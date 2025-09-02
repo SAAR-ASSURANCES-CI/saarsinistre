@@ -87,6 +87,12 @@
             <span class="text-red-700 font-bold text-lg md:text-xl">SAAR ASSURANCES</span>
         </div>
         <div class="flex items-center space-x-2 md:space-x-4">
+            <a href="{{ url('/') }}" class="hidden sm:inline-flex items-center space-x-2 px-3 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9M4 10v10a1 1 0 001 1h14a1 1 0 001-1V10" />
+                </svg>
+                <span class="text-sm font-medium">Retour à l'accueil</span>
+            </a>
             <!-- Notification Bell -->
             <button aria-label="Notifications" class="relative p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-red-400">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
