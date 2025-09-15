@@ -91,9 +91,9 @@ class PasswordResetController extends Controller
             $telephoneSMS = $this->formatPhoneNumber($telephone);
             $this->orangeService->sendSMS($telephoneSMS, $message, 'SAAR CI');
 
-            return redirect()->route('password.reset.verify')
-                ->with('success', 'Un code de vérification a été envoyé par SMS à votre numéro de téléphone.')
-                ->with('telephone', $telephone);
+        return redirect()->route('password.reset.verify.assure')
+            ->with('success', 'Un code de vérification a été envoyé par SMS à votre numéro de téléphone.')
+            ->with('telephone', $telephone);
 
         } catch (\Exception $e) {
             Log::error('Erreur lors de l\'envoi du code de réinitialisation', [
@@ -159,7 +159,7 @@ class PasswordResetController extends Controller
             'code' => $code
         ]);
 
-        return redirect()->route('password.reset.new')
+        return redirect()->route('password.reset.new.assure')
             ->with('success', 'Code vérifié avec succès. Vous pouvez maintenant définir votre nouveau mot de passe.');
     }
 
@@ -169,7 +169,7 @@ class PasswordResetController extends Controller
     public function showNewPasswordForm(Request $request)
     {
         if (!$request->session()->has('reset_telephone')) {
-            return redirect()->route('password.reset.request');
+            return redirect()->route('password.reset.request.assure');
         }
 
         return view('auth.new_password_assure');
@@ -191,20 +191,20 @@ class PasswordResetController extends Controller
         $telephone = $request->session()->get('reset_telephone');
 
         if (!$telephone) {
-            return redirect()->route('password.reset.request');
+            return redirect()->route('password.reset.request.assure');
         }
 
         $sinistre = Sinistre::where('telephone_assure', $telephone)->first();
         
         if (!$sinistre || !$sinistre->assure_id) {
-            return redirect()->route('password.reset.request')
+            return redirect()->route('password.reset.request.assure')
                 ->withErrors(['error' => 'Utilisateur non trouvé.']);
         }
 
         $user = User::find($sinistre->assure_id);
         
         if (!$user) {
-            return redirect()->route('password.reset.request')
+            return redirect()->route('password.reset.request.assure')
                 ->withErrors(['error' => 'Utilisateur non trouvé.']);
         }
 

@@ -89,7 +89,7 @@
                         </label>
                     </div>
                     <div class="text-sm">
-                        <a href="{{ route('password.forgot') }}" class="font-medium text-saar-blue hover:text-blue-800 transition-colors duration-200">
+                        <a href="{{ route('password.forgot.gestionnaire') }}" class="font-medium text-saar-blue hover:text-blue-800 transition-colors duration-200">
                             Mot de passe oublié ?
                         </a>
                     </div>

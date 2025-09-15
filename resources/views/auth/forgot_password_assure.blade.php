@@ -64,7 +64,7 @@
             </div>
 
             <!-- Formulaire de demande -->
-            <form class="mt-8 space-y-6" action="{{ route('password.reset.send') }}" method="POST">
+            <form class="mt-8 space-y-6" action="{{ route('password.reset.send.assure') }}" method="POST">
                 @csrf
                 <div class="space-y-4">
                     <div>
