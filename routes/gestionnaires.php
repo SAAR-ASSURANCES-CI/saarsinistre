@@ -16,8 +16,8 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
 // Réinitialisation de mot de passe
-Route::get('/password/forgot', [AuthController::class, 'showForgotPasswordForm'])->name('password.forgot');
-Route::post('/password/reset', [AuthController::class, 'sendResetLink'])->name('password.reset.send');
+Route::get('/password/forgot', [AuthController::class, 'showForgotPasswordForm'])->name('password.forgot.gestionnaire');
+Route::post('/password/reset/gestionnaire', [AuthController::class, 'sendResetLink'])->name('password.reset.send.gestionnaire');
 
 // Changement de mot de passe (pour utilisateurs connectés)
 Route::middleware('auth')->group(function () {

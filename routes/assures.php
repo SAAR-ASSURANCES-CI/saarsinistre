@@ -13,12 +13,12 @@ Route::middleware(['guest'])->group(function () {
     Route::post('/login/assure', [AuthController::class, 'loginAssure'])->name('login.assure.post');
     
     // Routes de réinitialisation de mot de passe
-    Route::get('/password/reset', [App\Http\Controllers\PasswordResetController::class, 'showRequestForm'])->name('password.reset.request');
-    Route::post('/password/reset', [App\Http\Controllers\PasswordResetController::class, 'sendResetCode'])->name('password.reset.send');
-    Route::get('/password/reset/verify', [App\Http\Controllers\PasswordResetController::class, 'showVerifyForm'])->name('password.reset.verify');
-    Route::post('/password/reset/verify', [App\Http\Controllers\PasswordResetController::class, 'verifyCode'])->name('password.reset.verify.post');
-    Route::get('/password/reset/new', [App\Http\Controllers\PasswordResetController::class, 'showNewPasswordForm'])->name('password.reset.new');
-    Route::post('/password/reset/new', [App\Http\Controllers\PasswordResetController::class, 'updatePassword'])->name('password.reset.update');
+    Route::get('/password/reset', [App\Http\Controllers\PasswordResetController::class, 'showRequestForm'])->name('password.reset.request.assure');
+    Route::post('/password/reset', [App\Http\Controllers\PasswordResetController::class, 'sendResetCode'])->name('password.reset.send.assure');
+    Route::get('/password/reset/verify', [App\Http\Controllers\PasswordResetController::class, 'showVerifyForm'])->name('password.reset.verify.assure');
+    Route::post('/password/reset/verify', [App\Http\Controllers\PasswordResetController::class, 'verifyCode'])->name('password.reset.verify.post.assure');
+    Route::get('/password/reset/new', [App\Http\Controllers\PasswordResetController::class, 'showNewPasswordForm'])->name('password.reset.new.assure');
+    Route::post('/password/reset/new', [App\Http\Controllers\PasswordResetController::class, 'updatePassword'])->name('password.reset.update.assure');
 });
 
 Route::post('/assure/logout', [AuthController::class, 'logoutAssure'])->name('logout.assure');

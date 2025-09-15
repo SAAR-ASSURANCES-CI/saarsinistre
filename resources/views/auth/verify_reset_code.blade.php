@@ -64,7 +64,7 @@
             </div>
 
             <!-- Formulaire de vérification -->
-            <form class="mt-8 space-y-6" action="{{ route('password.reset.verify.post') }}" method="POST">
+            <form class="mt-8 space-y-6" action="{{ route('password.reset.verify.post.assure') }}" method="POST">
                 @csrf
                 
                 <!-- Champ caché pour le téléphone -->
@@ -103,7 +103,7 @@
 
                 <!-- Lien de retour -->
                 <div class="text-center">
-                    <a href="{{ route('password.reset.request') }}" 
+                    <a href="{{ route('password.reset.request.assure') }}" 
                        class="text-saar-blue hover:text-blue-700 text-sm font-medium">
                         ← Demander un nouveau code
                     </a>

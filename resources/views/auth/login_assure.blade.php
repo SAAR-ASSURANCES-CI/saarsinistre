@@ -89,7 +89,7 @@
                         </label>
                     </div>
                     <div class="text-sm">
-                        <a href="{{ route('password.reset.request') }}" 
+                        <a href="{{ route('password.reset.request.assure') }}" 
                            class="text-saar-blue hover:text-blue-700 font-medium">
                             Mot de passe oublié ?
                         </a>
