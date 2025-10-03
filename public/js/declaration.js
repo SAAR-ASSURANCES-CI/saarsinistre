@@ -164,44 +164,75 @@ function validateCurrentStep() {
     const currentStepElement = document.getElementById(`step-${currentStep}`);
     const requiredFields = currentStepElement.querySelectorAll('[required]');
     let isValid = true;
+    let firstErrorField = null;
+
+    // Nettoyer les erreurs précédentes
+    clearAllFieldErrors();
+
     requiredFields.forEach(field => {
         if (field.type === 'file') {
             const zone = field.closest('.upload-zone');
             if (zone) {
                 const fieldName = zone.dataset.field;
                 if (!uploadedFiles[fieldName] || uploadedFiles[fieldName].length === 0) {
-                    zone.classList.add('border-red-500', 'bg-red-50');
+                    showFieldError(fieldName, 'Ce document est obligatoire');
+                    if (!firstErrorField) firstErrorField = zone;
                     isValid = false;
-                } else {
-                    zone.classList.remove('border-red-500', 'bg-red-50');
                 }
             }
         } else {
             if (!field.value.trim()) {
-                field.classList.add('border-red-500', 'bg-red-50');
-                field.addEventListener('input', function() {
-                    this.classList.remove('border-red-500', 'bg-red-50');
-                }, {
-                    once: true
-                });
+                const fieldName = field.getAttribute('name');
+                const fieldLabel = getFieldLabel(field);
+                showFieldError(fieldName, `${fieldLabel} est obligatoire`);
+                if (!firstErrorField) firstErrorField = field;
                 isValid = false;
-            } else {
-                field.classList.remove('border-red-500', 'bg-red-50');
             }
         }
     });
+
     if (!isValid) {
         currentStepElement.classList.add('animate-bounce-in');
         setTimeout(() => {
             currentStepElement.classList.remove('animate-bounce-in');
         }, 600);
-        if (currentStep === 3) {
-            alert('Veuillez télécharger tous les documents obligatoires.');
-        } else {
-            alert('Veuillez remplir tous les champs obligatoires.');
+        
+        // Faire défiler vers la première erreur
+        if (firstErrorField) {
+            firstErrorField.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
         }
     }
     return isValid;
+}
+
+function getFieldLabel(field) {
+    // Essayer de trouver le label associé
+    const label = field.closest('.space-y-4, .grid, .mb-4, .mb-6')?.querySelector('label');
+    if (label) {
+        return label.textContent.trim().replace('*', '').replace(':', '');
+    }
+    
+    // Labels par défaut basés sur le nom du champ
+    const fieldLabels = {
+        'nom_assure': 'Le nom de l\'assuré',
+        'telephone_assure': 'Le numéro de téléphone',
+        'numero_police': 'Le numéro de police',
+        'date_sinistre': 'La date du sinistre',
+        'lieu_sinistre': 'Le lieu du sinistre',
+        'circonstances': 'Les circonstances',
+        'conducteur_nom': 'Le nom du conducteur',
+        'carte_grise_recto': 'La carte grise (recto)',
+        'carte_grise_verso': 'La carte grise (verso)',
+        'visite_technique_recto': 'La visite technique (recto)',
+        'visite_technique_verso': 'La visite technique (verso)',
+        'attestation_assurance': 'L\'attestation d\'assurance',
+        'permis_conduire': 'Le permis de conduire'
+    };
+    
+    return fieldLabels[field.name] || 'Ce champ';
 }
 
 function updateProgressBar() {
@@ -316,6 +347,11 @@ function handleSubmit(e) {
                 );
             }
             if (!response.ok) {
+                if (response.status === 422) {
+                    const errorData = await response.json();
+                    handleValidationErrors(errorData);
+                    return;
+                }
                 const errorText = await response.text();
                 console.error('Error response:', errorText);
                 throw new Error(`Erreur ${response.status}: ${response.statusText}`);
@@ -381,6 +417,111 @@ function showSuccessPage(data) {
             </div>
         </div>
     `;
+}
+
+function handleValidationErrors(errorData) {
+    const submitBtn = document.getElementById('submit-btn');
+    const submitText = submitBtn.querySelector('.submit-text');
+    const loadingText = submitBtn.querySelector('.loading-text');
+    submitBtn.disabled = false;
+    submitText.classList.remove('hidden');
+    loadingText.classList.add('hidden');
+    submitBtn.classList.remove('animate-pulse');
+
+    clearAllFieldErrors();
+
+    if (errorData.errors) {
+        Object.keys(errorData.errors).forEach(fieldName => {
+            const errorMessages = errorData.errors[fieldName];
+            if (Array.isArray(errorMessages) && errorMessages.length > 0) {
+                showFieldError(fieldName, errorMessages[0]);
+            }
+        });
+    }
+
+    if (errorData.message) {
+        showErrorMessage(errorData.message);
+    }
+
+    scrollToFirstError();
+}
+
+function showFieldError(fieldName, errorMessage) {
+    
+    let field = document.querySelector(`[name="${fieldName}"]`);
+    
+    if (!field) {
+        const uploadZone = document.querySelector(`[data-field="${fieldName}"]`);
+        if (uploadZone) {
+            field = uploadZone;
+        }
+    }
+
+    if (field) {
+        field.classList.add('border-red-500', 'bg-red-50');
+        
+        let errorElement = field.parentNode.querySelector('.field-error');
+        if (!errorElement) {
+            errorElement = document.createElement('div');
+            errorElement.className = 'field-error text-red-600 text-sm mt-1 flex items-center';
+            field.parentNode.appendChild(errorElement);
+        }
+        
+        errorElement.innerHTML = `
+            <svg class="w-4 h-4 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+            <span>${errorMessage}</span>
+        `;
+
+        const cleanupError = () => {
+            field.classList.remove('border-red-500', 'bg-red-50');
+            if (errorElement && errorElement.parentNode) {
+                errorElement.parentNode.removeChild(errorElement);
+            }
+        };
+
+        if (field.tagName === 'INPUT' || field.tagName === 'TEXTAREA' || field.tagName === 'SELECT') {
+            field.addEventListener('input', cleanupError, { once: true });
+            field.addEventListener('change', cleanupError, { once: true });
+        } else if (field.classList.contains('upload-zone')) {
+            // Pour les zones d'upload, nettoyer quand un fichier est sélectionné
+            const fileInput = field.querySelector('input[type="file"]');
+            if (fileInput) {
+                fileInput.addEventListener('change', cleanupError, { once: true });
+            }
+        }
+    }
+}
+
+function clearAllFieldErrors() {
+    document.querySelectorAll('.border-red-500, .bg-red-50').forEach(element => {
+        element.classList.remove('border-red-500', 'bg-red-50');
+    });
+    
+    document.querySelectorAll('.field-error').forEach(errorElement => {
+        if (errorElement.parentNode) {
+            errorElement.parentNode.removeChild(errorElement);
+        }
+    });
+}
+
+function scrollToFirstError() {
+    const firstError = document.querySelector('.field-error');
+    if (firstError) {
+        firstError.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+        });
+        
+        const fieldContainer = firstError.closest('.space-y-4, .grid, .mb-4, .mb-6');
+        if (fieldContainer) {
+            fieldContainer.classList.add('animate-pulse');
+            setTimeout(() => {
+                fieldContainer.classList.remove('animate-pulse');
+            }, 2000);
+        }
+    }
 }
 
 function showErrorMessage(message) {
