@@ -48,6 +48,9 @@ class DeclarationController extends Controller
 
             $data = $request->validated();
             
+            // Valider les fichiers uploadés de manière asynchrone
+            $this->validateAsyncUploads($request, $data);
+            
             $user = null;
             
             if (!empty($data['email_assure'])) {
@@ -318,6 +321,7 @@ class DeclarationController extends Controller
 
         foreach ($uploadedFiles as $fileInfo) {
             if (!isset($fileInfo['stored_path']) || !isset($fileInfo['type'])) {
+                Log::warning("Données de fichier incomplètes", $fileInfo);
                 continue;
             }
 
@@ -328,12 +332,18 @@ class DeclarationController extends Controller
                 continue;
             }
 
-            
+            // Déplacer le fichier vers son emplacement final
             $finalPath = $this->moveToFinalLocation($tempPath, $sinistre, $fileInfo['type']);
             
             if ($finalPath) {
-                
+                // Créer l'enregistrement dans la base de données
                 $this->createDocumentRecord($sinistre, $fileInfo, $finalPath);
+                
+                Log::info("Fichier traité avec succès", [
+                    'sinistre_id' => $sinistre->id,
+                    'type' => $fileInfo['type'],
+                    'final_path' => $finalPath
+                ]);
             }
         }
     }
@@ -379,6 +389,12 @@ class DeclarationController extends Controller
                 'type_mime' => $fileInfo['mime_type'] ?? 'application/octet-stream',
                 'taille_fichier' => $fileInfo['size'] ?? 0,
             ]);
+            
+            Log::info("Document créé en base de données", [
+                'sinistre_id' => $sinistre->id,
+                'type_document' => $fileInfo['type'],
+                'chemin_fichier' => $finalPath
+            ]);
         } catch (Exception $e) {
             Log::error("Erreur création document pour {$fileInfo['type']}: " . $e->getMessage());
         }
@@ -402,6 +418,62 @@ class DeclarationController extends Controller
         ];
 
         return $labels[$type] ?? 'Document';
+    }
+
+    /**
+     * Valider les fichiers uploadés de manière asynchrone
+     */
+    protected function validateAsyncUploads($request, $data): void
+    {
+        if (!$request->has('uploaded_files')) {
+            throw new \Illuminate\Validation\ValidationException(
+                validator([], []),
+                ['uploaded_files' => ['Les fichiers doivent être uploadés']]
+            );
+        }
+
+        $uploadedFiles = json_decode($request->input('uploaded_files'), true);
+        
+        if (!$uploadedFiles || !is_array($uploadedFiles)) {
+            throw new \Illuminate\Validation\ValidationException(
+                validator([], []),
+                ['uploaded_files' => ['Données de fichiers uploadés invalides']]
+            );
+        }
+
+        // Créer un mapping des champs requis
+        $requiredFields = [
+            'carte_grise_recto' => 'La carte grise (recto)',
+            'carte_grise_verso' => 'La carte grise (verso)',
+            'visite_technique_recto' => 'La visite technique (recto)',
+            'visite_technique_verso' => 'La visite technique (verso)',
+            'attestation_assurance' => 'L\'attestation d\'assurance',
+            'permis_conduire' => 'Le permis de conduire'
+        ];
+
+        $errors = [];
+
+        // Vérifier que tous les champs requis sont présents
+        foreach ($requiredFields as $field => $label) {
+            $found = false;
+            foreach ($uploadedFiles as $fileData) {
+                if (isset($fileData['field']) && $fileData['field'] === $field) {
+                    $found = true;
+                    break;
+                }
+            }
+            
+            if (!$found) {
+                $errors[$field] = [$label . ' est obligatoire'];
+            }
+        }
+
+        if (!empty($errors)) {
+            throw new \Illuminate\Validation\ValidationException(
+                validator([], []),
+                $errors
+            );
+        }
     }
 
     /**

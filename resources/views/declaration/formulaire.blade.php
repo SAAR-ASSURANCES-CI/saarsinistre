@@ -94,10 +94,9 @@
         }
     </script>
     
+    <!-- Gestionnaire d'upload optimisé -->
+    <script src="{{ asset('js/upload-manager.js') }}"></script>
     <script src="{{ asset('js/declaration.js') }}"></script>
-    
-    <!-- Upload progressif pour mobile -->
-    <script src="{{ asset('js/progressive-upload.js') }}"></script>
     
     <!-- PWA Script -->
     <script src="{{ asset('js/pwa.js') }}"></script>

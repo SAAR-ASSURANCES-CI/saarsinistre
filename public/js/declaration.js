@@ -1,11 +1,15 @@
 let currentStep = 1;
 const totalSteps = 4;
 const uploadedFiles = {};
+const uploadProgress = new Map();
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeForm();
     setupEventListeners();
     updateProgressBar();
+    
+    // Charger le gestionnaire d'upload 
+    loadUploadManager();
 
 
     const inputs = document.querySelectorAll('input, textarea');
@@ -106,28 +110,163 @@ function setupFileUploads() {
     });
 }
 
-function handleFileUpload(zone, files) {
+async function handleFileUpload(zone, files) {
     const field = zone.dataset.field;
     const uploadContent = zone.querySelector('.upload-content');
     const uploadSuccess = zone.querySelector('.upload-success');
+    
     if (files.length > 0) {
+        // Vérifier la taille des fichiers
         for (let file of files) {
             if (file.size > 5 * 1024 * 1024) {
                 alert('Le fichier est trop volumineux. Taille maximum: 5MB');
                 return;
             }
         }
-        uploadedFiles[field] = files;
-        uploadContent.classList.add('hidden');
-        uploadSuccess.classList.remove('hidden');
-        uploadSuccess.classList.add('animate-bounce-in');
-        if (field === 'photos_vehicule') {
-            const photoCount = uploadSuccess.querySelector('.photo-count');
-            if (photoCount) {
-                photoCount.textContent = files.length;
-            }
+
+        showUploadProgress(zone, files.length);
+        
+        try {
+            const uploadPromises = Array.from(files).map(async (file, index) => {
+                return await uploadManager.uploadFile(file, field, (progress, fileId) => {
+                    updateFileProgress(zone, fileId, progress, index);
+                });
+            });
+
+            const uploadResults = await Promise.all(uploadPromises);
+            
+            uploadedFiles[field] = uploadResults;
+            
+            showUploadSuccess(zone, files.length);
+            
+        } catch (error) {
+            console.error('Erreur upload:', error);
+            showUploadError(zone, error.message);
         }
-        zone.querySelector('.border-dashed').classList.add('border-green-300', 'bg-green-50');
+    }
+}
+
+/**
+ * Afficher la barre de progression d'upload
+ */
+function showUploadProgress(zone, fileCount) {
+    const uploadContent = zone.querySelector('.upload-content');
+    const uploadSuccess = zone.querySelector('.upload-success');
+    
+    uploadContent.classList.add('hidden');
+    uploadSuccess.classList.add('hidden');
+    
+    let progressContainer = zone.querySelector('.upload-progress');
+    if (!progressContainer) {
+        progressContainer = document.createElement('div');
+        progressContainer.className = 'upload-progress p-4 bg-blue-50 border border-blue-200 rounded-lg';
+        progressContainer.innerHTML = `
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-blue-700">Upload en cours...</span>
+                <span class="text-xs text-blue-600" id="progress-text">0%</span>
+            </div>
+            <div class="w-full bg-blue-200 rounded-full h-2">
+                <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" id="progress-bar" style="width: 0%"></div>
+            </div>
+            <div class="mt-2 text-xs text-blue-600" id="file-info">0/${fileCount} fichier(s)</div>
+        `;
+        zone.appendChild(progressContainer);
+    }
+    
+    progressContainer.classList.remove('hidden');
+    zone.querySelector('.border-dashed').classList.add('border-blue-300', 'bg-blue-50');
+}
+
+/**
+ * Mettre à jour la progression d'un fichier
+ */
+function updateFileProgress(zone, fileId, progress, fileIndex) {
+    const progressBar = zone.querySelector('#progress-bar');
+    const progressText = zone.querySelector('#progress-text');
+    const fileInfo = zone.querySelector('#file-info');
+    
+    if (progressBar) {
+        progressBar.style.width = `${progress}%`;
+    }
+    if (progressText) {
+        progressText.textContent = `${Math.round(progress)}%`;
+    }
+    if (fileInfo) {
+        const totalFiles = zone.querySelectorAll('input[type="file"]')[0].files.length;
+        fileInfo.textContent = `${fileIndex + 1}/${totalFiles} fichier(s)`;
+    }
+}
+
+/**
+ * Afficher le succès d'upload
+ */
+function showUploadSuccess(zone, fileCount) {
+    const progressContainer = zone.querySelector('.upload-progress');
+    const uploadSuccess = zone.querySelector('.upload-success');
+    
+    if (progressContainer) {
+        progressContainer.classList.add('hidden');
+    }
+    
+    // Afficher le succès
+    uploadSuccess.classList.remove('hidden');
+    uploadSuccess.classList.add('animate-bounce-in');
+    
+    if (zone.dataset.field === 'photos_vehicule') {
+        const photoCount = uploadSuccess.querySelector('.photo-count');
+        if (photoCount) {
+            photoCount.textContent = fileCount;
+        }
+    }
+    
+    zone.querySelector('.border-dashed').classList.remove('border-blue-300', 'bg-blue-50');
+    zone.querySelector('.border-dashed').classList.add('border-green-300', 'bg-green-50');
+}
+
+/**
+ * Afficher une erreur d'upload
+ */
+function showUploadError(zone, errorMessage) {
+    const progressContainer = zone.querySelector('.upload-progress');
+    const uploadContent = zone.querySelector('.upload-content');
+    
+    // Masquer la progression
+    if (progressContainer) {
+        progressContainer.classList.add('hidden');
+    }
+    
+    // Afficher l'erreur
+    let errorContainer = zone.querySelector('.upload-error');
+    if (!errorContainer) {
+        errorContainer = document.createElement('div');
+        errorContainer.className = 'upload-error p-3 bg-red-50 border border-red-200 rounded-lg mb-2';
+        zone.appendChild(errorContainer);
+    }
+    
+    errorContainer.innerHTML = `
+        <div class="flex items-center">
+            <svg class="w-4 h-4 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+            <span class="text-sm text-red-700">${errorMessage}</span>
+        </div>
+    `;
+    
+    errorContainer.classList.remove('hidden');
+    zone.querySelector('.border-dashed').classList.remove('border-blue-300', 'bg-blue-50');
+    zone.querySelector('.border-dashed').classList.add('border-red-300', 'bg-red-50');
+    
+    // Réafficher le contenu d'upload
+    uploadContent.classList.remove('hidden');
+}
+
+/**
+ * Charger le gestionnaire d'upload
+ */
+function loadUploadManager() {
+    // Le script upload-manager.js doit être chargé avant
+    if (typeof window.uploadManager === 'undefined') {
+        console.error('UploadManager non chargé. Vérifiez que upload-manager.js est inclus.');
     }
 }
 
@@ -174,8 +313,10 @@ function validateCurrentStep() {
             const zone = field.closest('.upload-zone');
             if (zone) {
                 const fieldName = zone.dataset.field;
+                const fieldLabel = getFieldLabel(field);
+                
                 if (!uploadedFiles[fieldName] || uploadedFiles[fieldName].length === 0) {
-                    showFieldError(fieldName, 'Ce document est obligatoire');
+                    showFieldError(fieldName, `${fieldLabel} est obligatoire`);
                     if (!firstErrorField) firstErrorField = zone;
                     isValid = false;
                 }
@@ -307,15 +448,37 @@ function handleSubmit(e) {
     loadingText.classList.remove('hidden');
     submitBtn.classList.add('animate-pulse');
     const formData = new FormData(document.getElementById('declaration-form'));
+    
+    // Ajouter les fichiers uploadés de manière asynchrone
+    const uploadedFilesData = [];
     Object.keys(uploadedFiles).forEach(key => {
-        if (key === 'photos_vehicule') {
-            Array.from(uploadedFiles[key]).forEach((file, index) => {
-                formData.append(`photos_vehicule[${index}]`, file);
-            });
-        } else if (uploadedFiles[key] && uploadedFiles[key].length > 0) {
-            formData.append(key, uploadedFiles[key][0]);
+        if (uploadedFiles[key] && uploadedFiles[key].length > 0) {
+            if (key === 'photos_vehicule') {
+                uploadedFiles[key].forEach((fileData, index) => {
+                    uploadedFilesData.push({
+                        field: `photos_vehicule[${index}]`,
+                        stored_path: fileData.path,  // ← Corrigé : stored_path au lieu de path
+                        type: 'photo_vehicule',      // ← Corrigé : type au lieu de field
+                        original_name: fileData.originalName,
+                        size: fileData.size,
+                        mime_type: fileData.mimeType
+                    });
+                });
+            } else {
+                const fileData = uploadedFiles[key][0];
+                uploadedFilesData.push({
+                    field: key,
+                    stored_path: fileData.path,      // ← Corrigé : stored_path au lieu de path
+                    type: key,                       // ← Corrigé : type au lieu de field
+                    original_name: fileData.originalName,
+                    size: fileData.size,
+                    mime_type: fileData.mimeType
+                });
+            }
         }
     });
+    
+    formData.append('uploaded_files', JSON.stringify(uploadedFilesData));
     const constatCheckbox = document.getElementById('constat');
     formData.set('constat_autorite', constatCheckbox.checked ? '1' : '0');
     const impliqueTiersCheckbox = document.getElementById('implique_tiers');
@@ -339,6 +502,7 @@ function handleSubmit(e) {
         })
         .then(async response => {
             const contentType = response.headers.get('content-type');
+            
             if (contentType && contentType.includes('text/html')) {
                 const htmlText = await response.text();
                 console.error('Received HTML instead of JSON:', htmlText.substring(0, 500));
@@ -346,23 +510,40 @@ function handleSubmit(e) {
                     'Le serveur a retourné du HTML au lieu de JSON. Vérifiez la route et le contrôleur.'
                 );
             }
+            
             if (!response.ok) {
                 if (response.status === 422) {
-                    const errorData = await response.json();
-                    handleValidationErrors(errorData);
-                    return;
+                    try {
+                        const errorData = await response.json();
+                        handleValidationErrors(errorData);
+                        return;
+                    } catch (parseError) {
+                        console.error('Erreur parsing JSON 422:', parseError);
+                        throw new Error('Erreur de validation (422) - Impossible de parser la réponse');
+                    }
                 }
-                const errorText = await response.text();
-                console.error('Error response:', errorText);
-                throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+                
+                try {
+                    const errorText = await response.text();
+                    console.error('Error response:', errorText);
+                    throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+                } catch (textError) {
+                    throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+                }
             }
-            return response.json();
+            
+            try {
+                return await response.json();
+            } catch (jsonError) {
+                console.error('Erreur parsing JSON:', jsonError);
+                throw new Error('Erreur lors du parsing de la réponse JSON');
+            }
         })
         .then(data => {
-            if (data.success) {
+            if (data && data.success) {
                 showSuccessPage(data);
             } else {
-                throw new Error(data.message || 'Erreur lors de la soumission');
+                throw new Error(data?.message || 'Erreur lors de la soumission');
             }
         })
         .catch(error => {
@@ -447,24 +628,29 @@ function handleValidationErrors(errorData) {
 }
 
 function showFieldError(fieldName, errorMessage) {
-    
     let field = document.querySelector(`[name="${fieldName}"]`);
+    let targetElement = field;
     
     if (!field) {
         const uploadZone = document.querySelector(`[data-field="${fieldName}"]`);
         if (uploadZone) {
             field = uploadZone;
+            targetElement = uploadZone.querySelector('.border-dashed') || uploadZone;
         }
     }
 
     if (field) {
-        field.classList.add('border-red-500', 'bg-red-50');
+        // Appliquer les styles d'erreur sur l'élément cible
+        if (targetElement) {
+            targetElement.classList.add('border-red-500', 'bg-red-50');
+        }
         
-        let errorElement = field.parentNode.querySelector('.field-error');
+        // Trouver ou créer l'élément d'erreur
+        let errorElement = field.querySelector('.field-error');
         if (!errorElement) {
             errorElement = document.createElement('div');
-            errorElement.className = 'field-error text-red-600 text-sm mt-1 flex items-center';
-            field.parentNode.appendChild(errorElement);
+            errorElement.className = 'field-error text-red-600 text-sm mt-2 flex items-center';
+            field.appendChild(errorElement);
         }
         
         errorElement.innerHTML = `
@@ -473,35 +659,54 @@ function showFieldError(fieldName, errorMessage) {
             </svg>
             <span>${errorMessage}</span>
         `;
+        errorElement.classList.remove('hidden');
 
+        // Fonction de nettoyage
         const cleanupError = () => {
-            field.classList.remove('border-red-500', 'bg-red-50');
+            if (targetElement) {
+                targetElement.classList.remove('border-red-500', 'bg-red-50');
+            }
             if (errorElement && errorElement.parentNode) {
-                errorElement.parentNode.removeChild(errorElement);
+                errorElement.classList.add('hidden');
             }
         };
 
+        // Ajouter les listeners de nettoyage
         if (field.tagName === 'INPUT' || field.tagName === 'TEXTAREA' || field.tagName === 'SELECT') {
             field.addEventListener('input', cleanupError, { once: true });
             field.addEventListener('change', cleanupError, { once: true });
         } else if (field.classList.contains('upload-zone')) {
-            // Pour les zones d'upload, nettoyer quand un fichier est sélectionné
             const fileInput = field.querySelector('input[type="file"]');
             if (fileInput) {
                 fileInput.addEventListener('change', cleanupError, { once: true });
             }
+            // Nettoyer l'erreur quand un fichier est uploadé avec succès
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'childList') {
+                        const successElement = field.querySelector('.upload-success');
+                        if (successElement && !successElement.classList.contains('hidden')) {
+                            cleanupError();
+                            observer.disconnect();
+                        }
+                    }
+                });
+            });
+            observer.observe(field, { childList: true, subtree: true });
         }
     }
 }
 
 function clearAllFieldErrors() {
+    // Nettoyer les styles d'erreur
     document.querySelectorAll('.border-red-500, .bg-red-50').forEach(element => {
         element.classList.remove('border-red-500', 'bg-red-50');
     });
     
+    // Nettoyer les messages d'erreur
     document.querySelectorAll('.field-error').forEach(errorElement => {
         if (errorElement.parentNode) {
-            errorElement.parentNode.removeChild(errorElement);
+            errorElement.classList.add('hidden');
         }
     });
 }

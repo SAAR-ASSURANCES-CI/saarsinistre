@@ -19,7 +19,7 @@ class StoreDeclarationRequest extends FormRequest
      */
     protected function isMobileDevice(): bool
     {
-        $userAgent = $this->server('HTTP_USER_AGENT', '');
+        $userAgent = request()->header('User-Agent', '');
         return preg_match('/Mobile|Android|iPhone|iPad|iPod|BlackBerry|Windows Phone/i', $userAgent);
     }
 
@@ -69,12 +69,16 @@ class StoreDeclarationRequest extends FormRequest
             'commissariat' => 'nullable|required_if:constat_autorite,true|string|max:255',
             'dommages_releves' => 'nullable|string|max:1000',
 
-            'carte_grise_recto' => "required|file|mimes:{$supportedMimes}|max:{$maxFileSize}",
-            'carte_grise_verso' => "required|file|mimes:{$supportedMimes}|max:{$maxFileSize}",
-            'visite_technique_recto' => "required|file|mimes:{$supportedMimes}|max:{$maxPhotoSize}",
-            'visite_technique_verso' => "required|file|mimes:{$supportedMimes}|max:{$maxPhotoSize}",
-            'attestation_assurance' => "required|file|mimes:{$supportedMimes}|max:{$maxPhotoSize}",
-            'permis_conduire' => "required|file|mimes:{$supportedMimes}|max:{$maxPhotoSize}",
+            // Validation des fichiers (soit upload classique, soit asynchrone)
+            'carte_grise_recto' => "nullable|file|mimes:{$supportedMimes}|max:{$maxFileSize}",
+            'carte_grise_verso' => "nullable|file|mimes:{$supportedMimes}|max:{$maxFileSize}",
+            'visite_technique_recto' => "nullable|file|mimes:{$supportedMimes}|max:{$maxPhotoSize}",
+            'visite_technique_verso' => "nullable|file|mimes:{$supportedMimes}|max:{$maxPhotoSize}",
+            'attestation_assurance' => "nullable|file|mimes:{$supportedMimes}|max:{$maxPhotoSize}",
+            'permis_conduire' => "nullable|file|mimes:{$supportedMimes}|max:{$maxPhotoSize}",
+            
+            // Données des fichiers uploadés de manière asynchrone
+            'uploaded_files' => 'required|string|json',
             
             'tiers_photos_*' => 'nullable|array',
             'tiers_photos_*.*' => "nullable|file|mimes:{$supportedMimes}|max:{$maxFileSize}",
@@ -124,4 +128,5 @@ class StoreDeclarationRequest extends FormRequest
             'photos_vehicule.max' => 'Vous ne pouvez télécharger que 100 photos maximum.',
         ];
     }
+
 }
