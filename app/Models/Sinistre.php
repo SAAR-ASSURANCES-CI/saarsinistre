@@ -131,7 +131,17 @@ class Sinistre extends Model
     private static function genererNumeroSinistre(): string
     {
         $annee = date('Y');
-        $compteur = static::whereYear('created_at', $annee)->count() + 1;
+        $dernierSinistre = static::whereYear('created_at', $annee)
+            ->where('numero_sinistre', 'LIKE', 'APP-%' . $annee)
+            ->orderBy('numero_sinistre', 'desc')
+            ->first();
+        
+        if ($dernierSinistre) {
+            preg_match('/APP-(\d+)-' . $annee . '/', $dernierSinistre->numero_sinistre, $matches);
+            $compteur = (int)$matches[1] + 1;
+        } else {
+            $compteur = 1;
+        }
 
         return 'APP-' . str_pad($compteur, 5, '0', STR_PAD_LEFT) . '-' . $annee;
     }
