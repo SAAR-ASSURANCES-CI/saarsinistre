@@ -57,13 +57,39 @@ class DeclarationController extends Controller
             }
         
             if (!$user && !empty($data['telephone_assure'])) {
-                $sinistreExistant = Sinistre::where('telephone_assure', $data['telephone_assure'])
-                                          ->where('nom_assure', $data['nom_assure'])
-                                          ->whereNotNull('assure_id')
-                                          ->first();
+                // Chercher tous les sinistres avec ce téléphone (même sans assure_id)
+                $sinistresExistant = Sinistre::where('telephone_assure', $data['telephone_assure'])
+                                           ->where('nom_assure', $data['nom_assure'])
+                                           ->get();
                 
-                if ($sinistreExistant && $sinistreExistant->assure_id) {
-                    $user = User::find($sinistreExistant->assure_id);
+                if ($sinistresExistant->isNotEmpty()) {
+                    // Chercher un sinistre qui a déjà un assure_id
+                    $sinistreAvecAssure = $sinistresExistant->whereNotNull('assure_id')->first();
+                    
+                    if ($sinistreAvecAssure) {
+                        // Utiliser le compte existant
+                        $user = User::find($sinistreAvecAssure->assure_id);
+                        
+                        Log::info('Compte assuré existant trouvé via téléphone', [
+                            'user_id' => $user->id,
+                            'nom_assure' => $data['nom_assure'],
+                            'telephone_assure' => $data['telephone_assure'],
+                            'sinistres_existants' => $sinistresExistant->count()
+                        ]);
+                    } else {
+                        // Créer un nouveau compte et associer tous les sinistres existants
+                        $user = $this->accountService->createAssureAccount($data, app(OrangeService::class));
+                        
+                        // Mettre à jour tous les sinistres existants avec le nouvel assure_id
+                        $this->associerSinistresExistant($sinistresExistant, $user->id);
+                        
+                        Log::info('Nouveau compte créé et sinistres existants associés', [
+                            'user_id' => $user->id,
+                            'nom_assure' => $data['nom_assure'],
+                            'telephone_assure' => $data['telephone_assure'],
+                            'sinistres_associes' => $sinistresExistant->count()
+                        ]);
+                    }
                 }
             }
 
@@ -376,6 +402,24 @@ class DeclarationController extends Controller
         ];
 
         return $labels[$type] ?? 'Document';
+    }
+
+    /**
+     * Associer des sinistres existants à un compte assuré
+     */
+    protected function associerSinistresExistant($sinistres, int $assureId): void
+    {
+        foreach ($sinistres as $sinistre) {
+            if (is_null($sinistre->assure_id)) {
+                $sinistre->update(['assure_id' => $assureId]);
+                
+                Log::info('Sinistre associé au compte assuré', [
+                    'sinistre_id' => $sinistre->id,
+                    'numero_sinistre' => $sinistre->numero_sinistre,
+                    'assure_id' => $assureId
+                ]);
+            }
+        }
     }
 
     /**
