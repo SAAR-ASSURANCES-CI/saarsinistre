@@ -79,6 +79,50 @@ function setupEventListeners() {
     setupFileUploads();
 }
 
+/**
+ * Désactiver tous les champs d'upload
+ */
+function disableUploadFields() {
+    const uploadZones = document.querySelectorAll('.upload-zone');
+    uploadZones.forEach(zone => {
+        const input = zone.querySelector('input[type="file"]');
+        const uploadArea = zone.querySelector('.border-dashed');
+        
+        // Désactiver l'input file
+        if (input) {
+            input.disabled = true;
+        }
+        
+        // Désactiver la zone de drop
+        if (uploadArea) {
+            uploadArea.style.pointerEvents = 'none';
+            uploadArea.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+    });
+}
+
+/**
+ * Réactiver tous les champs d'upload
+ */
+function enableUploadFields() {
+    const uploadZones = document.querySelectorAll('.upload-zone');
+    uploadZones.forEach(zone => {
+        const input = zone.querySelector('input[type="file"]');
+        const uploadArea = zone.querySelector('.border-dashed');
+        
+        // Réactiver l'input file
+        if (input) {
+            input.disabled = false;
+        }
+        
+        // Réactiver la zone de drop
+        if (uploadArea) {
+            uploadArea.style.pointerEvents = 'auto';
+            uploadArea.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+    });
+}
+
 function setupFileUploads() {
     const uploadZones = document.querySelectorAll('.upload-zone');
     uploadZones.forEach(zone => {
@@ -120,10 +164,13 @@ async function handleFileUpload(zone, files) {
         for (let file of files) {
             if (file.size > 5 * 1024 * 1024) {
                 alert('Le fichier est trop volumineux. Taille maximum: 5MB');
+                enableUploadFields();
                 return;
             }
         }
 
+        disableUploadFields();
+        
         showUploadProgress(zone, files.length);
         
         try {
@@ -139,9 +186,15 @@ async function handleFileUpload(zone, files) {
             
             showUploadSuccess(zone, files.length);
             
+            // Réactiver tous les champs d'upload après succès
+            enableUploadFields();
+            
         } catch (error) {
             console.error('Erreur upload:', error);
             showUploadError(zone, error.message);
+            
+            // Réactiver tous les champs d'upload après erreur
+            enableUploadFields();
         }
     }
 }
