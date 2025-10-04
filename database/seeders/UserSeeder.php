@@ -22,6 +22,6 @@ class UserSeeder extends Seeder
             'actif' => true,
         ]);
 
-        $this->command->info('Utilisateurs de test créés avec succès !');
+        $this->command->info('Utilisateurs créés avec succès !');
     }
 }

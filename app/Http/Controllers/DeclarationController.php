@@ -60,9 +60,8 @@ class DeclarationController extends Controller
             }
         
             if (!$user && !empty($data['telephone_assure'])) {
-                // Chercher tous les sinistres avec ce téléphone (même sans assure_id)
+                
                 $sinistresExistant = Sinistre::where('telephone_assure', $data['telephone_assure'])
-                                           ->where('nom_assure', $data['nom_assure'])
                                            ->get();
                 
                 if ($sinistresExistant->isNotEmpty()) {
