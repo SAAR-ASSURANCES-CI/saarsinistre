@@ -6,20 +6,13 @@ const STATIC_ASSETS = [
     '/',
     '/manifest.json',
     '/js/pwa.js',
-    '/js/tailwindConfig.js',
     '/logo.png',
     '/favicon.ico',
-    '/css/app.css',
     '/offline.html',
-    'https://cdn.tailwindcss.com',
 ];
 
 const ROUTES_TO_CACHE = [
-    '/declaration',
-    '/assures/dashboard',
-    '/admin/dashboard',
-    '/chat',
-    '/users'
+    '/',
 ];
 
 async function cacheFirst(request) {
@@ -63,7 +56,13 @@ self.addEventListener('install', event => {
         Promise.all([
             caches.open(STATIC_CACHE).then(cache => {
                 console.log('Service Worker: Mise en cache des ressources statiques');
-                return cache.addAll(STATIC_ASSETS);
+                return Promise.all(
+                    STATIC_ASSETS.map(asset => 
+                        cache.add(asset).catch(err => 
+                            console.log(`Impossible de mettre en cache ${asset}:`, err.message)
+                        )
+                    )
+                );
             }),
             caches.open(DYNAMIC_CACHE).then(cache => {
                 console.log('Service Worker: Mise en cache des routes principales');
@@ -148,7 +147,7 @@ self.addEventListener('push', event => {
     if (event.data) {
         const data = event.data.json();
         const options = {
-            body: data.body || 'Nouvelle notification SAAR Sinistre',
+            body: data.body || 'Nouvelle notification SAARCISinistres',
             icon: '/icons/icon-192x192.svg',
             badge: '/icons/icon-72x72.svg',
             tag: 'saarsinistre-notification',
@@ -157,7 +156,7 @@ self.addEventListener('push', event => {
         };
         
         event.waitUntil(
-            self.registration.showNotification(data.title || 'SAAR Sinistre', options)
+            self.registration.showNotification(data.title || 'SAARCISinistres', options)
         );
     }
 });

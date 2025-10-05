@@ -1,4 +1,4 @@
-class SAARSinistrePWA {
+class SAARCISinistresPWA {
     constructor() {
         this.deferredPrompt = null;
         this.isInstalled = false;
@@ -12,6 +12,9 @@ class SAARSinistrePWA {
     async init() {
         this.checkInstallationStatus();
         
+        // Vérification immédiate de l'installation
+        this.immediateInstallationCheck();
+        
         this.setupInstallListeners();
         
         this.setupConnectivityListeners();
@@ -21,6 +24,32 @@ class SAARSinistrePWA {
         this.showPWAInterface();
     }
     
+    immediateInstallationCheck() {
+        const wasAccepted = localStorage.getItem('pwa-installation-accepted') === 'true';
+        if (wasAccepted) {
+            this.isInstalled = true;
+            return;
+        }
+        
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+        if (isStandalone) {
+            this.isInstalled = true;
+            localStorage.setItem('pwa-installation-accepted', 'true');
+            return;
+        }
+        
+        setTimeout(() => {
+            if (!this.deferredPrompt && !this.isInstalled) {
+                this.isInstalled = true;
+                localStorage.setItem('pwa-installation-accepted', 'true');
+                localStorage.removeItem('pwa-installation-dismissed');
+                localStorage.removeItem('pwa-installation-dismissed-timestamp');
+                
+                this.hidePWABarAfterInstallation();
+            }
+        }, 3000);
+    }
+    
     checkInstallationStatus() {
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
         const isIOSStandalone = window.navigator.standalone === true;
@@ -28,10 +57,11 @@ class SAARSinistrePWA {
         const wasDismissed = localStorage.getItem('pwa-installation-dismissed') === 'true';
         const dismissedTimestamp = localStorage.getItem('pwa-installation-dismissed-timestamp');
         
-        const reallyInstalled = isStandalone || isIOSStandalone;
+        // Détection plus robuste de l'installation
+        const hasOpenInAppButton = this.checkForOpenInAppButton();
+        const reallyInstalled = isStandalone || isIOSStandalone || hasOpenInAppButton;
         
         if (wasAccepted && !reallyInstalled) {
-            console.log('PWA: Désinstallation détectée - nettoyage des données');
             localStorage.removeItem('pwa-installation-accepted');
             localStorage.removeItem('pwa-installation-dismissed');
             localStorage.removeItem('pwa-installation-dismissed-timestamp');
@@ -45,13 +75,19 @@ class SAARSinistrePWA {
             const oneDayInMs = 24 * 60 * 60 * 1000;
             
             if (now - dismissedTime > oneDayInMs) {
-                console.log('PWA: Refus expiré - nettoyage des données');
                 localStorage.removeItem('pwa-installation-dismissed');
                 localStorage.removeItem('pwa-installation-dismissed-timestamp');
                 this.isInstalled = false;
                 return;
             }
         }
+        
+        if (reallyInstalled && !wasAccepted) {
+            localStorage.setItem('pwa-installation-accepted', 'true');
+            localStorage.removeItem('pwa-installation-dismissed');
+            localStorage.removeItem('pwa-installation-dismissed-timestamp');
+        }
+        
         this.isInstalled = reallyInstalled || wasAccepted;
         
         if ('getInstalledRelatedApps' in navigator) {
@@ -63,21 +99,40 @@ class SAARSinistrePWA {
             });
         }
         
-        console.log('PWA: État d\'installation -', {
-            isStandalone,
-            isIOSStandalone,
-            wasAccepted,
-            wasDismissed,
-            dismissedTimestamp,
-            reallyInstalled,
-            finalIsInstalled: this.isInstalled,
-            willShowModal: !this.isInstalled
-        });
+    }
+    
+    checkForOpenInAppButton() {
+        try {
+            
+            const installButton = document.querySelector('[data-testid="install-button"], [aria-label*="install"], [aria-label*="Installer"]');
+            if (installButton) {
+                return true;
+            }
+            
+            const openInAppElements = document.querySelectorAll('[aria-label*="Ouvrir"], [aria-label*="Open"], [title*="Ouvrir"], [title*="Open"]');
+            if (openInAppElements.length > 0) {
+                return true;
+            }
+            
+            if (!this.deferredPrompt && window.matchMedia('(display-mode: browser)').matches) {
+               
+                setTimeout(() => {
+                    if (!this.deferredPrompt) {
+                        this.isInstalled = true;
+                        localStorage.setItem('pwa-installation-accepted', 'true');
+                        this.hidePWABarAfterInstallation();
+                    }
+                }, 2000);
+            }
+            
+            return false;
+        } catch (error) {
+            return false;
+        }
     }
     
     setupInstallListeners() {
         window.addEventListener('beforeinstallprompt', (e) => {
-            console.log('PWA: Événement d\'installation détecté');
             e.preventDefault();
             this.deferredPrompt = e;
             
@@ -87,21 +142,19 @@ class SAARSinistrePWA {
             const dismissalExpired = this.checkDismissalExpiration();
             const canShow = (!wasDismissed || dismissalExpired) && !wasAccepted;
             if (canShow) {
-                this.showInstallButton();
+                // Bannière d'installation affichée
             } else {
-                console.log('PWA: Installation déjà gérée par l\'utilisateur - bouton non affiché');
+                // Installation déjà gérée par l'utilisateur - bannière non affichée
             }
         });
         
         window.addEventListener('appinstalled', (e) => {
-            console.log('PWA: Application installée avec succès');
             this.isInstalled = true;
             
             localStorage.setItem('pwa-installation-accepted', 'true');
             localStorage.removeItem('pwa-installation-dismissed');
             localStorage.removeItem('pwa-installation-dismissed-timestamp');
             
-            this.hideInstallButton();
             this.showInstallationSuccess();
         });
     }
@@ -123,7 +176,6 @@ class SAARSinistrePWA {
         if ('serviceWorker' in navigator) {
             try {
                 this.registration = await navigator.serviceWorker.register('/sw.js');
-                console.log('PWA: Service Worker enregistré:', this.registration);
                 
                 this.registration.addEventListener('updatefound', () => {
                     const newWorker = this.registration.installing;
@@ -152,15 +204,14 @@ class SAARSinistrePWA {
         
         if (!this.isInstalled) {
             this.createPWABar();
-            this.createInstallButton();
-            // Fallback iOS: pas d'événement beforeinstallprompt
+        
             if (this.isIOS() && !this.deferredPrompt) {
                 const wasDismissed = localStorage.getItem('pwa-installation-dismissed') === 'true';
                 const wasAccepted = localStorage.getItem('pwa-installation-accepted') === 'true';
                 const dismissalExpired = this.checkDismissalExpiration();
                 const canShow = (!wasDismissed || dismissalExpired) && !wasAccepted;
                 if (canShow) {
-                    this.showInstallButton();
+                    // Bannière iOS affichée
                 }
             }
         }
@@ -175,22 +226,32 @@ class SAARSinistrePWA {
         
         const pwaBar = document.createElement('div');
         pwaBar.id = 'pwa-bar';
-        pwaBar.className = 'fixed top-0 left-0 right-0 bg-gradient-to-r from-red-600 to-blue-600 text-white p-3 z-50 transform transition-transform duration-300';
+        pwaBar.className = 'fixed top-0 left-0 right-0 bg-gradient-to-r from-green-500 via-green-600 to-green-700 text-white p-4 z-50 transform transition-all duration-500 shadow-lg';
         pwaBar.style.transform = 'translateY(-100%)';
         
         pwaBar.innerHTML = `
             <div class="flex items-center justify-between max-w-7xl mx-auto">
-                <div class="flex items-center space-x-3">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                    </svg>
-                    <span class="font-medium">Installez SAARSinistre pour une meilleure expérience</span>
+                <div class="flex items-center space-x-4">
+                    <div class="flex-shrink-0">
+                        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-lg">Installez SAARCISinistres</h3>
+                        <p class="text-green-100 text-sm">Accès rapide, notifications et expérience optimisée</p>
+                    </div>
                 </div>
-                <div class="flex items-center space-x-2">
-                    <button id="pwa-install-btn" class="bg-white text-red-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors">
+                <div class="flex items-center space-x-3">
+                    <button id="pwa-install-btn" class="bg-white text-green-700 px-6 py-2 rounded-lg font-semibold hover:bg-green-50 transition-all duration-200 transform hover:scale-105 shadow-md">
+                        <svg class="w-4 h-4 inline mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+                        </svg>
                         Installer
                     </button>
-                    <button id="pwa-dismiss-btn" class="text-white/80 hover:text-white transition-colors">
+                    <button id="pwa-dismiss-btn" class="text-white/70 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                         </svg>
@@ -203,7 +264,7 @@ class SAARSinistrePWA {
         
         setTimeout(() => {
             pwaBar.style.transform = 'translateY(0)';
-        }, 2000);
+        }, 1500);
         
         document.getElementById('pwa-install-btn').addEventListener('click', () => {
             this.installApp();
@@ -214,26 +275,6 @@ class SAARSinistrePWA {
         });
     }
     
-    createInstallButton() {
-        if (this.isInstalled) return;
-        
-        const installBtn = document.createElement('div');
-        installBtn.id = 'pwa-install-fab';
-        installBtn.className = 'fixed bottom-6 right-6 z-40 hidden';
-        installBtn.innerHTML = `
-            <button class="bg-gradient-to-r from-red-600 to-blue-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
-                </svg>
-            </button>
-        `;
-        
-        document.body.appendChild(installBtn);
-        
-        installBtn.querySelector('button').addEventListener('click', () => {
-            this.installApp();
-        });
-    }
     
     createOfflineIndicator() {
         const offlineIndicator = document.createElement('div');
@@ -291,19 +332,6 @@ class SAARSinistrePWA {
         });
     }
     
-    showInstallButton() {
-        const installBtn = document.getElementById('pwa-install-fab');
-        if (installBtn) {
-            installBtn.classList.remove('hidden');
-        }
-    }
-    
-    hideInstallButton() {
-        const installBtn = document.getElementById('pwa-install-fab');
-        if (installBtn) {
-            installBtn.classList.add('hidden');
-        }
-    }
     
     hidePWABar() {
         const pwaBar = document.getElementById('pwa-bar');
@@ -314,7 +342,21 @@ class SAARSinistrePWA {
         
         localStorage.setItem('pwa-installation-dismissed', 'true');
         localStorage.setItem('pwa-installation-dismissed-timestamp', Date.now().toString());
-        console.log('PWA: Installation refusée - mémorisé avec timestamp');
+    }
+    
+    hidePWABarAfterInstallation() {
+        const pwaBar = document.getElementById('pwa-bar');
+        if (pwaBar) {
+            pwaBar.style.transform = 'translateY(-100%)';
+            pwaBar.style.opacity = '0';
+            setTimeout(() => {
+                if (pwaBar.parentNode) {
+                    pwaBar.remove();
+                }
+            }, 300);
+        }
+        
+        this.isInstalled = true;
     }
     
     showOfflineIndicator() {
@@ -353,12 +395,10 @@ class SAARSinistrePWA {
     
     async installApp() {
         if (!this.deferredPrompt) {
-            // Fallback iOS: afficher les instructions A2HS
             if (this.isIOS()) {
                 this.showIOSInstallInstructions();
                 return;
             }
-            console.log('PWA: Aucune invite d\'installation disponible');
             return;
         }
         
@@ -368,10 +408,7 @@ class SAARSinistrePWA {
             const { outcome } = await this.deferredPrompt.userChoice;
             
             if (outcome === 'accepted') {
-                console.log('PWA: Installation acceptée par l\'utilisateur');
                 this.showInstallationSuccess();
-            } else {
-                console.log('PWA: Installation refusée par l\'utilisateur');
             }
             
             this.deferredPrompt = null;
@@ -390,7 +427,7 @@ class SAARSinistrePWA {
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                 </svg>
                 <h3 class="text-xl font-bold mb-2">Installation réussie !</h3>
-                <p class="text-green-100">SAAR Sinistre est maintenant installé sur votre appareil.</p>
+                <p class="text-green-100">SAARCISinistres est maintenant installé sur votre appareil.</p>
             </div>
         `;
         
@@ -400,12 +437,12 @@ class SAARSinistrePWA {
             successNotification.remove();
         }, 3000);
         
+        this.isInstalled = true;
         localStorage.setItem('pwa-installation-accepted', 'true');
         localStorage.removeItem('pwa-installation-dismissed');
-        console.log('PWA: Installation acceptée - mémorisé dans localStorage');
+        localStorage.removeItem('pwa-installation-dismissed-timestamp');
         
-        this.hideInstallButton();
-        this.hidePWABar();
+        this.hidePWABarAfterInstallation();
     }
     
     async updateApp() {
@@ -496,7 +533,6 @@ class SAARSinistrePWA {
             if (now - dismissedTime > oneDayInMs) {
                 localStorage.removeItem('pwa-installation-dismissed');
                 localStorage.removeItem('pwa-installation-dismissed-timestamp');
-                console.log('PWA: Refus expiré - données nettoyées');
                 return true;
             }
         }
@@ -510,7 +546,6 @@ class SAARSinistrePWA {
         localStorage.removeItem('pwa-installation-accepted');
         this.isInstalled = false;
         this.checkInstallationStatus();
-        console.log('PWA: État d\'installation réinitialisé');
     }
     
     forceResetInstallationState() {
@@ -519,7 +554,6 @@ class SAARSinistrePWA {
         localStorage.removeItem('pwa-installation-accepted');
         this.isInstalled = false;
         this.checkInstallationStatus();
-        console.log('PWA: État d\'installation forcé à réinitialiser');
     }
     
     getInstallationState() {
@@ -542,11 +576,9 @@ class SAARSinistrePWA {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (SAARSinistrePWA.isSupported()) {
-        window.saarSinistrePWA = new SAARSinistrePWA();
-    } else {
-        console.log('PWA: Fonctionnalités PWA non supportées par ce navigateur');
+    if (SAARCISinistresPWA.isSupported()) {
+        window.saarSinistrePWA = new SAARCISinistresPWA();
     }
 });
 
-window.SAARSinistrePWA = SAARSinistrePWA; 
+window.SAARCISinistresPWA = SAARCISinistresPWA; 

@@ -6,20 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nouveau mot de passe - SAAR Assurances</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'saar-red': '#FF0000',
-                        'saar-blue': '#1E40AF',
-                        'saar-green': '#059669',
-                    }
-                }
-            }
-        }
-    </script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
 </head>
 
 <body class="bg-gradient-to-br from-red-50 via-white to-green-50 min-h-screen">
@@ -118,40 +106,7 @@
             </form>
 
             <!-- Script pour vérifier la force du mot de passe -->
-            <script>
-                const passwordInput = document.getElementById('password');
-                const passwordStrength = document.getElementById('password-strength');
-                const passwordFeedback = document.getElementById('password-feedback');
 
-                passwordInput.addEventListener('input', function() {
-                    const password = this.value;
-                    let strength = 0;
-                    let feedback = '';
-
-                    if (password.length >= 8) strength += 25;
-                    if (password.match(/[a-z]/)) strength += 25;
-                    if (password.match(/[A-Z]/)) strength += 25;
-                    if (password.match(/[0-9]/)) strength += 25;
-
-                    passwordStrength.style.width = strength + '%';
-
-                    if (strength <= 25) {
-                        passwordStrength.className = 'h-2 rounded-full transition-all duration-300 bg-red-500';
-                        feedback = 'Très faible';
-                    } else if (strength <= 50) {
-                        passwordStrength.className = 'h-2 rounded-full transition-all duration-300 bg-orange-500';
-                        feedback = 'Faible';
-                    } else if (strength <= 75) {
-                        passwordStrength.className = 'h-2 rounded-full transition-all duration-300 bg-yellow-500';
-                        feedback = 'Moyen';
-                    } else {
-                        passwordStrength.className = 'h-2 rounded-full transition-all duration-300 bg-green-500';
-                        feedback = 'Fort';
-                    }
-
-                    passwordFeedback.textContent = feedback;
-                });
-            </script>
         </div>
     </div>
 </body>

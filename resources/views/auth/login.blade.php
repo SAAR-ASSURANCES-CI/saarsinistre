@@ -6,25 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion - SAAR Assurances</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'saar-red': '#FF0000',
-                        'saar-blue': '#1E40AF',
-                        'saar-green': '#059669',
-                    }
-                }
-            }
-        }
-    </script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
 <body class="bg-gradient-to-br from-red-50 via-white to-green-50 min-h-screen">
     <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-md w-full space-y-8">
+            <!-- Bouton retour à l'accueil -->
+            <div class="text-left">
+                <a href="{{ url('/') }}" class="inline-flex items-center text-saar-blue hover:text-saar-red transition-colors duration-200">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    Retour à l'accueil
+                </a>
+            </div>
+            
             <!-- Logo et titre -->
             <div class="text-center">
                 <div class="mx-auto w-32 h-32 rounded-2xl flex items-center justify-center mb-4">

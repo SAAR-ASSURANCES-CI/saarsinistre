@@ -7,61 +7,11 @@
     <title>SAAR AssuranceS Côte d'Ivoire - Déclaration de Sinistre</title>
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0d6efd">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="SAAR Sinistre">
+    <meta name="apple-mobile-web-app-title" content="SAARCISinistres">
     <link rel="apple-touch-icon" sizes="180x180" href="/logo.png">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'saar-orange': '#FF0000',
-                        'saar-blue': '#1E40AF',
-                        'saar-green': '#059669',
-                        'ivory': '#FFF8DC'
-                    },
-                    animation: {
-                        'float': 'float 6s ease-in-out infinite',
-                        'pulse-slow': 'pulse 3s ease-in-out infinite',
-                        'fade-in-up': 'fadeInUp 0.8s ease-out',
-                        'slide-in-right': 'slideInRight 0.8s ease-out',
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': {
-                                transform: 'translateY(0px)'
-                            },
-                            '50%': {
-                                transform: 'translateY(-20px)'
-                            }
-                        },
-                        fadeInUp: {
-                            '0%': {
-                                opacity: '0',
-                                transform: 'translateY(30px)'
-                            },
-                            '100%': {
-                                opacity: '1',
-                                transform: 'translateY(0)'
-                            }
-                        },
-                        slideInRight: {
-                            '0%': {
-                                opacity: '0',
-                                transform: 'translateX(50px)'
-                            },
-                            '100%': {
-                                opacity: '1',
-                                transform: 'translateX(0)'
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
@@ -306,6 +256,9 @@
             <p class="text-gray-600">
                 © 2025 SAAR Assurances Côte d'Ivoire - Tous droits réservés
             </p>
+            <a href="{{ route('login') }}" class="text-gray-400 hover:text-gray-600 text-sm mt-2 inline-block transition-colors duration-200">
+                Accès personnel
+            </a>
         </div>
     </div>
 

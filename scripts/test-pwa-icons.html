@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Icônes PWA SAARCISinistres</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .icon-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .icon-card:hover {
+            transform: translateY(-5px);
+        }
+        .icon-preview {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .icon-info {
+            font-size: 14px;
+            color: #666;
+        }
+        .icon-size {
+            font-weight: bold;
+            color: #1E40AF;
+        }
+        .svg-preview {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            display: block;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .status {
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎨 Test des Icônes PWA SAARCISinistres</h1>
+        <p>Vérification de la qualité et de la cohérence des icônes</p>
+    </div>
+
+    <div class="icon-grid">
+        <div class="icon-card">
+            <img src="/icons/icon-16x16.png" alt="16x16" class="icon-preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div style="display:none; color:red;">❌ Icône manquante</div>
+            <div class="icon-info">
+                <div class="icon-size">16x16px</div>
+                <div>Favicon</div>
+            </div>
+        </div>
+
+        <div class="icon-card">
+            <img src="/icons/icon-32x32.png" alt="32x32" class="icon-preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div style="display:none; color:red;">❌ Icône manquante</div>
+            <div class="icon-info">
+                <div class="icon-size">32x32px</div>
+                <div>Favicon HD</div>
+            </div>
+        </div>
+
+        <div class="icon-card">
+            <img src="/icons/icon-48x48.png" alt="48x48" class="icon-preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div style="display:none; color:red;">❌ Icône manquante</div>
+            <div class="icon-info">
+                <div class="icon-size">48x48px</div>
+                <div>Android</div>
+            </div>
+        </div>
+
+        <div class="icon-card">
+            <img src="/icons/icon-72x72.png" alt="72x72" class="icon-preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div style="display:none; color:red;">❌ Icône manquante</div>
+            <div class="icon-info">
+                <div class="icon-size">72x72px</div>
+                <div>Android</div>
+            </div>
+        </div>
+
+        <div class="icon-card">
+            <img src="/icons/icon-96x96.png" alt="96x96" class="icon-preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div style="display:none; color:red;">❌ Icône manquante</div>
+            <div class="icon-info">
+                <div class="icon-size">96x96px</div>
+                <div>Android</div>
+            </div>
+        </div>
+
+        <div class="icon-card">
+            <img src="/icons/icon-128x128.png" alt="128x128" class="icon-preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div style="display:none; color:red;">❌ Icône manquante</div>
+            <div class="icon-info">
+                <div class="icon-size">128x128px</div>
+                <div>Chrome</div>
+            </div>
+        </div>
+
+        <div class="icon-card">
+            <img src="/icons/icon-144x144.png" alt="144x144" class="icon-preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div style="display:none; color:red;">❌ Icône manquante</div>
+            <div class="icon-info">
+                <div class="icon-size">144x144px</div>
+                <div>Android</div>
+            </div>
+        </div>
+
+        <div class="icon-card">
+            <img src="/icons/icon-152x152.png" alt="152x152" class="icon-preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div style="display:none; color:red;">❌ Icône manquante</div>
+            <div class="icon-info">
+                <div class="icon-size">152x152px</div>
+                <div>iOS</div>
+            </div>
+        </div>
+
+        <div class="icon-card">
+            <img src="/icons/icon-192x192.png" alt="192x192" class="icon-preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div style="display:none; color:red;">❌ Icône manquante</div>
+            <div class="icon-info">
+                <div class="icon-size">192x192px</div>
+                <div>Android (Maskable)</div>
+            </div>
+        </div>
+
+        <div class="icon-card">
+            <img src="/icons/icon-384x384.png" alt="384x384" class="icon-preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div style="display:none; color:red;">❌ Icône manquante</div>
+            <div class="icon-info">
+                <div class="icon-size">384x384px</div>
+                <div>Android</div>
+            </div>
+        </div>
+
+        <div class="icon-card">
+            <img src="/icons/icon-512x512.png" alt="512x512" class="icon-preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div style="display:none; color:red;">❌ Icône manquante</div>
+            <div class="icon-info">
+                <div class="icon-size">512x512px</div>
+                <div>Splash Screen (Maskable)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header">
+        <h2>🎨 Aperçu des Logos SVG</h2>
+        
+        <h3>Logo Principal (Détaillé)</h3>
+        <img src="/icons/icon-saarcisinistres.svg" alt="Logo Principal" class="svg-preview">
+        
+        <h3>Logo Simplifié (Petites tailles)</h3>
+        <img src="/icons/icon-saarcisinistres-simple.svg" alt="Logo Simplifié" class="svg-preview">
+    </div>
+
+    <div class="header">
+        <h2>📱 Test de l'Installation PWA</h2>
+        <div id="pwa-status">
+            <div class="status warning">⏳ Vérification en cours...</div>
+        </div>
+        
+        <button id="install-btn" style="display:none; padding: 15px 30px; background: #1E40AF; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; margin: 20px 0;">
+            📱 Installer SAARCISinistres
+        </button>
+    </div>
+
+    <script>
+        // Test de l'installation PWA
+        let deferredPrompt;
+        const installBtn = document.getElementById('install-btn');
+        const statusDiv = document.getElementById('pwa-status');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'block';
+            statusDiv.innerHTML = '<div class="status success">✅ PWA prêt à être installé</div>';
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    statusDiv.innerHTML = '<div class="status success">🎉 PWA installé avec succès !</div>';
+                } else {
+                    statusDiv.innerHTML = '<div class="status warning">❌ Installation annulée</div>';
+                }
+                deferredPrompt = null;
+                installBtn.style.display = 'none';
+            }
+        });
+
+        // Vérifier si l'app est déjà installée
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            statusDiv.innerHTML = '<div class="status success">✅ PWA déjà installé</div>';
+        }
+
+        // Vérifier le service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistration().then(registration => {
+                if (registration) {
+                    console.log('✅ Service Worker actif');
+                } else {
+                    console.log('❌ Service Worker non trouvé');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
