@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Confirmation de Déclaration - SAAR Assurances</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
 <body class="bg-gradient-to-br from-green-50 via-white to-blue-50 min-h-screen">
@@ -44,7 +44,7 @@
     </div>
 
     <div class="container mx-auto px-4 py-8">
-        <div class="max-w-4xl mx-auto">
+        <div class="max-w-2xl mx-auto">
 
             <!-- Message de succès -->
             <div class="text-center mb-8">
@@ -68,7 +68,7 @@
                     </div>
                 </div>
 
-                <div class="grid md:grid-cols-2 gap-8">
+                <div class="grid sm:grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Informations de l'assuré -->
                     <div>
                         <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
@@ -151,7 +151,7 @@
                         Documents reçus ({{ $sinistre->documents->count() }})
                     </h3>
 
-                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="grid sm:grid-cols-1 md:grid-cols-2 gap-4">
                         @foreach ($sinistre->documents as $document)
                             <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                                 <div class="flex items-start justify-between">
@@ -218,7 +218,7 @@
 
             <!-- Actions -->
             <div class="text-center space-y-4">
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <div class="flex flex-col sm:flex-row gap-3 justify-center">
                     <a href="{{ route('declaration.recu', $sinistre->id) }}"
                         class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-300">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

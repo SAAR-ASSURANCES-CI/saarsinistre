@@ -1,6 +1,6 @@
 {
-  "name": "SAARSinistre - Gestion des sinistres",
-  "short_name": "SAARSinistre",
+  "name": "SAARCISinistres - Gestion des sinistres",
+  "short_name": "SAARCISinistres",
   "description": "Application de gestion des sinistres pour SAAR Assurances Côte d'Ivoire. Déclarez et suivez vos sinistres en ligne.",
   "start_url": "/",
   "scope": "/",
@@ -38,20 +38,6 @@
       "description": "Voir mes sinistres",
       "url": "/assures/dashboard",
       "icons": [ { "src": "/icons/icon-96x96.png", "sizes": "96x96", "type": "image/png" } ]
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshots/mobile-sinistre.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "/screenshots/desktop-dashboard.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide"
     }
   ]
 } 

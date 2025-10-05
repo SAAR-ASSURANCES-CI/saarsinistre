@@ -6,20 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vérification du code - SAAR Assurances</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'saar-red': '#FF0000',
-                        'saar-blue': '#1E40AF',
-                        'saar-green': '#059669',
-                    }
-                }
-            }
-        }
-    </script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
 </head>
 
 <body class="bg-gradient-to-br from-red-50 via-white to-green-50 min-h-screen">
@@ -111,20 +99,7 @@
             </form>
 
             <!-- Script pour améliorer l'expérience utilisateur -->
-            <script>
-                document.getElementById('code').addEventListener('input', function(e) {
 
-                    this.value = this.value.replace(/[^0-9]/g, '');
-                        
-                    if (this.value.length > 6) {
-                        this.value = this.value.slice(0, 6);
-                    }
-
-                });
-
-                // Focus automatique sur le champ
-                document.getElementById('code').focus();
-            </script>
         </div>
     </div>
 </body>

@@ -10,64 +10,12 @@
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#dc2626">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="SAAR Sinistre">
+    <meta name="apple-mobile-web-app-title" content="SAARCISinistres">
     <link rel="apple-touch-icon" sizes="180x180" href="/logo.png">
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'saar-red': '#FF0000',
-                        'saar-blue': '#1E40AF',
-                        'saar-green': '#059669',
-                    },
-                    animation: {
-                        'slide-in': 'slideIn 0.5s ease-out',
-                        'fade-in': 'fadeIn 0.3s ease-out',
-                        'bounce-in': 'bounceIn 0.6s ease-out',
-                        'pulse-slow': 'pulse 2s infinite',
-                    },
-                    keyframes: {
-                        slideIn: {
-                            '0%': {
-                                opacity: '0',
-                                transform: 'translateX(20px)'
-                            },
-                            '100%': {
-                                opacity: '1',
-                                transform: 'translateX(0)'
-                            }
-                        },
-                        fadeIn: {
-                            '0%': {
-                                opacity: '0'
-                            },
-                            '100%': {
-                                opacity: '1'
-                            }
-                        },
-                        bounceIn: {
-                            '0%': {
-                                opacity: '0',
-                                transform: 'scale(0.9)'
-                            },
-                            '50%': {
-                                transform: 'scale(1.05)'
-                            },
-                            '100%': {
-                                opacity: '1',
-                                transform: 'scale(1)'
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
 <body class="bg-gradient-to-br from-red-50 via-white to-green-50 min-h-screen">

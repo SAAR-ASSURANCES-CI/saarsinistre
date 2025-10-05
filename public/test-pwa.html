@@ -3,230 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test PWA - SAAR Sinistre</title>
-    
-    <!-- PWA Meta Tags -->
+    <title>Test PWA SAARCISinistres</title>
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#dc2626">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="SAAR Sinistre">
-    <link rel="apple-touch-icon" href="/icons/icon-192x192.svg">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Service Worker Registration -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js');
-            });
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
         }
-    </script>
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .icon-preview {
+            width: 64px;
+            height: 64px;
+            margin: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button {
+            padding: 10px 20px;
+            background: #1E40AF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #1e3a8a; }
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-br from-red-50 via-white to-blue-50 min-h-screen p-4">
-    <div class="max-w-4xl mx-auto">
-        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-            <h1 class="text-3xl font-bold text-gray-800 mb-4">Test PWA SAAR Sinistre</h1>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Statut PWA -->
-                <div class="bg-blue-50 p-4 rounded-lg">
-                    <h2 class="text-xl font-semibold text-blue-800 mb-3">Statut PWA</h2>
-                    <div id="pwa-status" class="space-y-2">
-                        <div class="flex items-center space-x-2">
-                            <span class="w-3 h-3 rounded-full bg-gray-400" id="sw-status-indicator"></span>
-                            <span id="sw-status-text">Vérification...</span>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="w-3 h-3 rounded-full bg-gray-400" id="install-status-indicator"></span>
-                            <span id="install-status-text">Vérification...</span>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="w-3 h-3 rounded-full bg-gray-400" id="cache-status-indicator"></span>
-                            <span id="cache-status-text">Vérification...</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Actions PWA -->
-                <div class="bg-green-50 p-4 rounded-lg">
-                    <h2 class="text-xl font-semibold text-green-800 mb-3">Actions PWA</h2>
-                    <div class="space-y-3">
-                        <button id="install-btn" class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors hidden">
-                            Installer l'application
-                        </button>
-                        <button id="update-btn" class="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition-colors hidden">
-                            Vérifier les mises à jour
-                        </button>
-                        <button id="clear-cache-btn" class="w-full bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 transition-colors">
-                            Vider le cache
-                        </button>
-                    </div>
-                </div>
+<body>
+    <h1>🧪 Test PWA SAARCISinistres</h1>
+    
+    <div class="test-section">
+        <h2>📱 État de l'Installation PWA</h2>
+        <div id="pwa-status" class="status info">⏳ Vérification en cours...</div>
+        <button id="install-btn" style="display:none;">📱 Installer l'App</button>
+        <button id="reset-btn">🔄 Réinitialiser l'État</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>🎨 Test des Icônes PWA</h2>
+        <div class="icon-grid">
+            <div>
+                <img src="/icons/icon-16x16.png" alt="16x16" class="icon-preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div style="display:none; color:red;">❌ 16x16</div>
+                <div style="text-align:center; font-size:12px;">16x16</div>
             </div>
-            
-            <!-- Informations détaillées -->
-            <div class="mt-6 bg-gray-50 p-4 rounded-lg">
-                <h2 class="text-xl font-semibold text-gray-800 mb-3">Informations détaillées</h2>
-                <div id="pwa-details" class="text-sm text-gray-600 space-y-1">
-                    <div>Navigateur: <span id="browser-info">-</span></div>
-                    <div>Support Service Worker: <span id="sw-support">-</span></div>
-                    <div>Support Push: <span id="push-support">-</span></div>
-                    <div>Mode d'affichage: <span id="display-mode">-</span></div>
-                    <div>Version cache: <span id="cache-version">-</span></div>
-                </div>
+            <div>
+                <img src="/icons/icon-32x32.png" alt="32x32" class="icon-preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div style="display:none; color:red;">❌ 32x32</div>
+                <div style="text-align:center; font-size:12px;">32x32</div>
             </div>
-            
-            <!-- Logs -->
-            <div class="mt-6 bg-gray-50 p-4 rounded-lg">
-                <h2 class="text-xl font-semibold text-gray-800 mb-3">Logs PWA</h2>
-                <div id="pwa-logs" class="bg-black text-green-400 p-3 rounded text-xs font-mono h-32 overflow-y-auto">
-                    <div>Initialisation du test PWA...</div>
-                </div>
+            <div>
+                <img src="/icons/icon-48x48.png" alt="48x48" class="icon-preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div style="display:none; color:red;">❌ 48x48</div>
+                <div style="text-align:center; font-size:12px;">48x48</div>
             </div>
-        </div>
-        
-        <!-- Navigation -->
-        <div class="bg-white rounded-lg shadow-lg p-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Navigation</h2>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <a href="/" class="bg-red-100 text-red-800 p-3 rounded-lg text-center hover:bg-red-200 transition-colors">
-                    Accueil
-                </a>
-                <a href="/declaration" class="bg-blue-100 text-blue-800 p-3 rounded-lg text-center hover:bg-blue-200 transition-colors">
-                    Déclaration
-                </a>
-                <a href="/assures/dashboard" class="bg-green-100 text-green-800 p-3 rounded-lg text-center hover:bg-green-200 transition-colors">
-                    Dashboard Assuré
-                </a>
-                <a href="/admin/dashboard" class="bg-purple-100 text-purple-800 p-3 rounded-lg text-center hover:bg-purple-200 transition-colors">
-                    Dashboard Admin
-                </a>
+            <div>
+                <img src="/icons/icon-96x96.png" alt="96x96" class="icon-preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div style="display:none; color:red;">❌ 96x96</div>
+                <div style="text-align:center; font-size:12px;">96x96</div>
+            </div>
+            <div>
+                <img src="/icons/icon-128x128.png" alt="128x128" class="icon-preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div style="display:none; color:red;">❌ 128x128</div>
+                <div style="text-align:center; font-size:12px;">128x128</div>
+            </div>
+            <div>
+                <img src="/icons/icon-192x192.png" alt="192x192" class="icon-preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div style="display:none; color:red;">❌ 192x192</div>
+                <div style="text-align:center; font-size:12px;">192x192</div>
+            </div>
+            <div>
+                <img src="/icons/icon-512x512.png" alt="512x512" class="icon-preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div style="display:none; color:red;">❌ 512x512</div>
+                <div style="text-align:center; font-size:12px;">512x512</div>
             </div>
         </div>
     </div>
-
-    <!-- PWA Script -->
-    <script src="/js/pwa.js"></script>
     
+    <div class="test-section">
+        <h2>🎨 Aperçu des Logos SVG</h2>
+        <div style="text-align:center;">
+            <h3>Logo Principal</h3>
+            <img src="/icons/icon-saarcisinistres.svg" alt="Logo Principal" style="width:200px; height:200px; border-radius:20px; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
+            
+            <h3>Logo Simplifié</h3>
+            <img src="/icons/icon-saarcisinistres-simple.svg" alt="Logo Simplifié" style="width:200px; height:200px; border-radius:20px; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🔧 Informations de Debug</h2>
+        <div id="debug-info" class="status info">
+            <pre id="debug-content">Chargement...</pre>
+        </div>
+    </div>
+
     <script>
-        // Fonction pour ajouter des logs
-        function addLog(message) {
-            const logs = document.getElementById('pwa-logs');
-            const timestamp = new Date().toLocaleTimeString();
-            logs.innerHTML += `<div>[${timestamp}] ${message}</div>`;
-            logs.scrollTop = logs.scrollHeight;
-        }
-        
-        // Vérifier le statut PWA
-        function checkPWAStatus() {
-            addLog('Vérification du statut PWA...');
+        // Test de l'installation PWA
+        let deferredPrompt;
+        const installBtn = document.getElementById('install-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const statusDiv = document.getElementById('pwa-status');
+        const debugContent = document.getElementById('debug-content');
+
+        // Fonction pour mettre à jour le statut
+        function updateStatus() {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+            const isIOSStandalone = window.navigator.standalone === true;
+            const wasAccepted = localStorage.getItem('pwa-installation-accepted') === 'true';
+            const wasDismissed = localStorage.getItem('pwa-installation-dismissed') === 'true';
             
-            // Statut du Service Worker
-            if ('serviceWorker' in navigator) {
-                document.getElementById('sw-status-indicator').className = 'w-3 h-3 rounded-full bg-green-400';
-                document.getElementById('sw-status-text').textContent = 'Service Worker supporté';
-                addLog('Service Worker: Supporté');
+            const debugInfo = {
+                isStandalone,
+                isIOSStandalone,
+                wasAccepted,
+                wasDismissed,
+                userAgent: navigator.userAgent,
+                serviceWorker: 'serviceWorker' in navigator,
+                manifest: document.querySelector('link[rel="manifest"]') ? 'Présent' : 'Manquant'
+            };
+            
+            debugContent.textContent = JSON.stringify(debugInfo, null, 2);
+            
+            if (isStandalone || isIOSStandalone) {
+                statusDiv.className = 'status success';
+                statusDiv.textContent = '✅ PWA déjà installé et en mode standalone';
+                installBtn.style.display = 'none';
+            } else if (wasAccepted) {
+                statusDiv.className = 'status warning';
+                statusDiv.textContent = '⚠️ PWA marqué comme installé mais pas en mode standalone';
+                installBtn.style.display = 'none';
+            } else if (wasDismissed) {
+                statusDiv.className = 'status warning';
+                statusDiv.textContent = '❌ Installation refusée par l\'utilisateur';
+                installBtn.style.display = 'block';
             } else {
-                document.getElementById('sw-status-indicator').className = 'w-3 h-3 rounded-full bg-red-400';
-                document.getElementById('sw-status-text').textContent = 'Service Worker non supporté';
-                addLog('Service Worker: Non supporté');
-            }
-            
-            // Statut d'installation
-            if (window.matchMedia('(display-mode: standalone)').matches) {
-                document.getElementById('install-status-indicator').className = 'w-3 h-3 rounded-full bg-green-400';
-                document.getElementById('install-status-text').textContent = 'Application installée';
-                addLog('Installation: Application installée');
-            } else {
-                document.getElementById('install-status-indicator').className = 'w-3 h-3 rounded-full bg-yellow-400';
-                document.getElementById('install-status-text').textContent = 'Application non installée';
-                addLog('Installation: Application non installée');
-            }
-            
-            // Statut du cache
-            if ('caches' in window) {
-                document.getElementById('cache-status-indicator').className = 'w-3 h-3 rounded-full bg-green-400';
-                document.getElementById('cache-status-text').textContent = 'Cache API supportée';
-                addLog('Cache: API supportée');
-            } else {
-                document.getElementById('cache-status-indicator').className = 'w-3 h-3 rounded-full bg-red-400';
-                document.getElementById('cache-status-text').textContent = 'Cache API non supportée';
-                addLog('Cache: API non supportée');
-            }
-        }
-        
-        // Remplir les informations détaillées
-        function fillDetails() {
-            // Navigateur
-            document.getElementById('browser-info').textContent = navigator.userAgent.split(' ').pop();
-            
-            // Support Service Worker
-            document.getElementById('sw-support').textContent = 'serviceWorker' in navigator ? 'Oui' : 'Non';
-            
-            // Support Push
-            document.getElementById('push-support').textContent = 'PushManager' in window ? 'Oui' : 'Non';
-            
-            // Mode d'affichage
-            document.getElementById('display-mode').textContent = window.matchMedia('(display-mode: standalone)').matches ? 'Standalone' : 'Navigateur';
-            
-            // Version cache
-            if (window.saarSinistrePWA && window.saarSinistrePWA.registration) {
-                document.getElementById('cache-version').textContent = 'v1.0.0';
-            } else {
-                document.getElementById('cache-version').textContent = 'Non disponible';
+                statusDiv.className = 'status info';
+                statusDiv.textContent = 'ℹ️ PWA prêt à être installé';
+                installBtn.style.display = 'block';
             }
         }
-        
-        // Gérer les boutons
-        document.getElementById('clear-cache-btn').addEventListener('click', async () => {
-            addLog('Vidage du cache...');
-            if ('caches' in window) {
-                try {
-                    const cacheNames = await caches.keys();
-                    await Promise.all(cacheNames.map(name => caches.delete(name)));
-                    addLog('Cache vidé avec succès');
-                    alert('Cache vidé avec succès');
-                } catch (error) {
-                    addLog('Erreur lors du vidage du cache: ' + error.message);
-                    alert('Erreur lors du vidage du cache');
-                }
-            }
-        });
-        
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', () => {
-            addLog('Page chargée');
-            checkPWAStatus();
-            fillDetails();
-            
-            // Attendre que la PWA soit initialisée
-            setTimeout(() => {
-                if (window.saarSinistrePWA) {
-                    addLog('PWA initialisée avec succès');
-                    
-                    // Afficher le bouton d'installation si disponible
-                    if (window.saarSinistrePWA.deferredPrompt) {
-                        document.getElementById('install-btn').classList.remove('hidden');
-                        addLog('Bouton d\'installation affiché');
-                    }
-                } else {
-                    addLog('PWA non initialisée');
-                }
-            }, 2000);
-        });
-        
-        // Écouter les événements PWA
+
+        // Événements d'installation
         window.addEventListener('beforeinstallprompt', (e) => {
-            addLog('Événement beforeinstallprompt détecté');
+            e.preventDefault();
+            deferredPrompt = e;
+            statusDiv.className = 'status success';
+            statusDiv.textContent = '✅ PWA prêt à être installé';
+            installBtn.style.display = 'block';
         });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    statusDiv.className = 'status success';
+                    statusDiv.textContent = '🎉 PWA installé avec succès !';
+                } else {
+                    statusDiv.className = 'status warning';
+                    statusDiv.textContent = '❌ Installation annulée';
+                }
+                deferredPrompt = null;
+                installBtn.style.display = 'none';
+            }
+        });
+
+        resetBtn.addEventListener('click', () => {
+            localStorage.removeItem('pwa-installation-accepted');
+            localStorage.removeItem('pwa-installation-dismissed');
+            localStorage.removeItem('pwa-installation-dismissed-timestamp');
+            updateStatus();
+        });
+
+        // Mise à jour initiale
+        updateStatus();
         
-        window.addEventListener('appinstalled', (e) => {
-            addLog('Application installée');
-            document.getElementById('install-status-indicator').className = 'w-3 h-3 rounded-full bg-green-400';
-            document.getElementById('install-status-text').textContent = 'Application installée';
-        });
+        // Vérifier le service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistration().then(registration => {
+                if (registration) {
+                    console.log('✅ Service Worker actif');
+                } else {
+                    console.log('❌ Service Worker non trouvé');
+                }
+            });
+        }
     </script>
 </body>
 </html>
