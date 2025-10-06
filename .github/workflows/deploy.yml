@@ -51,14 +51,17 @@ jobs:
             # Mettre à jour le code
             echo "📥 Mise à jour du code..."
             cd $PROJECT_DIR
+            sudo -u www-data git config --global --add safe.directory $PROJECT_DIR
             sudo -u www-data git fetch origin
             sudo -u www-data git reset --hard origin/main
+            sudo chown -R www-data:www-data $PROJECT_DIR
             
             # Installer les dépendances
             echo "📦 Installation des dépendances..."
             sudo -u www-data composer install --no-dev --optimize-autoloader
             sudo -u www-data npm ci
             sudo -u www-data npm run build
+            sudo chown -R www-data:www-data $PROJECT_DIR
             
             # Exécuter les migrations
             echo "🗄️ Exécution des migrations..."
@@ -69,6 +72,7 @@ jobs:
             sudo -u www-data php artisan config:cache
             sudo -u www-data php artisan route:cache
             sudo -u www-data php artisan view:cache
+            sudo chown -R www-data:www-data $PROJECT_DIR
             
             # Redémarrer les services
             echo "🔄 Redémarrage des services..."
@@ -107,7 +111,7 @@ jobs:
                # Rollback automatique
                PROJECT_DIR="/var/www/sinistres.saarassurancesci.com/saarsinistre"
                BACKUP_DIR="/var/www/sinistres.saarassurancesci.com/backups/saarsinistre"
-              LATEST_BACKUP=$(ls -t $BACKUP_DIR/backup_* | head -n1)
+               LATEST_BACKUP=$(ls -t $BACKUP_DIR/backup_* | head -n1)
               
               if [ -n "$LATEST_BACKUP" ]; then
                 echo "🔄 Restauration depuis: $LATEST_BACKUP"
