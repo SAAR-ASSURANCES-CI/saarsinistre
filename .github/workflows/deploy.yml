@@ -25,28 +25,11 @@ jobs:
           script: |
             # Configuration
             PROJECT_DIR="/var/www/sinistres.saarassurancesci.com/saarsinistre"
-            BACKUP_DIR="/var/www/sinistres.saarassurancesci.com/backups/saarsinistre"
-            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
             
-            # Créer le répertoire de backup s'il n'existe pas
-            sudo mkdir -p $BACKUP_DIR
-            
-            # Sauvegarder la version actuelle
-            echo "🔄 Sauvegarde de la version actuelle..."
-            sudo cp -r $PROJECT_DIR $BACKUP_DIR/backup_$TIMESTAMP/
-            
-            # Arrêter les services temporairement
-            echo "⏸️ Arrêt des services..."
-            sudo systemctl stop nginx
-            sudo systemctl stop php8.4-fpm
-            
-            # Nettoyer les caches
-            echo "🧹 Nettoyage des caches..."
-            cd $PROJECT_DIR
-            sudo -u www-data php artisan cache:clear
-            sudo -u www-data php artisan config:clear
-            sudo -u www-data php artisan route:clear
-            sudo -u www-data php artisan view:clear
+            # Sauvegarder les fichiers critiques
+            echo "🔄 Sauvegarde des fichiers critiques..."
+            sudo -u www-data cp $PROJECT_DIR/.env $PROJECT_DIR/.env.backup
+            sudo -u www-data cp -r $PROJECT_DIR/storage $PROJECT_DIR/storage.backup
             
             # Mettre à jour le code
             echo "📥 Mise à jour du code..."
@@ -54,14 +37,12 @@ jobs:
             sudo -u www-data git config --global --add safe.directory $PROJECT_DIR
             sudo -u www-data git fetch origin
             sudo -u www-data git reset --hard origin/main
-            sudo chown -R www-data:www-data $PROJECT_DIR
             
             # Installer les dépendances
             echo "📦 Installation des dépendances..."
             sudo -u www-data composer install --no-dev --optimize-autoloader
-            sudo -u www-data npm ci
+            sudo -u www-data npm ci --cache /tmp/.npm
             sudo -u www-data npm run build
-            sudo chown -R www-data:www-data $PROJECT_DIR
             
             # Exécuter les migrations
             echo "🗄️ Exécution des migrations..."
@@ -72,20 +53,13 @@ jobs:
             sudo -u www-data php artisan config:cache
             sudo -u www-data php artisan route:cache
             sudo -u www-data php artisan view:cache
-            sudo chown -R www-data:www-data $PROJECT_DIR
             
             # Redémarrer les services
             echo "🔄 Redémarrage des services..."
-            sudo systemctl start php8.4-fpm
-            sudo systemctl start nginx
-            
-            # Vérifier le statut
-            echo "✅ Vérification du statut..."
-            sudo systemctl status nginx --no-pager
-            sudo systemctl status php8.4-fpm --no-pager
+            sudo systemctl reload nginx
+            sudo systemctl reload php8.4-fpm
             
             echo "🎉 Déploiement terminé avec succès !"
-            echo "📁 Backup disponible dans: $BACKUP_DIR/backup_$TIMESTAMP"
         
       - name: Health Check
         uses: appleboy/ssh-action@v1.0.3
@@ -104,22 +78,15 @@ jobs:
               echo "❌ Application non accessible (HTTP $HTTP_STATUS)"
               echo "🔄 Tentative de rollback..."
               
-               # Rollback automatique
-               PROJECT_DIR="/var/www/sinistres.saarassurancesci.com/saarsinistre"
-               BACKUP_DIR="/var/www/sinistres.saarassurancesci.com/backups/saarsinistre"
-               LATEST_BACKUP=$(ls -t $BACKUP_DIR/backup_* | head -n1)
-              
-              if [ -n "$LATEST_BACKUP" ]; then
-                echo "🔄 Restauration depuis: $LATEST_BACKUP"
-                sudo rm -rf $PROJECT_DIR
-                sudo cp -r $LATEST_BACKUP $PROJECT_DIR
-                sudo chown -R www-data:www-data $PROJECT_DIR
-                sudo systemctl restart nginx
-                sudo systemctl restart php8.4-fpm
-                echo "✅ Rollback terminé"
-              else
-                echo "❌ Aucun backup disponible pour le rollback"
-              fi
+              # Rollback simple avec Git
+              cd $PROJECT_DIR
+              sudo -u www-data git reset --hard HEAD~1
+              sudo -u www-data php artisan config:cache
+              sudo -u www-data php artisan route:cache
+              sudo -u www-data php artisan view:cache
+              sudo systemctl reload nginx
+              sudo systemctl reload php8.4-fpm
+              echo "✅ Rollback terminé"
               
               exit 1
             fi
