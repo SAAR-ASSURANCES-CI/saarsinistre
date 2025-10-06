@@ -22,7 +22,7 @@ class SinistreFactory extends Factory
             'numero_sinistre' => 'SIN-' . date('Y') . '-' . $this->faker->unique()->numberBetween(1000, 9999),
             'nom_assure' => $this->faker->name(),
             'email_assure' => $this->faker->unique()->safeEmail(),
-            'telephone_assure' => '+225 ' . $this->faker->phoneNumber(),
+            'telephone_assure' => '+225' . $this->faker->numerify('########'),
             'numero_police' => 'POL-' . date('Y') . '-' . $this->faker->numberBetween(1000, 9999),
             'date_sinistre' => $this->faker->dateTimeBetween('-30 days', 'now'),
             'heure_sinistre' => $this->faker->time(),
@@ -34,7 +34,7 @@ class SinistreFactory extends Factory
             'statut' => $this->faker->randomElement(['en_attente', 'en_cours', 'expertise_requise', 'regle', 'clos']),
             'montant_estime' => $this->faker->numberBetween(50000, 2000000),
             'jours_en_cours' => $this->faker->numberBetween(1, 30),
-            'en_retard' => $this->faker->boolean(20), // 20% de chance d'être en retard
+            'en_retard' => $this->faker->boolean(20),
         ];
     }
 
