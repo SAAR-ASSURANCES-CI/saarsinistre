@@ -33,7 +33,7 @@ jobs:
             
             # Sauvegarder la version actuelle
             echo "🔄 Sauvegarde de la version actuelle..."
-            sudo cp -r $PROJECT_DIR $BACKUP_DIR/backup_$TIMESTAMP
+            sudo cp -r $PROJECT_DIR $BACKUP_DIR/backup_$TIMESTAMP/
             
             # Arrêter les services temporairement
             echo "⏸️ Arrêt des services..."
@@ -78,10 +78,6 @@ jobs:
             echo "🔄 Redémarrage des services..."
             sudo systemctl start php8.4-fpm
             sudo systemctl start nginx
-            
-            # Redémarrer les queues
-            echo "🔄 Redémarrage des queues..."
-            sudo -u www-data php artisan queue:restart
             
             # Vérifier le statut
             echo "✅ Vérification du statut..."
