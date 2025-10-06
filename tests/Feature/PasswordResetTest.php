@@ -29,7 +29,7 @@ class PasswordResetTest extends TestCase
         ]);
 
         $response = $this->post('/password/reset', [
-            'telephone' => '0701234567'
+            'telephone' => '+2250701234567'
         ]);
 
         $response->assertRedirect('/password/reset/verify');
@@ -54,7 +54,7 @@ class PasswordResetTest extends TestCase
     public function test_assure_cannot_request_reset_with_unregistered_phone()
     {
         $response = $this->post('/password/reset', [
-            'telephone' => '0701234567'
+            'telephone' => '+2250701234567'
         ]);
 
         $response->assertSessionHasErrors(['telephone']);
@@ -72,12 +72,13 @@ class PasswordResetTest extends TestCase
 
         $response = $this->withSession(['telephone' => '+2250701234567'])
             ->post('/password/reset/verify', [
+                'telephone' => '+2250701234567',
                 'code' => '123456'
             ]);
 
         $response->assertRedirect('/password/reset/new');
         $response->assertSessionHas('success');
-        $response->assertSessionHas('verified_telephone', '+2250701234567');
+        $response->assertSessionHas('reset_telephone', '+2250701234567');
 
         // Vérifier que le code a été marqué comme utilisé
         $this->assertDatabaseHas('password_reset_codes', [
@@ -90,6 +91,7 @@ class PasswordResetTest extends TestCase
     {
         $response = $this->withSession(['telephone' => '+2250701234567'])
             ->post('/password/reset/verify', [
+                'telephone' => '+2250701234567',
                 'code' => '000000'
             ]);
 
@@ -109,7 +111,7 @@ class PasswordResetTest extends TestCase
             'telephone_assure' => '+2250701234567'
         ]);
 
-        $response = $this->withSession(['verified_telephone' => '+2250701234567'])
+        $response = $this->withSession(['reset_telephone' => '+2250701234567'])
             ->post('/password/reset/new', [
                 'password' => 'newpassword123',
                 'password_confirmation' => 'newpassword123'
@@ -125,7 +127,7 @@ class PasswordResetTest extends TestCase
 
     public function test_password_must_be_confirmed()
     {
-        $response = $this->withSession(['verified_telephone' => '+2250701234567'])
+        $response = $this->withSession(['reset_telephone' => '+2250701234567'])
             ->post('/password/reset/new', [
                 'password' => 'newpassword123',
                 'password_confirmation' => 'differentpassword'
@@ -136,7 +138,7 @@ class PasswordResetTest extends TestCase
 
     public function test_password_must_be_minimum_length()
     {
-        $response = $this->withSession(['verified_telephone' => '+2250701234567'])
+        $response = $this->withSession(['reset_telephone' => '+2250701234567'])
             ->post('/password/reset/new', [
                 'password' => '123',
                 'password_confirmation' => '123'
@@ -157,6 +159,7 @@ class PasswordResetTest extends TestCase
 
         $response = $this->withSession(['telephone' => '+2250701234567'])
             ->post('/password/reset/verify', [
+                'telephone' => '+2250701234567',
                 'code' => '123456'
             ]);
 
