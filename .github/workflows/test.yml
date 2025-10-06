@@ -76,11 +76,14 @@ jobs:
           echo "DB_PASSWORD=testpass" >> .env
           echo "APP_ENV=testing" >> .env
           php artisan config:cache
-          php artisan config:clear
-          php artisan cache:clear
         
       - name: Run database migrations
         run: php artisan migrate --force
+        
+      - name: Clear caches
+        run: |
+          php artisan config:clear
+          php artisan cache:clear
         
       - name: Run PHP tests
         run: php artisan test
