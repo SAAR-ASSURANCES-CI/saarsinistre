@@ -70,7 +70,7 @@ jobs:
           script: |
             # Vérifier que l'application répond
             echo "🔍 Vérification de l'application..."
-            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost)
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://sinistres.saarassurancesci.com)
             
             if [ "$HTTP_STATUS" = "200" ]; then
               echo "✅ Application accessible (HTTP $HTTP_STATUS)"
