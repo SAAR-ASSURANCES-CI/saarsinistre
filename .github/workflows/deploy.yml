@@ -1,0 +1,125 @@
+name: Deploy SAARCISinistres
+
+on:
+  workflow_run:
+    workflows: ["Tests SAARCISinistres"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            # Configuration
+            PROJECT_DIR="/var/www/sinistres.saarassurancesci.com/saarsinistre"
+            BACKUP_DIR="/var/backups/saarsinistre"
+            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+            
+            # Créer le répertoire de backup s'il n'existe pas
+            sudo mkdir -p $BACKUP_DIR
+            
+            # Sauvegarder la version actuelle
+            echo "🔄 Sauvegarde de la version actuelle..."
+            sudo cp -r $PROJECT_DIR $BACKUP_DIR/backup_$TIMESTAMP
+            
+            # Arrêter les services temporairement
+            echo "⏸️ Arrêt des services..."
+            sudo systemctl stop nginx
+            sudo systemctl stop php8.4-fpm
+            
+            # Nettoyer les caches
+            echo "🧹 Nettoyage des caches..."
+            cd $PROJECT_DIR
+            sudo -u www-data php artisan cache:clear
+            sudo -u www-data php artisan config:clear
+            sudo -u www-data php artisan route:clear
+            sudo -u www-data php artisan view:clear
+            
+            # Mettre à jour le code
+            echo "📥 Mise à jour du code..."
+            cd $PROJECT_DIR
+            sudo -u www-data git fetch origin
+            sudo -u www-data git reset --hard origin/main
+            
+            # Installer les dépendances
+            echo "📦 Installation des dépendances..."
+            sudo -u www-data composer install --no-dev --optimize-autoloader
+            sudo -u www-data npm ci
+            sudo -u www-data npm run build
+            
+            # Exécuter les migrations
+            echo "🗄️ Exécution des migrations..."
+            sudo -u www-data php artisan migrate --force
+            
+            # Optimiser l'application
+            echo "⚡ Optimisation de l'application..."
+            sudo -u www-data php artisan config:cache
+            sudo -u www-data php artisan route:cache
+            sudo -u www-data php artisan view:cache
+            
+            # Redémarrer les services
+            echo "🔄 Redémarrage des services..."
+            sudo systemctl start php8.4-fpm
+            sudo systemctl start nginx
+            
+            # Redémarrer les queues
+            echo "🔄 Redémarrage des queues..."
+            sudo -u www-data php artisan queue:restart
+            
+            # Vérifier le statut
+            echo "✅ Vérification du statut..."
+            sudo systemctl status nginx --no-pager
+            sudo systemctl status php8.4-fpm --no-pager
+            
+            echo "🎉 Déploiement terminé avec succès !"
+            echo "📁 Backup disponible dans: $BACKUP_DIR/backup_$TIMESTAMP"
+        
+      - name: Health Check
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            # Vérifier que l'application répond
+            echo "🔍 Vérification de l'application..."
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost)
+            
+            if [ "$HTTP_STATUS" = "200" ]; then
+              echo "✅ Application accessible (HTTP $HTTP_STATUS)"
+            else
+              echo "❌ Application non accessible (HTTP $HTTP_STATUS)"
+              echo "🔄 Tentative de rollback..."
+              
+               # Rollback automatique
+               PROJECT_DIR="/var/www/sinistres.saarassurancesci.com/saarsinistre"
+               BACKUP_DIR="/var/backups/saarsinistre"
+              LATEST_BACKUP=$(ls -t $BACKUP_DIR/backup_* | head -n1)
+              
+              if [ -n "$LATEST_BACKUP" ]; then
+                echo "🔄 Restauration depuis: $LATEST_BACKUP"
+                sudo rm -rf $PROJECT_DIR
+                sudo cp -r $LATEST_BACKUP $PROJECT_DIR
+                sudo chown -R www-data:www-data $PROJECT_DIR
+                sudo systemctl restart nginx
+                sudo systemctl restart php8.4-fpm
+                echo "✅ Rollback terminé"
+              else
+                echo "❌ Aucun backup disponible pour le rollback"
+              fi
+              
+              exit 1
+            fi
