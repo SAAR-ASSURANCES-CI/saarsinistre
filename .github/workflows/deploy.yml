@@ -25,7 +25,7 @@ jobs:
           script: |
             # Configuration
             PROJECT_DIR="/var/www/sinistres.saarassurancesci.com/saarsinistre"
-            BACKUP_DIR="/var/backups/saarsinistre"
+            BACKUP_DIR="/var/www/sinistres.saarassurancesci.com/backups/saarsinistre"
             TIMESTAMP=$(date +%Y%m%d_%H%M%S)
             
             # Créer le répertoire de backup s'il n'existe pas
@@ -106,7 +106,7 @@ jobs:
               
                # Rollback automatique
                PROJECT_DIR="/var/www/sinistres.saarassurancesci.com/saarsinistre"
-               BACKUP_DIR="/var/backups/saarsinistre"
+               BACKUP_DIR="/var/www/sinistres.saarassurancesci.com/backups/saarsinistre"
               LATEST_BACKUP=$(ls -t $BACKUP_DIR/backup_* | head -n1)
               
               if [ -n "$LATEST_BACKUP" ]; then
