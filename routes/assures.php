@@ -43,7 +43,7 @@ Route::middleware(['auth'])->prefix('assures')->name('assures.')->group(function
     
 });
 
-// Déclaration de sinistre (accessible à tous ou à restreindre selon besoin)
+// Déclaration de sinistre
 Route::prefix('declaration')->name('declaration.')->group(function () {
     Route::get('/formulaire', [DeclarationController::class, 'create'])->name('create');
     Route::post('/store', [DeclarationController::class, 'store'])->name('store');

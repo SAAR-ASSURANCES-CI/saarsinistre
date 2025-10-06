@@ -1,0 +1,106 @@
+name: Tests SAARCISinistres
+
+on:
+  push:
+    branches: [main, develop, feature/*]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: admin1234
+          MYSQL_DATABASE: saarsinistre_test
+          MYSQL_USER: testuser
+          MYSQL_PASSWORD: testpass
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+          extensions: mbstring, dom, fileinfo, mysql, pdo_mysql, bcmath, ctype, curl, gd, iconv, intl, json, openssl, pcre, pdo, tokenizer, xml, zip, xdebug
+          coverage: xdebug
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          
+      - name: Cache Composer
+        uses: actions/cache@v3
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ hashFiles('composer.lock') }}
+          
+      - name: Cache NPM
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: npm-${{ hashFiles('package-lock.json') }}
+          
+      - name: Install Composer dependencies
+        run: composer install --optimize-autoloader
+        
+      - name: Install NPM dependencies
+        run: npm ci
+        
+      - name: Build assets
+        run: npm run build
+        
+      - name: Copy environment file
+        run: cp .env.example .env
+        
+      - name: Generate application key
+        run: php artisan key:generate
+        
+      - name: Configure database for testing
+        run: |
+          echo "DB_CONNECTION=mysql" >> .env
+          echo "DB_DATABASE=saarsinistre_test" >> .env
+          echo "DB_HOST=127.0.0.1" >> .env
+          echo "DB_PORT=3306" >> .env
+          echo "DB_USERNAME=testuser" >> .env
+          echo "DB_PASSWORD=testpass" >> .env
+          echo "APP_ENV=testing" >> .env
+          php artisan config:cache
+        
+      - name: Run database migrations
+        run: php artisan migrate --force
+        
+      - name: Clear caches
+        run: |
+          php artisan config:clear
+          php artisan cache:clear
+        
+      - name: Run PHP tests
+        run: php artisan test
+        
+      - name: Run PHP tests with coverage
+        run: php artisan test --coverage --coverage-html=storage/app/coverage --coverage-text=storage/app/coverage.txt
+        
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: storage/app/coverage/
+          
+      - name: Upload coverage text
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-text
+          path: storage/app/coverage.txt

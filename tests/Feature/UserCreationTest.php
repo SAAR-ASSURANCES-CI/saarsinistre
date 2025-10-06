@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Jobs\SendUserCredentialsEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
@@ -17,15 +16,18 @@ class UserCreationTest extends TestCase
     {
         Queue::fake();
 
+        $admin = User::factory()->create(['role' => 'admin']);
+
         $userData = [
             'nom_complet' => 'Jean Dupont',
             'email' => 'jean.dupont@example.com',
             'role' => 'gestionnaire',
         ];
 
-        $response = $this->post(route('gestionnaires.dashboard.users.store'), $userData);
+        $response = $this->actingAs($admin)
+            ->post(route('gestionnaires.dashboard.users.store'), $userData);
 
-        // Vérifier que l'utilisateur a été créé
+        
         $this->assertDatabaseHas('users', [
             'nom_complet' => 'Jean Dupont',
             'email' => 'jean.dupont@example.com',
@@ -34,14 +36,17 @@ class UserCreationTest extends TestCase
 
         $user = User::where('email', 'jean.dupont@example.com')->first();
 
-        // Vérifier que l'utilisateur a un mot de passe temporaire
         $this->assertNotNull($user->password_temp);
         $this->assertNotNull($user->password_expire_at);
         $this->assertTrue($user->password_expire_at->gt(now()));
 
-        // Vérifier que l'email a été mis en queue
         Queue::assertPushed(SendUserCredentialsEmail::class, function ($job) use ($user) {
-            return $job->user->id === $user->id;
+            
+            $reflection = new \ReflectionClass($job);
+            $userProperty = $reflection->getProperty('user');
+            $userProperty->setAccessible(true);
+            $jobUser = $userProperty->getValue($job);
+            return $jobUser->id === $user->id;
         });
 
         $response->assertRedirect(route('gestionnaires.dashboard.users.index'));
@@ -50,7 +55,6 @@ class UserCreationTest extends TestCase
 
     public function test_password_generation_creates_6_digit_password()
     {
-        // Utiliser la réflexion pour tester la méthode privée
         $controller = new \App\Http\Controllers\UserController();
         $reflection = new \ReflectionClass($controller);
         $method = $reflection->getMethod('generateTemporaryPassword');
@@ -58,7 +62,6 @@ class UserCreationTest extends TestCase
 
         $password = $method->invoke($controller);
 
-        // Vérifier que le mot de passe a 6 chiffres
         $this->assertEquals(6, strlen($password));
         $this->assertTrue(is_numeric($password));
     }
