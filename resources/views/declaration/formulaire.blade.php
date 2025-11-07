@@ -43,11 +43,11 @@
     </script>
     
     <!-- Gestionnaire d'upload optimisé -->
-    <script src="{{ asset('js/upload-manager.js') }}"></script>
-    <script src="{{ asset('js/declaration.js') }}"></script>
+    <script src="{{ asset('js/upload-manager.js') }}?v={{ config('app.asset_version') }}"></script>
+    <script src="{{ asset('js/declaration.js') }}?v={{ config('app.asset_version') }}"></script>
     
     <!-- PWA Script -->
-    <script src="{{ asset('js/pwa.js') }}"></script>
+    <script src="{{ asset('js/pwa.js') }}?v={{ config('app.asset_version') }}"></script>
 </body>
 
 </html>

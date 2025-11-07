@@ -107,6 +107,30 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Application Version
+    |--------------------------------------------------------------------------
+    |
+    | This value is used for cache busting assets. It should be updated
+    | on each deployment to ensure users get the latest version of assets.
+    |
+    */
+
+    'version' => env('APP_VERSION', '1.0.0'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Asset Version (for cache busting)
+    |--------------------------------------------------------------------------
+    |
+    | This timestamp-based version is used to bust browser cache for static
+    | assets. It's automatically generated but can be overridden via .env
+    |
+    */
+
+    'asset_version' => env('ASSET_VERSION', time()),
+
+    /*
+    |--------------------------------------------------------------------------
     | Maintenance Mode Driver
     |--------------------------------------------------------------------------
     |

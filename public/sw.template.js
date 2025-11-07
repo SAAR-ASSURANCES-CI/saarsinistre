@@ -11,7 +11,6 @@ const STATIC_ASSETS = [
     '/offline.html',
 ];
 
-
 const ROUTES_TO_CACHE = [];
 
 async function cacheFirst(request) {
@@ -169,7 +168,7 @@ self.addEventListener('fetch', event => {
         return;
     }
     
-    // Par défaut: stale-while-revalidate pour un bon équilibre
+    
     event.respondWith(staleWhileRevalidate(request));
 });
 
@@ -219,4 +218,5 @@ self.addEventListener('error', event => {
 
 self.addEventListener('unhandledrejection', event => {
     console.error('Service Worker: Promesse rejetée non gérée:', event.reason);
-}); 
+});
+

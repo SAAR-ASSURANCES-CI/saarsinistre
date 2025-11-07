@@ -62,7 +62,7 @@
     <!-- Modal componennt -->
     @include('users.partials.modals')
 
-    <script src="{{ asset('js/users/users.js') }}"></script>
+    <script src="{{ asset('js/users/users.js') }}?v={{ config('app.asset_version') }}"></script>
 </body>
 
 </html>

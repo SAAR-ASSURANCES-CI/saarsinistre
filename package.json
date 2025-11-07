@@ -3,9 +3,12 @@
     "private": true,
     "type": "module",
     "scripts": {
+        "prebuild": "node scripts/update-sw-version.mjs",
         "build": "vite build",
+        "postbuild": "echo Build terminé avec versioning du cache",
         "dev": "vite",
-        "icons:convert": "node scripts/convert-icons.mjs"
+        "icons:convert": "node scripts/convert-icons.mjs",
+        "update-cache-version": "node scripts/update-sw-version.mjs"
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.10",

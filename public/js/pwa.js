@@ -175,7 +175,10 @@ class SAARCISinistresPWA {
     async initServiceWorker() {
         if ('serviceWorker' in navigator) {
             try {
-                this.registration = await navigator.serviceWorker.register('/sw.js');
+                // Enregistrement avec vérification régulière des mises à jour
+                this.registration = await navigator.serviceWorker.register('/sw.js', {
+                    updateViaCache: 'none' 
+                });
                 
                 this.registration.addEventListener('updatefound', () => {
                     const newWorker = this.registration.installing;
@@ -191,6 +194,18 @@ class SAARCISinistresPWA {
                     if (event.data && event.data.type === 'UPDATE_AVAILABLE') {
                         this.updateAvailable = true;
                         this.showUpdateNotification();
+                    }
+                });
+                
+                // Vérifier les mises à jour toutes les 30 minutes
+                setInterval(() => {
+                    this.checkForUpdates();
+                }, 30 * 60 * 1000);
+                
+                // Vérifier quand la page redevient visible
+                document.addEventListener('visibilitychange', () => {
+                    if (!document.hidden) {
+                        this.checkForUpdates();
                     }
                 });
                 

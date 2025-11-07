@@ -19,7 +19,7 @@
         });
       }
     </script>
-    <script src="/js/pwa.js"></script>
+    <script src="/js/pwa.js?v={{ config('app.asset_version') }}"></script>
 </head>
 
 <body class="bg-gradient-to-br from-red-50 via-white to-green-50 min-h-screen overflow-x-hidden">
