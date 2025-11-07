@@ -7,8 +7,18 @@ class Utils {
 
     static formatTime(timeString) {
         if (!timeString) return "";
-        if (timeString.match(/^\d{2}:\d{2}$/)) return timeString;
+        
+        // Vérifier si c'est un format HH:MM ou HH:MM:SS
+        if (timeString.match(/^\d{2}:\d{2}(:\d{2})?$/)) {
+            // Extraire uniquement HH:MM
+            return timeString.substring(0, 5);
+        }
+        
+        // Fallback pour les autres formats
         const date = new Date(timeString);
+        if (isNaN(date.getTime())) {
+            return timeString; 
+        }
         return date.toLocaleTimeString("fr-FR", {
             hour: "2-digit",
             minute: "2-digit",
