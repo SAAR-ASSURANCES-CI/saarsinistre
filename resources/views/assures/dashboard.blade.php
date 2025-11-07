@@ -578,6 +578,6 @@
     @include('assures.partials.feedback-popup')
     
     <!-- PWA Script -->
-    <script src="{{ asset('js/pwa.js') }}"></script>
+    <script src="{{ asset('js/pwa.js') }}?v={{ config('app.asset_version') }}"></script>
 </body>
 </html>

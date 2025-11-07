@@ -3,9 +3,12 @@
     "private": true,
     "type": "module",
     "scripts": {
+        "prebuild": "node scripts/update-sw-version.mjs",
         "build": "vite build",
+        "postbuild": "echo Build terminé avec versioning du cache",
         "dev": "vite",
-        "icons:convert": "node scripts/convert-icons.mjs"
+        "icons:convert": "node scripts/convert-icons.mjs",
+        "update-cache-version": "node scripts/update-sw-version.mjs"
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.10",
@@ -18,6 +21,7 @@
         "postcss": "^8.4.38",
         "pusher-js": "^8.4.0",
         "tailwindcss": "^3.4.4",
+        "terser": "^5.44.1",
         "vite": "^6.2.4"
     },
     "dependencies": {

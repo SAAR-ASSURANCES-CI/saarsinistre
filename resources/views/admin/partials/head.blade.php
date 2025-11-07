@@ -17,7 +17,7 @@
     });
   }
 </script>
-<script src="/js/pwa.js"></script>
+<script src="/js/pwa.js?v={{ config('app.asset_version') }}"></script>
 <style>
     @media (max-width: 640px) {
         .stats-cards {

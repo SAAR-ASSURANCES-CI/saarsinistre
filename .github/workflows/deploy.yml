@@ -42,13 +42,22 @@ jobs:
             echo "📦 Installation des dépendances..."
             sudo -u www-data composer install --no-dev --optimize-autoloader
             sudo -u www-data npm ci --cache /tmp/.npm
+            
+            # Build avec versioning automatique du cache
+            echo "🔨 Build des assets avec versioning..."
             sudo -u www-data npm run build
             
             # Exécuter les migrations
             echo "🗄️ Exécution des migrations..."
             sudo -u www-data php artisan migrate --force
             
-            # Optimiser l'application
+            # Nettoyer les anciens caches avant d'optimiser
+            echo "🧹 Nettoyage des caches..."
+            sudo -u www-data php artisan config:clear
+            sudo -u www-data php artisan cache:clear
+            sudo -u www-data php artisan view:clear
+            
+            # Optimiser l'application avec les nouvelles versions
             echo "⚡ Optimisation de l'application..."
             sudo -u www-data php artisan config:cache
             sudo -u www-data php artisan route:cache
@@ -68,6 +77,9 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
+            # Configuration
+            PROJECT_DIR="/var/www/sinistres.saarassurancesci.com/saarsinistre"
+            
             # Vérifier que l'application répond
             echo "🔍 Vérification de l'application..."
             HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://sinistres.saarassurancesci.com)
@@ -81,6 +93,10 @@ jobs:
               # Rollback simple avec Git
               cd $PROJECT_DIR
               sudo -u www-data git reset --hard HEAD~1
+              sudo -u www-data npm ci --cache /tmp/.npm
+              sudo -u www-data npm run build
+              sudo -u www-data php artisan config:clear
+              sudo -u www-data php artisan cache:clear
               sudo -u www-data php artisan config:cache
               sudo -u www-data php artisan route:cache
               sudo -u www-data php artisan view:cache

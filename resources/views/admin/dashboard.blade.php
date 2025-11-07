@@ -29,12 +29,12 @@
     @include('admin.modals.status')
     @include('admin.modals.details')
 
-    <script src="{{ asset('js/Dashboard/utils.js') }}"></script>
-    <script src="{{ asset('js/Dashboard/api.js') }}"></script>
-    <script src="{{ asset('js/Dashboard/notifications.js') }}"></script>
-    <script src="{{ asset('js/Dashboard/modals.js') }}"></script>
-    <script src="{{ asset('js/Dashboard/sinistres.js') }}"></script>
-    <script src="{{ asset('js/Dashboard/dashboard.js') }}"></script>
+    <script src="{{ asset('js/Dashboard/utils.js') }}?v={{ config('app.asset_version') }}"></script>
+    <script src="{{ asset('js/Dashboard/api.js') }}?v={{ config('app.asset_version') }}"></script>
+    <script src="{{ asset('js/Dashboard/notifications.js') }}?v={{ config('app.asset_version') }}"></script>
+    <script src="{{ asset('js/Dashboard/modals.js') }}?v={{ config('app.asset_version') }}"></script>
+    <script src="{{ asset('js/Dashboard/sinistres.js') }}?v={{ config('app.asset_version') }}"></script>
+    <script src="{{ asset('js/Dashboard/dashboard.js') }}?v={{ config('app.asset_version') }}"></script>
 </body>
 
 </html>
