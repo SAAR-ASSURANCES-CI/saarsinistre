@@ -34,7 +34,7 @@ function fetchUsers(search, role, status) {
     if (role) params.append("role", role);
     if (status) params.append("status", status);
 
-    fetch(`/dashboard/users?${params.toString()}`, {
+    fetch(`/gestionnaires/dashboard/users?${params.toString()}`, {
         headers: {
             "X-Requested-With": "XMLHttpRequest",
             Accept: "application/json",
@@ -171,7 +171,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 formData.append('actif', 0);
             }
             formData.append('_method', 'PUT');
-            fetch(`/dashboard/users/${userId}`, {
+            fetch(`/gestionnaires/dashboard/users/${userId}`, {
                 method: "POST",
                 headers: {
                     "X-Requested-With": "XMLHttpRequest",
@@ -238,7 +238,7 @@ function toggleAssureField() {
 
 function openEditUserModal(userId) {
     
-    fetch(`/dashboard/users/${userId}/edit`)
+    fetch(`/gestionnaires/dashboard/users/${userId}/edit`)
         .then((response) => response.json())
         .then((user) => {
             
@@ -267,7 +267,7 @@ function openEditUserModal(userId) {
             
             document.getElementById(
                 "edit-user-form"
-            ).action = `/dashboard/users/${userId}`;
+            ).action = `/gestionnaires/dashboard/users/${userId}`;
 
            
             document
@@ -311,7 +311,7 @@ window.onclick = function(event) {
 };
 
 function openInfoUserModal(userId) {
-    fetch(`/dashboard/users/${userId}/edit`)
+    fetch(`/gestionnaires/dashboard/users/${userId}/edit`)
         .then((response) => response.json())
         .then((user) => {
             document.getElementById("info-nom_complet").textContent = user.nom_complet;
