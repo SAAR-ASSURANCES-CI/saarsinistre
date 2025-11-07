@@ -18,7 +18,7 @@ return [
     |
     */
 
-    'default' => env('LOG_CHANNEL', 'stack'),
+    'default' => env('LOG_CHANNEL', 'custom'),
 
     /*
     |--------------------------------------------------------------------------
@@ -130,6 +130,12 @@ return [
         'sentry_logs' => [
             'driver' => 'sentry_logs',
             'level' => env('LOG_LEVEL', 'info'),
+        ],
+
+        'custom' => [
+            'driver' => 'custom',
+            'via' => \App\Logging\CustomLogger::class,
+            'level' => env('LOG_LEVEL', 'debug'),
         ],
 
     ],
