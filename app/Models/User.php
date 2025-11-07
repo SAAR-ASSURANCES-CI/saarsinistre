@@ -103,6 +103,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Vérifier si l'utilisateur est administrateur
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Vérifier si l'utilisateur est gestionnaire
+     */
+    public function isGestionnaire(): bool
+    {
+        return $this->role === 'gestionnaire';
+    }
+
+    /**
      * Scope pour récupérer seulement les gestionnaires
      */
     public function scopeGestionnaires($query)

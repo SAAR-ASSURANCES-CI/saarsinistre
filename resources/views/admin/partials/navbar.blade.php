@@ -26,7 +26,8 @@
                 <span class="font-medium">Média</span>
             </a>
 
-            <!-- Utilisateurs -->
+            <!-- Utilisateurs (visible uniquement pour les administrateurs) -->
+            @if(auth()->user()->isAdmin())
             <a href="{{ route('gestionnaires.dashboard.users.index') }}"
                 class="menu-item flex items-center space-x-2 px-6 py-4 {{ request()->routeIs('gestionnaires.dashboard.users.*') ? 'text-white bg-white/20 border-white' : 'text-white/80 hover:text-white hover:bg-white/10' }} transition-all duration-200 border-b-3 border-transparent hover:border-white/50">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,6 +37,7 @@
                 </svg>
                 <span class="font-medium">Utilisateurs</span>
             </a>
+            @endif
 
             <!-- Feedback -->
             <a href="{{ route('gestionnaires.dashboard.feedback.index') }}"
