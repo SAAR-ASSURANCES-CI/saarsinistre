@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('password_temp')->nullable();
             $table->string('password_expire_at')->nullable();
 
-            $table->enum('role', ['admin', 'gestionnaire', 'assure'])->default('assure');
+            $table->enum('role', ['admin', 'gestionnaire', 'assure', 'expert'])->default('assure');
             $table->boolean('actif')->default(true);
             $table->integer('sinistres_en_cours')->default(0);
             $table->rememberToken();

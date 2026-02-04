@@ -119,6 +119,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Vérifier si l'utilisateur est expert
+     */
+    public function isExpert(): bool
+    {
+        return $this->role === 'expert';
+    }
+
+    /**
      * Scope pour récupérer seulement les gestionnaires
      */
     public function scopeGestionnaires($query)
