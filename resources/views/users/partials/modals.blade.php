@@ -31,6 +31,7 @@
                         <option value="">Sélectionner un rôle</option>
                         <option value="admin">Administrateur</option>
                         <option value="gestionnaire">Gestionnaire</option>
+                        <option value="expert">Expert</option>
                     </select>
                 </div>
                 <div class="md:col-span-2">
@@ -96,6 +97,7 @@
                     <option value="admin">Administrateur</option>
                     <option value="gestionnaire">Gestionnaire</option>
                     <option value="assure">Assuré</option>
+                    <option value="expert">Expert</option>
                 </select>
             </div>
 

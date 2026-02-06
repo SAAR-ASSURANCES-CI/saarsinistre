@@ -17,6 +17,7 @@
             <option value="gestionnaire" {{ request('role') === 'gestionnaire' ? 'selected' : '' }}>Gestionnaire
             </option>
             <option value="assure" {{ request('role') === 'assure' ? 'selected' : '' }}>Assuré</option>
+            <option value="expert" {{ request('role') === 'expert' ? 'selected' : '' }}>Expert</option>
         </select>
         <select id="filter-status"
             class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-saar-blue focus:border-transparent">

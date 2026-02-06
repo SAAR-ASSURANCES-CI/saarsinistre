@@ -49,9 +49,10 @@ class AuthController extends Controller
             ])->withInput($request->except('password'));
         }
 
-        if (!in_array($user->role, ['admin', 'gestionnaire'])) {
+        // Limiter l'accès de cette interface aux rôles autorisés
+        if ($user && !in_array($user->role, ['admin', 'gestionnaire', 'expert'])) {
             return back()->withErrors([
-                'email' => 'Accès refusé. Cette interface est réservée aux gestionnaires et administrateurs.'
+                'email' => 'Accès refusé. Cette interface est réservée aux gestionnaires, administrateurs et experts.'
             ])->withInput();
         }
 

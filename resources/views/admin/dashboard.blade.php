@@ -28,6 +28,11 @@
     @include('admin.modals.assign')
     @include('admin.modals.status')
     @include('admin.modals.details')
+    @include('admin.modals.expertise')
+
+    <script>
+        window.userRole = '{{ Auth::user()->role }}';
+    </script>
 
     <script src="{{ asset('js/Dashboard/utils.js') }}?v={{ config('app.asset_version') }}"></script>
     <script src="{{ asset('js/Dashboard/api.js') }}?v={{ config('app.asset_version') }}"></script>

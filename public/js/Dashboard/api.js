@@ -81,6 +81,31 @@ class DashboardAPI {
     async getStats() {
         return this.request(`${this.API_BASE}/gestionnaires/dashboard/stats`);
     }
+
+    // Méthodes pour l'expertise
+    async getExpertise(sinistreId) {
+        return this.request(
+            `${this.API_BASE}/gestionnaires/dashboard/sinistres/${sinistreId}/expertise`
+        );
+    }
+
+    async saveExpertise(sinistreId, data) {
+        return this.request(
+            `${this.API_BASE}/gestionnaires/dashboard/sinistres/${sinistreId}/expertise`,
+            {
+                method: "POST",
+                body: JSON.stringify(data),
+            }
+        );
+    }
+
+    async previewExpertisePdf(sinistreId) {
+        return `${this.API_BASE}/gestionnaires/dashboard/sinistres/${sinistreId}/expertise/preview`;
+    }
+
+    async downloadExpertisePdf(sinistreId) {
+        window.location.href = `${this.API_BASE}/gestionnaires/dashboard/sinistres/${sinistreId}/expertise/pdf`;
+    }
 }
 
 const API = new DashboardAPI();

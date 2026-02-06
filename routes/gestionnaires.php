@@ -8,6 +8,7 @@ use App\Http\Controllers\MediaController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\ExpertiseController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
@@ -27,8 +28,8 @@ Route::middleware('auth')->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Routes accessibles uniquement aux gestionnaires et admins authentifiés
-Route::middleware(['auth', 'role:admin,gestionnaire', \App\Http\Middleware\CheckPasswordExpiry::class])->prefix('gestionnaires')->name('gestionnaires.')->group(function () {
+// Routes accessibles uniquement aux gestionnaires, admins et experts authentifiés
+Route::middleware(['auth', 'role:admin,gestionnaire,expert', \App\Http\Middleware\CheckPasswordExpiry::class])->prefix('gestionnaires')->name('gestionnaires.')->group(function () {
     // Dashboard principal
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
@@ -48,6 +49,12 @@ Route::middleware(['auth', 'role:admin,gestionnaire', \App\Http\Middleware\Check
             Route::get('/{sinistre}/fiche', function (PdfGenerationService $pdfService, $sinistre) {
                 return $pdfService->generateSinistreFiche((int)$sinistre);
             })->name('fiche');
+
+            // Expertise de sinistre (réservé aux experts, admins et gestionnaires)
+            Route::get('/{sinistre}/expertise', [ExpertiseController::class, 'show'])->name('expertise.show');
+            Route::post('/{sinistre}/expertise', [ExpertiseController::class, 'store'])->name('expertise.store');
+            Route::get('/{sinistre}/expertise/preview', [ExpertiseController::class, 'preview'])->name('expertise.preview');
+            Route::get('/{sinistre}/expertise/pdf', [ExpertiseController::class, 'downloadPdf'])->name('expertise.pdf');
         });
 
         // Statistiques
@@ -124,3 +131,4 @@ Route::get('/debug/sinistre/{id}', function ($id) {
         'all_attributes' => $sinistre->toArray()
     ]);
 })->name('debug.sinistre');
+

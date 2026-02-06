@@ -110,6 +110,14 @@ class Sinistre extends Model
     }
 
     /**
+     * Relation avec l'expertise
+     */
+    public function expertise()
+    {
+        return $this->hasOne(Expertise::class);
+    }
+
+    /**
      * Boot method pour générer le numéro de sinistre
      */
     protected static function boot()
