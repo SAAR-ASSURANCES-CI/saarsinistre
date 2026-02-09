@@ -65,4 +65,48 @@ class UserCreationTest extends TestCase
         $this->assertEquals(6, strlen($password));
         $this->assertTrue(is_numeric($password));
     }
+
+    public function test_can_create_user_with_expert_role()
+    {
+        Queue::fake();
+
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $userData = [
+            'nom_complet' => 'Expert Test',
+            'email' => 'expert@example.com',
+            'role' => 'expert',
+        ];
+
+        $response = $this->actingAs($admin)
+            ->post(route('gestionnaires.dashboard.users.store'), $userData);
+
+        $this->assertDatabaseHas('users', [
+            'nom_complet' => 'Expert Test',
+            'email' => 'expert@example.com',
+            'role' => 'expert',
+        ]);
+
+        $response->assertRedirect(route('gestionnaires.dashboard.users.index'));
+        $response->assertSessionHas('success');
+    }
+
+    public function test_can_update_user_to_expert_role()
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $user = User::factory()->create(['role' => 'gestionnaire']);
+
+        $response = $this->actingAs($admin)
+            ->putJson(route('gestionnaires.dashboard.users.update', $user->id), [
+                'nom_complet' => $user->nom_complet,
+                'email' => $user->email,
+                'role' => 'expert',
+            ]);
+
+        $response->assertOk();
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'role' => 'expert',
+        ]);
+    }
 }

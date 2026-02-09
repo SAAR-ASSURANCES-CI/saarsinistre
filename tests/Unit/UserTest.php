@@ -45,4 +45,32 @@ class UserTest extends TestCase
         $this->assertTrue(in_array('nom_complet', $user->getFillable()));
         $this->assertTrue(in_array('email', $user->getFillable()));
     }
+
+    #[Test]
+    public function it_can_create_user_with_expert_role()
+    {
+        $user = User::factory()->create([
+            'nom_complet' => 'Expert User',
+            'email' => 'expert@example.com',
+            'role' => 'expert',
+        ]);
+
+        $this->assertDatabaseHas('users', [
+            'nom_complet' => 'Expert User',
+            'email' => 'expert@example.com',
+            'role' => 'expert',
+        ]);
+
+        $this->assertEquals('expert', $user->role);
+    }
+
+    #[Test]
+    public function it_can_check_if_user_is_expert()
+    {
+        $expert = User::factory()->create(['role' => 'expert']);
+        $gestionnaire = User::factory()->create(['role' => 'gestionnaire']);
+
+        $this->assertTrue($expert->isExpert());
+        $this->assertFalse($gestionnaire->isExpert());
+    }
 }
