@@ -48,15 +48,23 @@ User (expert)
   │
   │ hasMany
   ▼
-Expertise ──belongsTo──► Sinistre
+Expertise ◄──hasOne── Sinistre
   │
-  └─ Champs:
-     - date_expertise
-     - client_nom
-     - lieu_expertise
-     - vehicule_expertise
-     - operations (JSON)
-     - collaborateur_*
+  │ belongsTo
+  ▼
+Sinistre
+
+⚠️ CONTRAINTE IMPORTANTE : Un sinistre ne peut avoir qu'UNE SEULE expertise
+   - L'expertise peut être créée/modifiée par n'importe quel expert ou admin
+   - La dernière sauvegarde écrase les données précédentes
+  
+Champs de l'expertise :
+  - date_expertise
+  - client_nom
+  - lieu_expertise
+  - vehicule_expertise
+  - operations (JSON)
+  - collaborateur_*
 ```
 
 ---

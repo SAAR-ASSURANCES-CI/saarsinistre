@@ -4,21 +4,25 @@ namespace App\Http\Controllers;
 
 use App\Models\Expertise;
 use App\Models\Sinistre;
+use App\Models\User;
 use App\Http\Requests\StoreExpertiseRequest;
 use App\Services\ExpertisePdfService;
+use Illuminate\Support\Facades\Auth;
 
 class ExpertiseController extends Controller
 {
-    /**
-     * Récupérer l'expertise existante pour un sinistre (ou les valeurs par défaut).
-     */
     public function show(Sinistre $sinistre)
     {
-        $expertise = $sinistre->expertise()
-            ->where('expert_id', auth()->id())
-            ->first();
+        /** @var User $user */
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Utilisateur non authentifié.',
+            ], 401);
+        }
 
-        $user = auth()->user();
+        $expertise = $sinistre->expertise;
 
         return response()->json([
             'success' => true,
@@ -26,26 +30,40 @@ class ExpertiseController extends Controller
             'expert' => [
                 'nom_complet' => $user->nom_complet,
                 'email' => $user->email,
+                'telephone' => config('expertise.default_phone', $user->phone),
             ],
         ]);
     }
 
-    /**
-     * Créer ou mettre à jour l'expertise pour un sinistre.
-     */
+    private function getExpertiseOrFail(Sinistre $sinistre)
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        if (!$user) {
+            abort(401, 'Utilisateur non authentifié.');
+        }
+
+        $expertise = $sinistre->expertise;
+
+        if (!$expertise) {
+            abort(404, 'Aucune expertise trouvée pour ce sinistre.');
+        }
+
+        return $expertise;
+    }
+
     public function store(StoreExpertiseRequest $request, Sinistre $sinistre)
     {
         $validated = $request->validated();
 
-        // Nettoyer les opérations : trim libellé et supprimer les lignes vides
         $operations = collect($validated['operations'] ?? [])
             ->map(function (array $operation) {
                 return [
                     'libelle' => trim($operation['libelle'] ?? ''),
-                    'echange' => !empty($operation['echange']),
-                    'reparation' => !empty($operation['reparation']),
-                    'controle' => !empty($operation['controle']),
-                    'peinture' => !empty($operation['peinture']),
+                    'echange' => filter_var($operation['echange'] ?? false, FILTER_VALIDATE_BOOLEAN),
+                    'reparation' => filter_var($operation['reparation'] ?? false, FILTER_VALIDATE_BOOLEAN),
+                    'controle' => filter_var($operation['controle'] ?? false, FILTER_VALIDATE_BOOLEAN),
+                    'peinture' => filter_var($operation['peinture'] ?? false, FILTER_VALIDATE_BOOLEAN),
                 ];
             })
             ->filter(function (array $operation) {
@@ -54,14 +72,20 @@ class ExpertiseController extends Controller
             ->values()
             ->all();
 
-        $user = $request->user();
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Utilisateur non authentifié.',
+            ], 401);
+        }
 
-        // On reconstruit les champs pré-remplis côté backend pour garantir l'intégrité.
         $data = [
+            'expert_id' => $user->id,
             'date_expertise' => now()->toDateString(),
             'client_nom' => $sinistre->nom_assure ?? '',
             'collaborateur_nom' => $user->nom_complet,
-            'collaborateur_telephone' => '0747707127/0711236714',
+            'collaborateur_telephone' => config('expertise.default_phone') ?? $user->phone,
             'collaborateur_email' => $user->email,
             'lieu_expertise' => $validated['lieu_expertise'],
             'contact_client' => $validated['contact_client'] ?? $sinistre->telephone_assure ?? '',
@@ -70,10 +94,7 @@ class ExpertiseController extends Controller
         ];
 
         $expertise = Expertise::updateOrCreate(
-            [
-                'sinistre_id' => $sinistre->id,
-                'expert_id' => auth()->id(),
-            ],
+            ['sinistre_id' => $sinistre->id],
             $data
         );
 
@@ -83,42 +104,16 @@ class ExpertiseController extends Controller
         ]);
     }
 
-    /**
-     * Prévisualiser le PDF de l'expertise.
-     */
     public function preview(Sinistre $sinistre)
     {
-        $expertise = $sinistre->expertise()
-            ->where('expert_id', auth()->id())
-            ->first();
-
-        if (!$expertise) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Aucune expertise trouvée pour ce sinistre.',
-            ], 404);
-        }
-
+        $expertise = $this->getExpertiseOrFail($sinistre);
         $pdfService = new ExpertisePdfService();
         return $pdfService->previewExpertisePdf($expertise);
     }
 
-    /**
-     * Télécharger le PDF de l'expertise.
-     */
     public function downloadPdf(Sinistre $sinistre)
     {
-        $expertise = $sinistre->expertise()
-            ->where('expert_id', auth()->id())
-            ->first();
-
-        if (!$expertise) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Aucune expertise trouvée pour ce sinistre.',
-            ], 404);
-        }
-
+        $expertise = $this->getExpertiseOrFail($sinistre);
         $pdfService = new ExpertisePdfService();
         return $pdfService->downloadExpertisePdf($expertise);
     }

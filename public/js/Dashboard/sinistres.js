@@ -134,7 +134,7 @@ class SinistresManager {
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v12m0 0l-3-3m3 3l3-3M5 20h14a2 2 0 002-2V7a2 2 0 00-2-2h-5l-2-2H5a2 2 0 00-2 2v13a2 2 0 002 2z"></path>
                             </svg>
                         </a>
-                        ${window.userRole === 'expert' ? `
+                        ${window.userRole === 'expert' || window.userRole === 'admin' ? `
                         <button onclick="Modals.showExpertiseModal(${sinistre.id})"
                                 class="text-orange-600 hover:text-orange-800 transition-colors"
                                 title="Expertise">

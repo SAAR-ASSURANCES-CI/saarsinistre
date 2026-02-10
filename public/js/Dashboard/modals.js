@@ -389,17 +389,13 @@ class ModalsManager {
         }
     }
 
-    // ========== Méthodes pour l'expertise ==========
-
     async showExpertiseModal(sinistreId) {
         try {
             this.currentSinistreId = sinistreId;
-            
-            // Charger les détails du sinistre
+
             const sinistreData = await API.getSinistreDetails(sinistreId);
             const sinistre = sinistreData.sinistre;
-            
-            // Charger l'expertise existante si elle existe + infos expert
+
             let expertise = null;
             let expertInfo = null;
             try {
@@ -409,75 +405,55 @@ class ModalsManager {
                     expertInfo = expertiseData.expert || null;
                 }
             } catch (error) {
-                // Pas d'expertise existante, on continue
             }
-            
-            // Pré-remplir les champs en lecture seule
+
             const today = new Date().toLocaleDateString('fr-FR', {
                 day: '2-digit',
                 month: '2-digit',
                 year: 'numeric'
             });
-            // ET REMPLACEZ-LES PAR :
-document.getElementById('expertise-date').value = today;
-document.getElementById('expertise-client').value = sinistre.nom_assure || '';
+            document.getElementById('expertise-date').value = today;
+            document.getElementById('expertise-client').value = sinistre.nom_assure || '';
 
-            // document.getElementById('expertise-date').textContent = today;
-            // document.getElementById('expertise-client').textContent = sinistre.nom_assure || '';
-            
-            // Récupérer les infos de l'expert connecté depuis l'API
             const expertNom = expertInfo?.nom_complet || 'Expert';
             const expertEmail = expertInfo?.email || '';
+            const expertTelephone = expertInfo?.telephone || '';
             document.getElementById('expertise-collaborateur-nom').value = expertNom;
-document.getElementById('expertise-collaborateur-telephone').value = '0747707127/0711236714';
-document.getElementById('expertise-collaborateur-email').value = expertEmail;
-            // document.getElementById('expertise-collaborateur-nom').textContent = expertNom;
-            // document.getElementById('expertise-collaborateur-telephone').textContent = '0747707127/0711236714';
-            // document.getElementById('expertise-collaborateur-email').textContent = expertEmail;
-
+            document.getElementById('expertise-collaborateur-telephone').value = expertTelephone;
+            document.getElementById('expertise-collaborateur-email').value = expertEmail;
             document.getElementById('expertise-contact-client').value = sinistre.telephone_assure || '';
-            // document.getElementById('expertise-contact-client').textContent = sinistre.telephone_assure || '';
 
-            this.openModal('expertise-modal');
-            
-            // Pré-remplir le lieu d'expertise si expertise existe
             const lieuInput = document.getElementById('expertise-lieu');
             if (expertise && expertise.lieu_expertise) {
                 lieuInput.value = expertise.lieu_expertise;
             } else {
                 lieuInput.value = '';
             }
-            
-            // Pré-remplir le véhicule expertisé si expertise existe
+
             const vehiculeInput = document.getElementById('expertise-vehicule');
             if (expertise && expertise.vehicule_expertise) {
                 vehiculeInput.value = expertise.vehicule_expertise;
             } else {
                 vehiculeInput.value = '';
             }
-            
-            // Initialiser le tableau d'opérations
+
             this.clearExpertiseOperations();
             if (expertise && expertise.operations && expertise.operations.length > 0) {
                 expertise.operations.forEach(op => {
                     this.addExpertiseOperationRow(op);
                 });
             }
-            
+
             this.openModal('expertise-modal');
         } catch (error) {
-            console.error('Erreur lors du chargement de l\'expertise:', error);
             Utils.showErrorMessage('Erreur lors du chargement des informations');
         }
     }
     addExpertiseOperationRow(operationData = null) {
-        const tbody = document.getElementById('expertise-operations-body'); // <-- BON ID
+        const tbody = document.getElementById('expertise-operations-body');
         if (!tbody) {
-            console.error('Impossible d\'ajouter une opération: tbody non trouvé');
             return;
         }
-    // addExpertiseOperationRow(operationData = null) {
-    //     const tbody = document.getElementById('expertise-operations-tbody');
         const rowIndex = tbody.children.length;
         
         const row = document.createElement('tr');
@@ -541,17 +517,11 @@ document.getElementById('expertise-collaborateur-email').value = expertEmail;
     }
 
     clearExpertiseOperations() {
-        const tbody = document.getElementById('expertise-operations-body'); // <-- BON ID
+        const tbody = document.getElementById('expertise-operations-body');
         if (tbody) {
             tbody.innerHTML = '';
-        } else {
-            console.error('tbody #expertise-operations-body non trouvé');
         }
     }
-    // clearExpertiseOperations() {
-    //     const tbody = document.getElementById('expertise-operations-tbody');
-    //     tbody.innerHTML = '';
-    // }
 
 
     async saveExpertise() {
@@ -581,16 +551,14 @@ document.getElementById('expertise-collaborateur-email').value = expertEmail;
         for (const row of rows) {
             const libelleInput = row.querySelector('.operation-libelle');
             const libelle = libelleInput ? libelleInput.value.trim() : '';
-            
-            // Ignorer les lignes sans libellé
+
             if (!libelle) continue;
-            
+
             const echange = row.querySelector('.operation-echange')?.checked || false;
             const reparation = row.querySelector('.operation-reparation')?.checked || false;
             const controle = row.querySelector('.operation-controle')?.checked || false;
             const peinture = row.querySelector('.operation-peinture')?.checked || false;
-            
-            // Vérifier qu'au moins une case est cochée
+
             if (!echange && !reparation && !controle && !peinture) {
                 Utils.showErrorMessage(`L'opération "${libelle}" doit avoir au moins une case cochée (ECH, REP, CTL ou P)`);
                 return false;
@@ -609,8 +577,7 @@ document.getElementById('expertise-collaborateur-email').value = expertEmail;
             Utils.showErrorMessage('Au moins une opération avec libellé est requise');
             return false;
         }
-        
-        // Préparer les données
+
         const data = {
             lieu_expertise: lieuExpertise,
             vehicule_expertise: vehiculeExpertise,
@@ -632,8 +599,7 @@ async previewExpertise() {
         Utils.showErrorMessage('Erreur: sinistre non identifié');
         return;
     }
-    
-    // 1. D'abord sauvegarder l'expertise
+
     const success = await this.saveExpertise();
     
     if (!success) {
@@ -655,10 +621,8 @@ async previewExpertise() {
 }
 
     async downloadExpertise() {
-        // 1. Sauvegarder d'abord l'expertise
         const success = await this.saveExpertise();
         if (!success) {
-            // saveExpertise() a déjà affiché un message d'erreur
             return;
         }
         
@@ -671,7 +635,6 @@ async previewExpertise() {
                 await API.downloadExpertisePdf(this.currentSinistreId);
                 Utils.showLoading(false);
                 Utils.showSuccessMessage('PDF téléchargé avec succès');
-                // Fermer la modale après téléchargement
                 this.closeModal('expertise-modal');
             } catch (error) {
                 Utils.showLoading(false);

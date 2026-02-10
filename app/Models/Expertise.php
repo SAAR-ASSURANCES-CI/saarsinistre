@@ -30,6 +30,14 @@ class Expertise extends Model
     ];
 
     /**
+     * Utiliser toujours le numéro de téléphone configuré dans .env
+     */
+    public function getCollaborateurTelephoneAttribute($value)
+    {
+        return config('expertise.default_phone', $value);
+    }
+
+    /**
      * Relation avec le sinistre
      */
     public function sinistre(): BelongsTo
