@@ -18,7 +18,7 @@ class UserController extends Controller
      */
     public function index(Request $request): JsonResponse|View
     {
-        $gestionnairesQuery = User::whereIn('role', ['gestionnaire', 'admin']);
+        $gestionnairesQuery = User::whereIn('role', ['gestionnaire', 'admin', 'expert']);
         $assuresQuery = User::where('role', 'assure');
 
         if ($request->has('search')) {
@@ -77,7 +77,7 @@ class UserController extends Controller
         $request->validate([
             'nom_complet' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'role' => 'required|in:admin,gestionnaire',
+            'role' => 'required|in:admin,gestionnaire,expert',
         ]);
 
         $motDePasseTemporaire = $this->generateTemporaryPassword();
@@ -110,7 +110,7 @@ class UserController extends Controller
         $request->validate([
             'nom_complet' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'role' => 'required|in:admin,gestionnaire,assure',
+            'role' => 'required|in:admin,gestionnaire,assure,expert',
             'numero_assure' => 'nullable|string|max:50|unique:users,numero_assure,' . $user->id,
         ]);
 

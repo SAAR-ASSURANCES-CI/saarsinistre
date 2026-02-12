@@ -47,6 +47,9 @@
                     @if ($user->role === 'admin')
                         <span
                             class="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">Administrateur</span>
+                    @elseif ($user->role === 'expert')
+                        <span
+                            class="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded-full">Expert</span>
                     @else
                         <span
                             class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">Gestionnaire</span>

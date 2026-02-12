@@ -316,7 +316,13 @@ function openInfoUserModal(userId) {
         .then((user) => {
             document.getElementById("info-nom_complet").textContent = user.nom_complet;
             document.getElementById("info-email").textContent = user.email;
-            document.getElementById("info-role").textContent = user.role === 'admin' ? 'Administrateur' : (user.role === 'gestionnaire' ? 'Gestionnaire' : 'Assuré');
+            const roleLabels = {
+                'admin': 'Administrateur',
+                'gestionnaire': 'Gestionnaire',
+                'assure': 'Assuré',
+                'expert': 'Expert'
+            };
+            document.getElementById("info-role").textContent = roleLabels[user.role] || user.role;
             document.getElementById("info-actif").textContent = user.actif ? 'Actif' : 'Inactif';
 
             
