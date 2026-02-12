@@ -21,13 +21,10 @@ class ExpertiseFeatureTest extends TestCase
     {
         parent::setUp();
         
-        // Créer un gestionnaire authentifié
         $this->gestionnaire = User::factory()->create([
             'role' => 'gestionnaire',
             'email' => 'gestionnaire@test.com',
         ]);
-
-        // Créer un sinistre
         $this->sinistre = Sinistre::factory()->create([
             'assure_id' => $this->gestionnaire->id,
             'nom_assure' => 'Jean Dupont',
@@ -68,8 +65,7 @@ class ExpertiseFeatureTest extends TestCase
     {
         $response = $this->actingAs($this->gestionnaire)
             ->postJson("/gestionnaires/dashboard/sinistres/{$this->sinistre->id}/expertise", [
-                // Pas de lieu_expertise
-                // Pas d'operations
+              
             ]);
 
         $response->assertStatus(422);
@@ -83,7 +79,7 @@ class ExpertiseFeatureTest extends TestCase
             ->postJson("/gestionnaires/dashboard/sinistres/{$this->sinistre->id}/expertise", [
                 'lieu_expertise' => 'Abidjan',
                 'vehicule_expertise' => 'Toyota Corolla - AB 1234 CD',
-                'operations' => [], // Tableau vide
+                'operations' => [], 
             ]);
 
         $response->assertStatus(422);
@@ -99,7 +95,6 @@ class ExpertiseFeatureTest extends TestCase
                 'vehicule_expertise' => 'Toyota Corolla - AB 1234 CD',
                 'operations' => [
                     [
-                        // Manque le libellé
                         'echange' => true,
                     ],
                 ],
@@ -111,7 +106,6 @@ class ExpertiseFeatureTest extends TestCase
     #[Test]
     public function it_can_update_existing_expertise()
     {
-        // Créer une expertise existante
         $expertise = Expertise::factory()->create([
             'sinistre_id' => $this->sinistre->id,
             'expert_id' => $this->gestionnaire->id,
@@ -119,7 +113,6 @@ class ExpertiseFeatureTest extends TestCase
             'vehicule_expertise' => 'Toyota Corolla - AB 1234 CD',
         ]);
 
-        // Mettre à jour
         $response = $this->actingAs($this->gestionnaire)
             ->postJson("/gestionnaires/dashboard/sinistres/{$this->sinistre->id}/expertise", [
                 'lieu_expertise' => 'Yamoussoukro',
@@ -172,8 +165,6 @@ class ExpertiseFeatureTest extends TestCase
         $response = $this->actingAs($this->gestionnaire)
             ->get("/gestionnaires/dashboard/sinistres/{$this->sinistre->id}/expertise/preview");
 
-        // Le PDF peut être généré ou non selon LibreOffice
-        // On vérifie juste que la route ne retourne pas d'erreur 500
         $this->assertNotEquals(500, $response->getStatusCode());
     }
 
@@ -205,8 +196,6 @@ class ExpertiseFeatureTest extends TestCase
         $response = $this->actingAs($this->gestionnaire)
             ->get("/gestionnaires/dashboard/sinistres/{$this->sinistre->id}/expertise/pdf");
 
-        // Le PDF peut être généré ou non selon LibreOffice
-        // On vérifie juste que la route ne retourne pas d'erreur 500
         $this->assertNotEquals(500, $response->getStatusCode());
     }
 

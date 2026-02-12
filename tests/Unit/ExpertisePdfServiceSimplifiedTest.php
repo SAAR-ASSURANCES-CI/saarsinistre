@@ -8,6 +8,7 @@ use App\Models\Sinistre;
 use App\Models\User;
 use App\Services\ExpertisePdfService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 
 class ExpertisePdfServiceSimplifiedTest extends TestCase
 {
@@ -102,7 +103,7 @@ class ExpertisePdfServiceSimplifiedTest extends TestCase
         $expertise = Expertise::factory()->create([
             'sinistre_id' => $sinistre->id,
             'expert_id' => $user->id,
-            'operations' => [], // Aucune opération
+            'operations' => [], 
         ]);
 
         $response = $this->service->previewExpertisePdf($expertise);
