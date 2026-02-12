@@ -76,7 +76,9 @@
         }
 
         .operations-table {
-            width: 100%;
+            width: 98%;
+            margin-left: auto;
+            margin-right: auto;
             border-collapse: collapse;
             margin-top: 20px;
             margin-bottom: 20px;
@@ -172,17 +174,17 @@
             </div>
             <div class="info-item">
                 <strong>Mandant :</strong>
-                <span>SAAR Assurances</span>
+                <span>SAAR Assurances CI</span>
             </div>
         </div>
 
         <div class="info-row">
             <div class="info-item">
-                <strong>Nom du client :</strong>
+                <strong>Nom de l'assuré :</strong>
                 <span>{{ $expertise->client_nom }}</span>
             </div>
             <div class="info-item">
-                <strong>Téléphone client :</strong>
+                <strong>Téléphone assuré :</strong>
                 <span>{{ $expertise->contact_client }}</span>
             </div>
             <div class="info-item">
@@ -255,7 +257,10 @@
     </div>
 
     <div class="footer">
-        Document généré le {{ now()->format('d/m/Y à H:i') }} - SAAR Assurances CI
+        <p>Deux plateaux Aghien -01 - BP 12201 Abidjan 01 - Côte d'Ivoire</p>
+        <p>Téléphone : (225) 27 22 50 81 50 / Fax : (225) 27 22 50 25 12</p>
+        <p>E-mail: infos@saar-assurances.com – WWW.saar-assurances.com</p>
+        <p style="margin-top: 10px; font-size: 7pt;">Document généré le {{ now()->format('d/m/Y à H:i') }}</p>
     </div>
 </body>
 </html>
