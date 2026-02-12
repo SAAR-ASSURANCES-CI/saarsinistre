@@ -1,5 +1,5 @@
-// __SW_VERSION__ sera remplacé automatiquement par le script de build
-const CACHE_VERSION = '__SW_VERSION__';
+// 20260211124058-1770813658896 sera remplacé automatiquement par le script de build
+const CACHE_VERSION = '20260211124058-1770813658896';
 const CACHE_NAME = `saarsinistre-v${CACHE_VERSION}`;
 const STATIC_CACHE = `saarsinistre-static-v${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `saarsinistre-dynamic-v${CACHE_VERSION}`;
@@ -10,7 +10,6 @@ const STATIC_ASSETS = [
     '/favicon.ico',
     '/offline.html',
 ];
-
 
 const ROUTES_TO_CACHE = [];
 
@@ -169,7 +168,7 @@ self.addEventListener('fetch', event => {
         return;
     }
     
-    // Par défaut: stale-while-revalidate pour un bon équilibre
+    
     event.respondWith(staleWhileRevalidate(request));
 });
 
@@ -219,4 +218,5 @@ self.addEventListener('error', event => {
 
 self.addEventListener('unhandledrejection', event => {
     console.error('Service Worker: Promesse rejetée non gérée:', event.reason);
-}); 
+});
+
