@@ -40,7 +40,6 @@ abstract class TestCase extends BaseTestCase
             ], JSON_PRETTY_PRINT));
         }
         
-        // Create dummy asset files if they don't exist
         $assetsDir = $buildDir . '/assets';
         if (!file_exists($assetsDir)) {
             mkdir($assetsDir, 0755, true);

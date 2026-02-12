@@ -13,10 +13,9 @@ class PWATest extends TestCase
     #[Test]
     public function it_has_manifest_file()
     {
-        // Vérifier que le fichier manifest existe
+      
         $this->assertFileExists(public_path('manifest.json'));
         
-        // Vérifier le contenu du manifest
         $manifest = json_decode(file_get_contents(public_path('manifest.json')), true);
         $this->assertEquals('SAARCISinistres', $manifest['short_name']);
         $this->assertEquals('SAARCISinistres - Gestion des sinistres', $manifest['name']);
@@ -25,10 +24,8 @@ class PWATest extends TestCase
     #[Test]
     public function it_has_service_worker()
     {
-        // Vérifier que le fichier service worker existe
         $this->assertFileExists(public_path('sw.js'));
         
-        // Vérifier le contenu du service worker
         $content = file_get_contents(public_path('sw.js'));
         $this->assertStringContainsString('self.addEventListener', $content);
     }
@@ -47,10 +44,8 @@ class PWATest extends TestCase
     #[Test]
     public function it_has_offline_page()
     {
-        // Vérifier que le fichier offline existe
         $this->assertFileExists(public_path('offline.html'));
         
-        // Vérifier le contenu de la page offline
         $content = file_get_contents(public_path('offline.html'));
         $this->assertStringContainsString('Vous êtes hors ligne', $content);
     }
