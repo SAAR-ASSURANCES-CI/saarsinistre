@@ -21,18 +21,18 @@ class ExpertisePdfServiceSimplifiedTest extends TestCase
         $this->service = new ExpertisePdfService();
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_pdf_from_blade_view()
     {
-        // Créer les données de test
+        $assure = User::factory()->create(['role' => 'assure']);
+        
         $user = User::factory()->create([
-            'nom' => 'Dupont',
-            'prenom' => 'Jean',
+            'nom_complet' => 'Jean Dupont',
             'email' => 'expert@saar.com',
-            'phone' => '0747707127',
         ]);
 
         $sinistre = Sinistre::factory()->create([
+            'assure_id' => $assure->id,
             'numero_sinistre' => 'SIN-2026-001',
             'nom_assure' => 'Client Test',
             'telephone_assure' => '0225123456',
@@ -67,18 +67,21 @@ class ExpertisePdfServiceSimplifiedTest extends TestCase
             ],
         ]);
 
-        // Tester la génération du PDF
+        
         $response = $this->service->previewExpertisePdf($expertise);
 
         $this->assertNotNull($response);
         $this->assertEquals('application/pdf', $response->headers->get('Content-Type'));
     }
 
-    /** @test */
+    #[Test]
     public function it_downloads_pdf_with_correct_filename()
     {
+        $assure = User::factory()->create(['role' => 'assure']);
         $user = User::factory()->create();
-        $sinistre = Sinistre::factory()->create(['numero_sinistre' => 'SIN-TEST-123']);
+        $sinistre = Sinistre::factory()->create([
+            'assure_id' => $assure->id,
+        ]);
         $expertise = Expertise::factory()->create([
             'sinistre_id' => $sinistre->id,
             'expert_id' => $user->id,
@@ -87,14 +90,15 @@ class ExpertisePdfServiceSimplifiedTest extends TestCase
         $response = $this->service->downloadExpertisePdf($expertise);
 
         $this->assertNotNull($response);
-        $this->assertStringContainsString('Fiche_Expertise_SIN-TEST-123.pdf', $response->headers->get('Content-Disposition'));
+        $this->assertStringContainsString('Fiche_Expertise_' . $sinistre->numero_sinistre . '.pdf', $response->headers->get('Content-Disposition'));
     }
 
-    /** @test */
+    #[Test]
     public function it_handles_empty_operations_gracefully()
     {
+        $assure = User::factory()->create(['role' => 'assure']);
         $user = User::factory()->create();
-        $sinistre = Sinistre::factory()->create();
+        $sinistre = Sinistre::factory()->create(['assure_id' => $assure->id]);
         $expertise = Expertise::factory()->create([
             'sinistre_id' => $sinistre->id,
             'expert_id' => $user->id,
