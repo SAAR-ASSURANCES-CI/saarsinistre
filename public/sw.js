@@ -1,5 +1,4 @@
-// 20260211124058-1770813658896 sera remplacé automatiquement par le script de build
-const CACHE_VERSION = '20260211124058-1770813658896';
+const CACHE_VERSION = '__SW_VERSION__';
 const CACHE_NAME = `saarsinistre-v${CACHE_VERSION}`;
 const STATIC_CACHE = `saarsinistre-static-v${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `saarsinistre-dynamic-v${CACHE_VERSION}`;
@@ -48,7 +47,6 @@ async function networkFirst(request) {
     }
 }
 
-// Stratégie stale-while-revalidate pour un meilleur équilibre
 async function staleWhileRevalidate(request) {
     const cachedResponse = await caches.match(request);
     
@@ -127,13 +125,11 @@ self.addEventListener('fetch', event => {
         return;
     }
     
-    // Assets statiques spécifiques 
     if (STATIC_ASSETS.includes(url.pathname)) {
         event.respondWith(cacheFirst(request));
         return;
     }
     
-    // Assets buildés par Vite 
     if (url.pathname.startsWith('/build/')) {
         event.respondWith(cacheFirst(request));
         return;
@@ -144,19 +140,16 @@ self.addEventListener('fetch', event => {
         return;
     }
     
-    // Icônes - cache OK
     if (url.pathname.startsWith('/icons/')) {
         event.respondWith(cacheFirst(request));
         return;
     }
     
-    // JS/CSS non buildés 
     if (url.pathname.startsWith('/js/') || url.pathname.startsWith('/css/')) {
         event.respondWith(staleWhileRevalidate(request));
         return;
     }
     
-    // API et données dynamiques 
     if (url.pathname.startsWith('/api/') || 
         url.pathname.includes('sinistres') ||
         url.pathname.includes('users') ||

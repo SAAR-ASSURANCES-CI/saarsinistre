@@ -11,12 +11,10 @@ const projectRoot = join(__dirname, '..');
 const generateVersion = () => {
     const now = new Date();
     const timestamp = now.getTime();
-    // Format: YYYYMMDDHHMMSS
     const dateStr = now.toISOString().replace(/[-:T.]/g, '').slice(0, 14);
     return `${dateStr}-${timestamp}`;
 };
 
-// Mettre à jour le service worker
 const updateServiceWorker = () => {
     const swPath = join(projectRoot, 'public', 'sw.js');
     const swTemplatePath = join(projectRoot, 'public', 'sw.template.js');
@@ -31,13 +29,10 @@ const updateServiceWorker = () => {
             console.log('✓ Utilisation du fichier sw.js existant');
         }
         
-        // Générer la nouvelle version
         const version = generateVersion();
         
-        // Remplacer le placeholder
         const updatedContent = swContent.replace(/__SW_VERSION__/g, version);
         
-        // Écrire le fichier mis à jour
         writeFileSync(swPath, updatedContent, 'utf-8');
         
         console.log(`✓ Service Worker mis à jour avec la version: ${version}`);
@@ -51,18 +46,15 @@ const updateServiceWorker = () => {
     }
 };
 
-// Mettre à jour la version dans .env
 const updateEnvVersion = (version) => {
     const envPath = join(projectRoot, '.env');
     
     try {
         let envContent = readFileSync(envPath, 'utf-8');
         
-        // Vérifier si ASSET_VERSION existe déjà
         if (envContent.includes('ASSET_VERSION=')) {
             envContent = envContent.replace(/ASSET_VERSION=.*/g, `ASSET_VERSION=${version}`);
         } else {
-            // Ajouter ASSET_VERSION à la fin du fichier
             envContent += `\n# Asset versioning for cache busting\nASSET_VERSION=${version}\n`;
         }
         
@@ -74,7 +66,6 @@ const updateEnvVersion = (version) => {
     }
 };
 
-// Exécuter le script
 console.log('\n🔄 Mise à jour de la version du cache...\n');
 const version = updateServiceWorker();
 console.log('\n✅ Mise à jour terminée!\n');
