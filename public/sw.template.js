@@ -129,7 +129,7 @@ self.addEventListener('fetch', event => {
         event.respondWith(cacheFirst(request));
         return;
     }
-    
+     
     if (url.pathname.startsWith('/build/')) {
         event.respondWith(cacheFirst(request));
         return;
@@ -212,4 +212,3 @@ self.addEventListener('error', event => {
 self.addEventListener('unhandledrejection', event => {
     console.error('Service Worker: Promesse rejetée non gérée:', event.reason);
 });
-
