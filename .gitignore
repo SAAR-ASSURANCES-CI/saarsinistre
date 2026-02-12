@@ -35,6 +35,6 @@ Thumbs.db
 **/test-*.js
 
 # Templates
-*.template.js
+# *.template.js
 
 README_EXPERTISE.md
