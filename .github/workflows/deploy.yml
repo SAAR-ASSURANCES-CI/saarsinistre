@@ -11,11 +11,11 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     if: github.event.workflow_run.conclusion == 'success'
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -25,84 +25,47 @@ jobs:
           script: |
             # Configuration
             PROJECT_DIR="/var/www/sinistres.saarassurancesci.com/saarsinistre"
-            
+
             # Sauvegarder les fichiers critiques
             echo "🔄 Sauvegarde des fichiers critiques..."
             sudo -u www-data cp $PROJECT_DIR/.env $PROJECT_DIR/.env.backup
             sudo -u www-data cp -r $PROJECT_DIR/storage $PROJECT_DIR/storage.backup
-            
+
             # Mettre à jour le code
             echo "📥 Mise à jour du code..."
             cd $PROJECT_DIR
             sudo -u www-data git config --global --add safe.directory $PROJECT_DIR
             sudo -u www-data git fetch origin
             sudo -u www-data git reset --hard origin/main
-            
+
             # Installer les dépendances
             echo "📦 Installation des dépendances..."
             sudo -u www-data composer install --no-dev --optimize-autoloader
             sudo -u www-data npm ci --cache /tmp/.npm
-            
+
             # Build avec versioning automatique du cache
             echo "🔨 Build des assets avec versioning..."
             sudo -u www-data npm run build
-            
+
             # Exécuter les migrations
             echo "🗄️ Exécution des migrations..."
             sudo -u www-data php artisan migrate --force
-            
+
             # Nettoyer les anciens caches avant d'optimiser
             echo "🧹 Nettoyage des caches..."
             sudo -u www-data php artisan config:clear
             sudo -u www-data php artisan cache:clear
             sudo -u www-data php artisan view:clear
-            
+
             # Optimiser l'application avec les nouvelles versions
             echo "⚡ Optimisation de l'application..."
             sudo -u www-data php artisan config:cache
             sudo -u www-data php artisan route:cache
             sudo -u www-data php artisan view:cache
-            
+
             # Redémarrer les services
             echo "🔄 Redémarrage des services..."
             sudo systemctl reload nginx
             sudo systemctl reload php8.4-fpm
-            
+
             echo "🎉 Déploiement terminé avec succès !"
-        
-      - name: Health Check
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USERNAME }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            # Configuration
-            PROJECT_DIR="/var/www/sinistres.saarassurancesci.com/saarsinistre"
-            
-            # Vérifier que l'application répond
-            echo "🔍 Vérification de l'application..."
-            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://sinistres.saarassurancesci.com)
-            
-            if [ "$HTTP_STATUS" = "200" ]; then
-              echo "✅ Application accessible (HTTP $HTTP_STATUS)"
-            else
-              echo "❌ Application non accessible (HTTP $HTTP_STATUS)"
-              echo "🔄 Tentative de rollback..."
-              
-              # Rollback simple avec Git
-              cd $PROJECT_DIR
-              sudo -u www-data git reset --hard HEAD~1
-              sudo -u www-data npm ci --cache /tmp/.npm
-              sudo -u www-data npm run build
-              sudo -u www-data php artisan config:clear
-              sudo -u www-data php artisan cache:clear
-              sudo -u www-data php artisan config:cache
-              sudo -u www-data php artisan route:cache
-              sudo -u www-data php artisan view:cache
-              sudo systemctl reload nginx
-              sudo systemctl reload php8.4-fpm
-              echo "✅ Rollback terminé"
-              
-              exit 1
-            fi
