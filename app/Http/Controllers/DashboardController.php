@@ -44,63 +44,96 @@ class DashboardController extends Controller
     }
 
     public function getSinistres(Request $request)
-    {
-        $query = Sinistre::with(['gestionnaire:id,nom_complet'])
-            ->select([
-                'id',
-                'numero_sinistre',
-                'nom_assure',
-                'email_assure',
-                'telephone_assure',
-                'numero_police',
-                'date_sinistre',
-                'heure_sinistre',
-                'lieu_sinistre',
-                'statut',
-                'gestionnaire_id',
-                'jours_en_cours',
-                'en_retard',
-                'montant_estime',
-                'montant_regle',
-                'circonstances',
-                'date_affectation',
-                'date_reglement',
-                'created_at'
-            ]);
+{
+    $query = Sinistre::with(['gestionnaire:id,nom_complet'])
+        ->select([
+            'id',
+            'numero_sinistre',
+            'nom_assure',
+            'email_assure',
+            'telephone_assure',
+            'numero_police',
+            'date_sinistre',
+            'heure_sinistre',
+            'lieu_sinistre',
+            'statut',
+            'gestionnaire_id',
+            'jours_en_cours',
+            'en_retard',
+            'montant_estime',
+            'montant_regle',
+            'circonstances',
+            'date_affectation',
+            'date_reglement',
+            'created_at'
+        ]);
 
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('numero_sinistre', 'LIKE', "%{$search}%")
-                    ->orWhere('nom_assure', 'LIKE', "%{$search}%")
-                    ->orWhere('telephone_assure', 'LIKE', "%{$search}%")
-                    ->orWhere('numero_police', 'LIKE', "%{$search}%");
-            });
-        }
-
-        if ($request->filled('statut')) {
-            $query->where('statut', $request->statut);
-        }
-
-        if ($request->filled('gestionnaire_id')) {
-            if ($request->gestionnaire_id === 'null') {
-                $query->whereNull('gestionnaire_id');
-            } else {
-                $query->where('gestionnaire_id', $request->gestionnaire_id);
-            }
-        }
-
-        $query->orderBy('created_at', 'desc');
-
-        $perPage = $request->get('per_page', 10);
-        $sinistres = $query->paginate($perPage);
-
-        $sinistres->getCollection()->each(function ($sinistre) {
-            $sinistre->calculerJoursEnCours();
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->where(function ($q) use ($search) {
+            $q->where('numero_sinistre', 'LIKE', "%{$search}%")
+                ->orWhere('nom_assure', 'LIKE', "%{$search}%")
+                ->orWhere('telephone_assure', 'LIKE', "%{$search}%")
+                ->orWhere('numero_police', 'LIKE', "%{$search}%");
         });
-
-        return response()->json($sinistres);
     }
+
+    if ($request->filled('statut')) {
+        switch ($request->statut) {
+            case 'en_retard':
+                $query->where('en_retard', true);
+                break;
+                
+            case 'regle':
+                $query->whereIn('statut', ['regle', 'clos']);
+                break;
+                
+            default:
+                $query->where('statut', $request->statut);
+                break;
+        }
+    }
+
+    if ($request->filled('gestionnaire_id')) {
+        if ($request->gestionnaire_id === 'null') {
+            $query->whereNull('gestionnaire_id');
+        } else {
+            $query->where('gestionnaire_id', $request->gestionnaire_id);
+        }
+    }
+
+    $query->orderBy('created_at', 'desc');
+
+    $perPage = $request->get('per_page', 10);
+    $sinistres = $query->paginate($perPage);
+
+    $sinistres->getCollection()->each(function ($sinistre) {
+        $sinistre->calculerJoursEnCours();
+    });
+
+    $counts = [
+        'tous' => Sinistre::count(),
+        'en_attente' => Sinistre::where('statut', 'en_attente')->count(),
+        'en_cours' => Sinistre::where('statut', 'en_cours')->count(),
+        'regle' => Sinistre::whereIn('statut', ['regle', 'clos'])->count(),
+        'expertise_requise' => Sinistre::where('statut', 'expertise_requise')->count(),
+        'en_attente_documents' => Sinistre::where('statut', 'en_attente_documents')->count(),
+        'refuse' => Sinistre::where('statut', 'refuse')->count(),
+        'en_retard' => Sinistre::where('en_retard', true)->count(),
+        'pret_reglement' => Sinistre::where('statut', 'pret_reglement')->count(),
+    ];
+
+    return response()->json([
+        'data' => $sinistres->items(),
+        'current_page' => $sinistres->currentPage(),
+        'last_page' => $sinistres->lastPage(),
+        'per_page' => $sinistres->perPage(),
+        'total' => $sinistres->total(), 
+        'from' => $sinistres->firstItem(),
+        'to' => $sinistres->lastItem(),
+        'counts' => $counts,
+    ]);
+}
 
     public function assignerGestionnaire(Request $request, Sinistre $sinistre)
     {
