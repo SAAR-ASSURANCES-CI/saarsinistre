@@ -1,0 +1,115 @@
+
+   .status-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;  
+    padding: 10px 18px;
+    border-radius: 20px;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    background: white;
+    border: 1.5px solid #e5e7eb;
+    color: #374151;
+    position: relative;
+    overflow: hidden;
+    transform: scale(1);
+}
+
+
+
+.status-tab:not(.active):hover {
+    border-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.status-tab.active {
+    border-color: #3b82f6;
+    background: #dbeafe;
+    color: #1e40af;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.status-tab:active {
+    transform: scale(0.95);
+}
+
+.status-tab span[id^="count-"] {
+    transition: all 0.3s ease;
+    border-radius: 9999px;
+    padding: 2px 8px;
+    font-size: 11px;
+    background-color: #f3f4f6; 
+}
+
+.status-tab:hover span[id^="count-"] {
+    transform: scale(1.1);
+}
+
+.status-tab.active span[id^="count-"] {
+    background-color: #bfdbfe !important; 
+    color: #1e3a8a; 
+}
+
+.status-tab span[id^="count-"].updating {
+    animation: pulseCount 0.5s ease-in-out;
+}
+
+@keyframes pulseCount {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.15);
+    }
+}
+
+
+.status-tab::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+    pointer-events: none;  
+}
+
+.status-tab:hover::before {
+    left: 100%;
+}
+
+
+#sinistres-tbody tr {
+    animation: fadeInRow 0.3s ease-in-out;
+}
+
+@keyframes fadeInRow {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+
+.hide-discussion {
+    display: none;
+}
+
+#loading-state {
+    transition: opacity 0.3s ease;
+}
+
+#loading-state.hidden {
+    opacity: 0;
+    pointer-events: none;
+}

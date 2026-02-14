@@ -1,6 +1,72 @@
 <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
     <div class="px-6 py-4 border-b border-gray-200">
-        <h2 class="text-xl font-bold text-gray-900">Liste des Sinistres</h2>
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Liste des Sinistres</h2>
+        
+        <!-- Tabs de filtrage par statut sans icônes -->
+<div class="flex flex-wrap gap-2">
+    <button onclick="Sinistres.filterByStatus('')" 
+            data-status="" 
+            class="status-tab active">
+        Tous
+        <span class="ml-2 px-2 py-0.5 bg-blue-100 rounded-full text-xs" id="count-tous">0</span>
+    </button>
+    
+    <button onclick="Sinistres.filterByStatus('en_attente')" 
+            data-status="en_attente" 
+            class="status-tab">
+        En Attente
+        <span class="ml-2 px-2 py-0.5 bg-gray-100 rounded-full text-xs" id="count-en_attente">0</span>
+    </button>
+    
+    <button onclick="Sinistres.filterByStatus('en_cours')" 
+            data-status="en_cours" 
+            class="status-tab">
+        En Cours
+        <span class="ml-2 px-2 py-0.5 bg-gray-100 rounded-full text-xs" id="count-en_cours">0</span>
+    </button>
+    
+    <button onclick="Sinistres.filterByStatus('regle')" 
+            data-status="regle" 
+            class="status-tab">
+        Traités
+        <span class="ml-2 px-2 py-0.5 bg-gray-100 rounded-full text-xs" id="count-regle">0</span>
+    </button>
+    
+    <button onclick="Sinistres.filterByStatus('expertise_requise')" 
+            data-status="expertise_requise" 
+            class="status-tab">
+        Expertise Requise
+        <span class="ml-2 px-2 py-0.5 bg-gray-100 rounded-full text-xs" id="count-expertise_requise">0</span>
+    </button>
+    
+    <button onclick="Sinistres.filterByStatus('en_attente_documents')" 
+            data-status="en_attente_documents" 
+            class="status-tab">
+        En attente de documents
+        <span class="ml-2 px-2 py-0.5 bg-gray-100 rounded-full text-xs" id="count-en_attente_documents">0</span>
+    </button>
+    
+    <button onclick="Sinistres.filterByStatus('refuse')" 
+            data-status="refuse" 
+            class="status-tab">
+        Refusés
+        <span class="ml-2 px-2 py-0.5 bg-gray-100 rounded-full text-xs" id="count-refuse">0</span>
+    </button>
+    
+    <button onclick="Sinistres.filterByStatus('en_retard')" 
+            data-status="en_retard" 
+            class="status-tab">
+        En retard
+        <span class="ml-2 px-2 py-0.5 bg-gray-100 rounded-full text-xs" id="count-en_retard">0</span>
+    </button>
+
+    <button onclick="Sinistres.filterByStatus('pret_reglement')" 
+            data-status="pret_reglement" 
+            class="status-tab">
+        Prêt pour règlement
+        <span class="ml-2 px-2 py-0.5 bg-gray-100 rounded-full text-xs" id="count-pret_reglement">0</span>
+    </button>
+</div>
     </div>
 
     <div class="overflow-x-auto">
@@ -34,7 +100,6 @@
         </table>
     </div>
 
-    <!-- Loading State -->
     <div id="loading-state" class="hidden p-8 text-center">
         <div class="inline-flex items-center">
             <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-saar-blue" xmlns="http://www.w3.org/2000/svg"

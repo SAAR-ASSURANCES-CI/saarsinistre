@@ -3,6 +3,8 @@ class SinistresManager {
         this.currentPage = 1;
         this.currentPerPage = 10;
         this.currentSinistreId = null;
+        this.currentStatusFilter = '';
+        this.statusCounts = {}; 
     }
 
     async loadSinistres() {
@@ -12,19 +14,76 @@ class SinistresManager {
                 page: this.currentPage,
                 per_page: this.currentPerPage,
                 search: document.getElementById("search-input").value || "",
-                statut: document.getElementById("status-filter").value || "",
-                gestionnaire_id:
-                    document.getElementById("gestionnaire-filter").value || "",
+                statut: this.currentStatusFilter,
+                gestionnaire_id: document.getElementById("gestionnaire-filter")?.value || "",
             };
-
+            
             const data = await API.getSinistres(params);
+            
             this.displaySinistres(data.data);
             this.updatePagination(data);
+            this.updateStatusCounts(data.counts || {});
         } catch (error) {
             this.displayEmptyState();
         } finally {
             Utils.showLoading(false);
         }
+    }
+
+  
+    filterByStatus(status) {
+        this.currentStatusFilter = status;
+        this.currentPage = 1;
+        
+        this.updateTabsUI(status);
+        
+        this.loadSinistres();
+    }
+
+updateTabsUI(activeStatus) {
+    const tabs = document.querySelectorAll('.status-tab');
+    tabs.forEach(tab => {
+        const tabStatus = tab.getAttribute('data-status');
+        
+        tab.classList.remove('active');
+        
+        if (tabStatus === activeStatus) {
+            tab.classList.add('active');
+            
+            const countSpan = tab.querySelector('span[id^="count-"]');
+            if (countSpan) {
+                countSpan.classList.add('updating');
+                setTimeout(() => {
+                    countSpan.classList.remove('updating');
+                }, 500);
+            }
+        }
+    });
+}
+
+    updateStatusCounts(counts) {
+        this.statusCounts = counts;
+        
+        const statusKeys = ['tous', 'en_attente', 'en_cours', 'regle', 
+                           'expertise_requise', 'en_attente_documents', 
+                           'refuse', 'en_retard', 'pret_reglement'];
+        
+        statusKeys.forEach(status => {
+            const countElement = document.getElementById(`count-${status}`);
+            if (countElement) {
+                const oldValue = countElement.textContent;
+                const newValue = counts[status] || 0;
+                
+                if (oldValue !== newValue.toString()) {
+                    countElement.classList.add('updating');
+                    setTimeout(() => {
+                        countElement.classList.remove('updating');
+                    }, 500);
+                }
+                
+                countElement.textContent = newValue;
+            }
+        });
     }
 
     displaySinistres(sinistres) {
@@ -160,7 +219,7 @@ class SinistresManager {
         const tbody = document.getElementById("sinistres-tbody");
         tbody.innerHTML = `
             <tr>
-                <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                <td colspan="7" class="px-6 py-8 text-center text-gray-500">
                     <div class="flex flex-col items-center">
                         <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -276,9 +335,15 @@ class SinistresManager {
 
     resetFilters() {
         document.getElementById("search-input").value = "";
-        document.getElementById("status-filter").value = "";
-        document.getElementById("gestionnaire-filter").value = "";
+        if (document.getElementById("status-filter")) {
+            document.getElementById("status-filter").value = "";
+        }
+        if (document.getElementById("gestionnaire-filter")) {
+            document.getElementById("gestionnaire-filter").value = "";
+        }
+        this.currentStatusFilter = '';
         this.currentPage = 1;
+        this.updateTabsUI('');
         this.loadSinistres();
     }
 
@@ -310,5 +375,4 @@ class SinistresManager {
         if (refuses) refuses.textContent = stats.refuse;
     }
 }
-
 const Sinistres = new SinistresManager();

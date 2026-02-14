@@ -44,7 +44,7 @@ class SuiviSinistreController extends Controller
 
             $gestionnaireNom = null;
             if ($sinistre->gestionnaire) {
-                $gestionnaireNom = $sinistre->gestionnaire->name;
+                $gestionnaireNom = $sinistre->gestionnaire->nom_complet;
             }
 
             $expertiseStatut = null;

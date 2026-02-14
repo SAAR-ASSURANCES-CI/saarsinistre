@@ -10,6 +10,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/logo.png">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 @vite(['resources/css/app.css', 'resources/js/app.js'])
+<link rel="stylesheet" href="{{ asset('css/sinistres-tabs.css') }}">
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
