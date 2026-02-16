@@ -13,7 +13,7 @@ class MediaController extends Controller
     {
         $sinistres = Sinistre::whereHas('documents')
             ->with('documents')
-            ->paginate(15);
+            ->paginate(24);
         return view('media.index', compact('sinistres'));
     }
 
