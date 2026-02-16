@@ -12,8 +12,8 @@ class MediaController extends Controller
     public function index()
     {
         $sinistres = Sinistre::whereHas('documents')
-           ->with('documents')
-           ->paginate(25);
+            ->with('documents')
+            ->paginate(15);
         return view('media.index', compact('sinistres'));
     }
 
@@ -21,7 +21,7 @@ class MediaController extends Controller
     {
         $request->validate([
             'sinistre_id' => 'required|exists:sinistres,id',
-            'file' => 'required|file|max:10240', 
+            'file' => 'required|file|max:10240',
         ]);
 
         $sinistre = Sinistre::findOrFail($request->sinistre_id);
@@ -52,16 +52,16 @@ class MediaController extends Controller
         $document->delete();
         return redirect()->route('media.index')->with('success', 'Fichier supprimé avec succès.');
     }
-    
+
     public function search(Request $request)
-{
-    $query = $request->input('q');
-    
-    $sinistres = Sinistre::whereHas('documents')
-        ->where('numero_sinistre', 'like', '%' . $query . '%')
-        ->with('documents')
-        ->get();
-    
-    return response()->json($sinistres);
+    {
+        $query = $request->input('q');
+
+        $sinistres = Sinistre::whereHas('documents')
+            ->where('numero_sinistre', 'like', '%' . $query . '%')
+            ->with('documents')
+            ->get();
+
+        return response()->json($sinistres);
+    }
 }
-} 
