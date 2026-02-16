@@ -9,20 +9,19 @@ use Illuminate\Support\Facades\Storage;
 
 class MediaController extends Controller
 {
-    // Affiche la liste des dossiers (sinistres) et leurs fichiers
     public function index()
     {
-        // Récupère tous les sinistres ayant au moins un document
-        $sinistres = Sinistre::whereHas('documents')->with('documents')->get();
+        $sinistres = Sinistre::whereHas('documents')
+            ->with('documents')
+            ->paginate(15);
         return view('media.index', compact('sinistres'));
     }
 
-    // Upload d'un fichier dans le dossier d'un sinistre
     public function store(Request $request)
     {
         $request->validate([
             'sinistre_id' => 'required|exists:sinistres,id',
-            'file' => 'required|file|max:10240', 
+            'file' => 'required|file|max:10240',
         ]);
 
         $sinistre = Sinistre::findOrFail($request->sinistre_id);
@@ -48,10 +47,21 @@ class MediaController extends Controller
         return redirect()->route('media.index')->with('success', 'Fichier ajouté avec succès.');
     }
 
-    // Suppression d'un fichier
     public function destroy(DocumentSinistre $document)
     {
         $document->delete();
         return redirect()->route('media.index')->with('success', 'Fichier supprimé avec succès.');
     }
-} 
+
+    public function search(Request $request)
+    {
+        $query = $request->input('q');
+
+        $sinistres = Sinistre::whereHas('documents')
+            ->where('numero_sinistre', 'like', '%' . $query . '%')
+            ->with('documents')
+            ->get();
+
+        return response()->json($sinistres);
+    }
+}
