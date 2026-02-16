@@ -12,7 +12,6 @@ class SAARCISinistresPWA {
     async init() {
         this.checkInstallationStatus();
         
-        // Vérification immédiate de l'installation
         this.immediateInstallationCheck();
         
         this.setupInstallListeners();
@@ -57,7 +56,6 @@ class SAARCISinistresPWA {
         const wasDismissed = localStorage.getItem('pwa-installation-dismissed') === 'true';
         const dismissedTimestamp = localStorage.getItem('pwa-installation-dismissed-timestamp');
         
-        // Détection plus robuste de l'installation
         const hasOpenInAppButton = this.checkForOpenInAppButton();
         const reallyInstalled = isStandalone || isIOSStandalone || hasOpenInAppButton;
         
@@ -175,7 +173,6 @@ class SAARCISinistresPWA {
     async initServiceWorker() {
         if ('serviceWorker' in navigator) {
             try {
-                // Enregistrement avec vérification régulière des mises à jour
                 this.registration = await navigator.serviceWorker.register('/sw.js', {
                     updateViaCache: 'none' 
                 });
@@ -197,12 +194,10 @@ class SAARCISinistresPWA {
                     }
                 });
                 
-                // Vérifier les mises à jour toutes les 30 minutes
                 setInterval(() => {
                     this.checkForUpdates();
                 }, 30 * 60 * 1000);
                 
-                // Vérifier quand la page redevient visible
                 document.addEventListener('visibilitychange', () => {
                     if (!document.hidden) {
                         this.checkForUpdates();
@@ -216,22 +211,6 @@ class SAARCISinistresPWA {
     }
     
     showPWAInterface() {
-        
-        if (!this.isInstalled) {
-            this.createPWABar();
-        
-            if (this.isIOS() && !this.deferredPrompt) {
-                const wasDismissed = localStorage.getItem('pwa-installation-dismissed') === 'true';
-                const wasAccepted = localStorage.getItem('pwa-installation-accepted') === 'true';
-                const dismissalExpired = this.checkDismissalExpiration();
-                const canShow = (!wasDismissed || dismissalExpired) && !wasAccepted;
-                if (canShow) {
-                    // Bannière iOS affichée
-                }
-            }
-        }
-        
-        
         this.createOfflineIndicator();
         this.createUpdateNotification();
     }
