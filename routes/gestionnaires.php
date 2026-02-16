@@ -81,9 +81,11 @@ Route::middleware(['auth', 'role:admin,gestionnaire,expert', \App\Http\Middlewar
 
         // Médias
         Route::prefix('media')->name('media.')->group(function () {
+            Route::get('/search', [MediaController::class, 'search'])->name('search');
             Route::get('/', [MediaController::class, 'index'])->name('index');
             Route::post('/upload', [MediaController::class, 'store'])->name('store');
             Route::delete('/{document}', [MediaController::class, 'destroy'])->name('destroy');
+           
         });
 
         // Feedback
