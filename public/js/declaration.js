@@ -1,5 +1,5 @@
 let currentStep = 1;
-const totalSteps = 4;
+const totalSteps = 5;
 const uploadedFiles = {};
 const uploadProgress = new Map();
 
@@ -333,7 +333,7 @@ function nextStep() {
             nextStepElement.classList.add('animate-slide-in');
             updateProgressBar();
             updateNavigation();
-            if (currentStep === 4) {
+            if (currentStep ===5 ) {
                 updateRecap();
             }
         }
@@ -484,6 +484,13 @@ function updateRecap() {
     document.getElementById('recap-date').textContent = formData.get('date_sinistre') || '';
     document.getElementById('recap-lieu').textContent = formData.get('lieu_sinistre') || '';
     document.getElementById('recap-conducteur').textContent = formData.get('conducteur_nom') || '';
+document.getElementById('recap-marque').textContent = formData.get('marque') || '';
+document.getElementById('recap-immatriculation').textContent = formData.get('immatriculation') || '';
+document.getElementById('recap-type').textContent = formData.get('type') || '';
+document.getElementById('recap-chassis').textContent = formData.get('numero_chassis') || '';
+document.getElementById('recap-modele').textContent = formData.get('modele') || '';
+document.getElementById('recap-annee').textContent = formData.get('annee') || '';
+document.getElementById('recap-couleur').textContent = formData.get('couleur') || '';
 }
 
 function handleSubmit(e) {
@@ -502,7 +509,6 @@ function handleSubmit(e) {
     submitBtn.classList.add('animate-pulse');
     const formData = new FormData(document.getElementById('declaration-form'));
     
-    // Ajouter les fichiers uploadés de manière asynchrone
     const uploadedFilesData = [];
     Object.keys(uploadedFiles).forEach(key => {
         if (uploadedFiles[key] && uploadedFiles[key].length > 0) {
@@ -510,8 +516,8 @@ function handleSubmit(e) {
                 uploadedFiles[key].forEach((fileData, index) => {
                     uploadedFilesData.push({
                         field: `photos_vehicule[${index}]`,
-                        stored_path: fileData.path,  // ← Corrigé : stored_path au lieu de path
-                        type: 'photo_vehicule',      // ← Corrigé : type au lieu de field
+                        stored_path: fileData.path,  
+                        type: 'photo_vehicule',      
                         original_name: fileData.originalName,
                         size: fileData.size,
                         mime_type: fileData.mimeType
@@ -521,8 +527,8 @@ function handleSubmit(e) {
                 const fileData = uploadedFiles[key][0];
                 uploadedFilesData.push({
                     field: key,
-                    stored_path: fileData.path,      // ← Corrigé : stored_path au lieu de path
-                    type: key,                       // ← Corrigé : type au lieu de field
+                    stored_path: fileData.path,     
+                    type: key,                      
                     original_name: fileData.originalName,
                     size: fileData.size,
                     mime_type: fileData.mimeType
@@ -693,12 +699,10 @@ function showFieldError(fieldName, errorMessage) {
     }
 
     if (field) {
-        // Appliquer les styles d'erreur sur l'élément cible
         if (targetElement) {
             targetElement.classList.add('border-red-500', 'bg-red-50');
         }
         
-        // Trouver ou créer l'élément d'erreur
         let errorElement = field.querySelector('.field-error');
         if (!errorElement) {
             errorElement = document.createElement('div');
@@ -714,7 +718,6 @@ function showFieldError(fieldName, errorMessage) {
         `;
         errorElement.classList.remove('hidden');
 
-        // Fonction de nettoyage
         const cleanupError = () => {
             if (targetElement) {
                 targetElement.classList.remove('border-red-500', 'bg-red-50');
@@ -724,7 +727,6 @@ function showFieldError(fieldName, errorMessage) {
             }
         };
 
-        // Ajouter les listeners de nettoyage
         if (field.tagName === 'INPUT' || field.tagName === 'TEXTAREA' || field.tagName === 'SELECT') {
             field.addEventListener('input', cleanupError, { once: true });
             field.addEventListener('change', cleanupError, { once: true });
@@ -751,12 +753,10 @@ function showFieldError(fieldName, errorMessage) {
 }
 
 function clearAllFieldErrors() {
-    // Nettoyer les styles d'erreur
     document.querySelectorAll('.border-red-500, .bg-red-50').forEach(element => {
         element.classList.remove('border-red-500', 'bg-red-50');
     });
     
-    // Nettoyer les messages d'erreur
     document.querySelectorAll('.field-error').forEach(errorElement => {
         if (errorElement.parentNode) {
             errorElement.classList.add('hidden');

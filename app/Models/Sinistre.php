@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use App\Models\Vehicle;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Model;
 use App\Jobs\SendGestionnaireAssignmentSms;
@@ -344,4 +345,9 @@ class Sinistre extends Model
         return in_array($this->statut, ['clos', 'regle']) && 
                !$this->feedbacks()->where('assure_id', $this->assure_id)->exists();
     }
+
+    public function vehicle()
+{
+    return $this->hasOne(Vehicle::class);
+}
 }

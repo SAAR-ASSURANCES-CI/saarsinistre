@@ -1,4 +1,4 @@
-<div id="step-4" class="step-content hidden p-8">
+<div id="step-5" class="step-content hidden p-8">
     <div class="text-center mb-8">
         <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl mb-4">
             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -8,16 +8,32 @@
         <h3 class="text-2xl font-bold text-gray-900 mb-2">Vérification et Envoi</h3>
         <p class="text-gray-600">Vérifiez vos informations avant l'envoi final</p>
     </div>
-    <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6 mb-8 border border-gray-200">
+        <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6 mb-6 border border-gray-200">
         <h4 class="font-bold text-gray-900 mb-6 text-lg">📋 Récapitulatif de votre déclaration</h4>
-        <div class="grid md:grid-cols-2 gap-8 text-sm">
-            <div class="space-y-3">
+                <div class="mb-6">
+            <h5 class="font-semibold text-gray-800 mb-3 text-sm uppercase tracking-wide">Vos informations</h5>
+            <div class="grid md:grid-cols-2 gap-4 text-sm">
                 <p><strong>Nom:</strong> <span id="recap-nom" class="text-gray-700"></span></p>
                 <p><strong>Email:</strong> <span id="recap-email" class="text-gray-700"></span></p>
                 <p><strong>Téléphone:</strong> <span id="recap-telephone" class="text-gray-700"></span></p>
                 <p><strong>N° Police:</strong> <span id="recap-police" class="text-gray-700"></span></p>
             </div>
-            <div class="space-y-3">
+        </div>
+        <div class="mb-6 border-t border-gray-300 pt-6">
+            <h5 class="font-semibold text-gray-800 mb-3 text-sm uppercase tracking-wide">Véhicule impliqué</h5>
+            <div class="grid md:grid-cols-2 gap-4 text-sm">
+                <p><strong>Marque:</strong> <span id="recap-marque" class="text-gray-700"></span></p>
+                <p><strong>Modèle:</strong> <span id="recap-modele" class="text-gray-700"></span></p>
+                <p><strong>Année:</strong> <span id="recap-annee" class="text-gray-700"></span></p>
+                <p><strong>Couleur:</strong> <span id="recap-couleur" class="text-gray-700"></span></p>
+                <p><strong>Immatriculation:</strong> <span id="recap-immatriculation" class="text-gray-700"></span></p>
+                <p><strong>Type:</strong> <span id="recap-type" class="text-gray-700"></span></p>
+                <p><strong>N° Châssis:</strong> <span id="recap-chassis" class="text-gray-700"></span></p>
+            </div>
+        </div>
+        <div class="border-t border-gray-300 pt-6">
+            <h5 class="font-semibold text-gray-800 mb-3 text-sm uppercase tracking-wide">Détails du sinistre</h5>
+            <div class="grid md:grid-cols-2 gap-4 text-sm">
                 <p><strong>Date sinistre:</strong> <span id="recap-date" class="text-gray-700"></span></p>
                 <p><strong>Lieu:</strong> <span id="recap-lieu" class="text-gray-700"></span></p>
                 <p><strong>Conducteur:</strong> <span id="recap-conducteur" class="text-gray-700"></span></p>
@@ -54,4 +70,4 @@
             </label>
         </div>
     </div>
-</div> 
+</div>

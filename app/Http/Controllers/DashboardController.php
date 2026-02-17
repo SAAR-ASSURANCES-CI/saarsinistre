@@ -35,7 +35,7 @@ class DashboardController extends Controller
 
     public function getSinistreDetails($id)
     {
-        $sinistre = Sinistre::with(['gestionnaire', 'documents', 'tiers.documents'])
+        $sinistre = Sinistre::with(['gestionnaire', 'documents', 'tiers.documents', 'vehicle'])
             ->findOrFail($id);
 
         return response()->json([
@@ -200,7 +200,7 @@ class DashboardController extends Controller
 
     public function getDetails(Sinistre $sinistre)
     {
-        $sinistre->load(['gestionnaire:id,nom_complet', 'documents', 'tiers.documents']);
+        $sinistre->load(['gestionnaire:id,nom_complet', 'documents', 'tiers.documents', 'vehicle']);
 
         $stats = [
             'pourcentage_documents_verifies' => $sinistre->pourcentage_documents_verifies,

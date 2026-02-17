@@ -66,14 +66,13 @@
                         </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-700 uppercase">Véhicule expertisé (Marque et Immatriculation) ✏️</label>
+                        <label class="block text-xs font-medium text-gray-700 uppercase">Véhicule expertisé (automatique)</label>
                         <input id="expertise-vehicule" name="vehicule_expertise" type="text"
-                            placeholder="Ex: Toyota Corolla - AB 1234 CD"
-                            class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-saar-blue focus:ring-2 focus:ring-blue-100 text-sm">
+    readonly
+    class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed text-sm">
                     </div>
                 </div>
 
-                <!-- Tableau d'opérations -->
                 <div class="border border-gray-200 rounded-xl p-4 space-y-3">
                     <div class="flex items-center justify-between">
                         <h4 class="text-sm font-semibold text-gray-800">Opérations d'expertise</h4>
@@ -96,7 +95,6 @@
                                 </tr>
                             </thead>
                             <tbody id="expertise-operations-body" class="divide-y divide-gray-100">
-                                <!-- Lignes ajoutées dynamiquement par JavaScript -->
                             </tbody>
                         </table>
                     </div>

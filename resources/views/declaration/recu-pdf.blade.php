@@ -11,37 +11,37 @@
             line-height: 1.4;
             color: #333;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
         }
 
         .header {
             text-align: center;
             border-bottom: 2px solid #e53e3e;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
+            padding-bottom: 12px;
+            margin-bottom: 15px;
         }
 
         .company-name {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: bold;
             color: #e53e3e;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
 
         .document-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #2d3748;
-            margin-top: 15px;
+            margin-top: 8px;
         }
 
         .sinistre-number {
             background: #ebf8ff;
             border: 2px solid #3182ce;
-            border-radius: 8px;
-            padding: 15px;
+            border-radius: 6px;
+            padding: 8px;
             text-align: center;
-            margin: 20px 0;
+            margin: 10px 0 15px 0;
         }
 
         .sinistre-number .label {
@@ -52,23 +52,23 @@
         }
 
         .sinistre-number .number {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
             color: #1a365d;
-            margin-top: 5px;
+            margin-top: 2px;
         }
 
         .section {
-            margin-bottom: 25px;
+            margin-bottom: 15px;
         }
 
         .section-title {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             color: #2d3748;
             border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 5px;
-            margin-bottom: 10px;
+            padding-bottom: 3px;
+            margin-bottom: 6px;
         }
 
         .info-grid {
@@ -83,34 +83,35 @@
         .info-label {
             display: table-cell;
             font-weight: bold;
-            width: 40%;
-            padding: 3px 10px 3px 0;
+            width: 35%;
+            padding: 2px 8px 2px 0;
             vertical-align: top;
         }
 
         .info-value {
             display: table-cell;
-            padding: 3px 0;
+            padding: 2px 0;
             vertical-align: top;
         }
 
         .status-badge {
             background: #fef5e7;
             color: #744210;
-            padding: 2px 8px;
+            padding: 2px 6px;
             border-radius: 12px;
             font-size: 10px;
             font-weight: bold;
+            display: inline-block;
         }
 
         .documents-list {
             background: #f7fafc;
-            padding: 15px;
+            padding: 10px;
             border-radius: 5px;
         }
 
         .document-item {
-            padding: 5px 0;
+            padding: 3px 0;
             border-bottom: 1px dotted #cbd5e0;
         }
 
@@ -119,16 +120,11 @@
         }
 
         .footer {
-            margin-top: 40px;
-            padding-top: 20px;
+            margin-top: 15px;
+            padding-top: 8px;
             border-top: 1px solid #e2e8f0;
             font-size: 10px;
             color: #718096;
-        }
-
-        .footer-contact {
-            text-align: center;
-            margin-bottom: 10px;
         }
 
         .footer-note {
@@ -141,10 +137,25 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) rotate(-45deg);
-            font-size: 80px;
+            font-size: 70px;
             color: rgba(229, 62, 62, 0.1);
             z-index: -1;
             font-weight: bold;
+        }
+
+        .header div:not(.company-name):not(.document-title) {
+            font-size: 11px;
+        }
+
+        .info-grid .info-row:last-child .info-label,
+        .info-grid .info-row:last-child .info-value {
+            padding-bottom: 0;
+        }
+
+        @media print {
+            body {
+                padding: 12px;
+            }
         }
     </style>
 </head>
@@ -168,7 +179,7 @@
 
     <!-- Informations de l'assuré -->
     <div class="section">
-        <div class="section-title"><i class="fas fa-user"></i> INFORMATIONS DE L'ASSURÉ</div>
+        <div class="section-title">INFORMATIONS DE L'ASSURÉ</div>
         <div class="info-grid">
             <div class="info-row">
                 <div class="info-label">Nom complet :</div>
@@ -185,6 +196,41 @@
             <div class="info-row">
                 <div class="info-label">N° Police :</div>
                 <div class="info-value">{{ $sinistre->numero_police }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informations du véhicule -->
+    <div class="section">
+        <div class="section-title">INFORMATIONS DU VÉHICULE</div>
+        <div class="info-grid">
+            <div class="info-row">
+                <div class="info-label">Marque :</div>
+                <div class="info-value">{{ $sinistre->vehicle->marque }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Immatriculation :</div>
+                <div class="info-value">{{ $sinistre->vehicle->immatriculation }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Type :</div>
+                <div class="info-value">{{ ucfirst($sinistre->vehicle->type) }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">N° Châssis :</div>
+                <div class="info-value">{{ $sinistre->vehicle->numero_chassis }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Année :</div>
+                <div class="info-value">{{ $sinistre->vehicle->annee }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Couleur :</div>
+                <div class="info-value">{{ $sinistre->vehicle->couleur }}</div>
+            </div>   
+            <div class="info-row">
+                <div class="info-label">Modèle :</div>
+                <div class="info-value">{{ $sinistre->vehicle->modele }}</div>
             </div>
         </div>
     </div>
@@ -248,18 +294,18 @@
 
     <!-- Circonstances -->
     <div class="section">
-        <div class="section-title"> CIRCONSTANCES</div>
-        <div style="background: #f7fafc; padding: 10px; border-radius: 5px; font-style: italic;">
+        <div class="section-title">CIRCONSTANCES</div>
+        <div style="background: #f7fafc; padding: 8px; border-radius: 5px; font-style: italic;">
             {{ $sinistre->circonstances }}
         </div>
     </div>
 
     <!-- Prochaines étapes -->
     <div class="section">
-        <div class="section-title"> PROCHAINES ÉTAPES</div>
-        <div style="background: #ebf8ff; padding: 15px; border-radius: 5px;">
-            <div style="margin-bottom: 8px;"><strong>1.</strong> Un gestionnaire sera assigné sous 24h ouvrées</div>
-            <div style="margin-bottom: 8px;"><strong>2.</strong> Notre équipe étudiera votre dossier et vous contactera si nécessaire</div>
+        <div class="section-title">PROCHAINES ÉTAPES</div>
+        <div style="background: #ebf8ff; padding: 10px; border-radius: 5px;">
+            <div style="margin-bottom: 5px;"><strong>1.</strong> Un gestionnaire sera assigné sous 24h ouvrées</div>
+            <div><strong>2.</strong> Notre équipe étudiera votre dossier et vous contactera si nécessaire</div>
         </div>
     </div>
 

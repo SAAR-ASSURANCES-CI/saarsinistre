@@ -44,6 +44,14 @@ class StoreDeclarationRequest extends FormRequest
             'implique_tiers' => 'boolean',
             'nombre_tiers' => 'nullable|required_if:implique_tiers,true|string|in:1,2,3,4,5,6,7,8,9,10+',
             'details_tiers' => 'nullable|string|max:2000',
+
+'marque' => 'required|string|max:100',
+'modele' => 'nullable|string|max:100',
+'immatriculation' => 'required|string|max:20',
+'annee' => 'nullable|integer|min:1950|max:' . (date('Y') + 1),
+'couleur' => 'nullable|string|max:50',
+'numero_chassis' => 'required|string|min:5|max:25',
+'type' => 'nullable|string|in:voiture,moto,camion,utilitaire,autre',
             
             'tiers' => 'nullable|array',
             'tiers.*.nom_conducteur' => 'nullable|string|max:255',
@@ -69,7 +77,6 @@ class StoreDeclarationRequest extends FormRequest
             'commissariat' => 'nullable|required_if:constat_autorite,true|string|max:255',
             'dommages_releves' => 'nullable|string|max:1000',
 
-            // Validation des fichiers (soit upload classique, soit asynchrone)
             'carte_grise_recto' => "nullable|file|mimes:{$supportedMimes}|max:{$maxFileSize}",
             'carte_grise_verso' => "nullable|file|mimes:{$supportedMimes}|max:{$maxFileSize}",
             'visite_technique_recto' => "nullable|file|mimes:{$supportedMimes}|max:{$maxPhotoSize}",
@@ -77,7 +84,6 @@ class StoreDeclarationRequest extends FormRequest
             'attestation_assurance' => "nullable|file|mimes:{$supportedMimes}|max:{$maxPhotoSize}",
             'permis_conduire' => "nullable|file|mimes:{$supportedMimes}|max:{$maxPhotoSize}",
             
-            // Données des fichiers uploadés de manière asynchrone
             'uploaded_files' => 'required|string|json',
             
             'tiers_photos_*' => 'nullable|array',
@@ -101,6 +107,13 @@ class StoreDeclarationRequest extends FormRequest
             'telephone_assure.max' => 'Le téléphone ne doit pas dépasser 20 caractères.',
             'numero_police.required' => 'Le numéro de police est obligatoire.',
             'numero_police.max' => 'Le numéro de police ne doit pas dépasser 50 caractères.',
+
+'marque.required' => 'La marque du véhicule est obligatoire.',
+'marque.max' => 'La marque ne doit pas dépasser 100 caractères.',
+'immatriculation.required' => 'L\'immatriculation est obligatoire.',
+'numero_chassis.required' => 'Le numéro de châssis est obligatoire.',
+'annee.min' => 'L\'année doit être supérieure à 1950.',
+'annee.max' => 'L\'année ne peut pas être dans le futur.',
 
             'date_sinistre.required' => 'La date du sinistre est obligatoire.',
             'date_sinistre.before_or_equal' => 'La date du sinistre ne peut pas être dans le futur.',

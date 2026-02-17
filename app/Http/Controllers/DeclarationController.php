@@ -157,32 +157,30 @@ class DeclarationController extends Controller
             'permis_conduire',
             'photos_vehicule',
             'tiers',
-            'tiers_photos_1',
-            'tiers_photos_2',
-            'tiers_photos_3',
-            'tiers_photos_4',
-            'tiers_photos_5',
-            'tiers_photos_6',
-            'tiers_photos_7',
-            'tiers_photos_8',
-            'tiers_photos_9',
-            'tiers_photos_10',
-            'tiers_attestation_1',
-            'tiers_attestation_2',
-            'tiers_attestation_3',
-            'tiers_attestation_4',
-            'tiers_attestation_5',
-            'tiers_attestation_6',
-            'tiers_attestation_7',
-            'tiers_attestation_8',
-            'tiers_attestation_9',
-            'tiers_attestation_10'
+            'tiers_photos_1', 'tiers_photos_2', 'tiers_photos_3', 'tiers_photos_4', 'tiers_photos_5',
+            'tiers_photos_6', 'tiers_photos_7', 'tiers_photos_8', 'tiers_photos_9', 'tiers_photos_10',
+            'tiers_attestation_1', 'tiers_attestation_2', 'tiers_attestation_3', 'tiers_attestation_4',
+            'tiers_attestation_5', 'tiers_attestation_6', 'tiers_attestation_7', 'tiers_attestation_8',
+            'tiers_attestation_9', 'tiers_attestation_10',
+            'marque', 'modele', 'immatriculation', 'annee', 'couleur', 'numero_chassis', 'type'
         ])->toArray();
-
+    
         $donneesSinistre['constat_autorite'] = (bool)($donneesSinistre['constat_autorite'] ?? false);
         $donneesSinistre['statut'] = 'en_attente';
-
-        return Sinistre::create($donneesSinistre);
+    
+        $sinistre = Sinistre::create($donneesSinistre);
+    
+        $sinistre->vehicle()->create([
+            'marque' => $validated['marque'],
+            'modele' => $validated['modele'] ?? null,
+            'immatriculation' => $validated['immatriculation'],
+            'annee' => $validated['annee'] ?? null,
+            'couleur' => $validated['couleur'] ?? null,
+            'numero_chassis' => $validated['numero_chassis'],
+            'type' => $validated['type'],
+        ]);
+    
+        return $sinistre;
     }
 
     protected function handleTiers($request, Sinistre $sinistre, array $tiersData): void
