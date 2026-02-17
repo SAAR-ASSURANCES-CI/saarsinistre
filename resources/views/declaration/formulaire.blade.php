@@ -25,9 +25,10 @@
         <div class="max-w-4xl mx-auto">
             <form id="declaration-form" class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
                 @include('declaration.partials.step1-infos')
-                @include('declaration.partials.step2-sinistre')
-                @include('declaration.partials.step3-documents')
-                @include('declaration.partials.step4-confirmation')
+                @include('declaration.partials.step2-vehicle')
+                @include('declaration.partials.step3-sinistre')
+                @include('declaration.partials.step4-documents')
+                @include('declaration.partials.step5-confirmation')
                 @include('declaration.partials.navigation')
             </form>
         </div>

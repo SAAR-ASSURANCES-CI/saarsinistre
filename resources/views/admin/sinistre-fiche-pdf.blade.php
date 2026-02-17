@@ -156,6 +156,47 @@
             </div>
         </div>
     </div>
+@if($sinistre->vehicle)
+<div class="section">
+    <div class="title">Informations du véhicule</div>
+    <div class="grid">
+        <div class="row">
+            <div class="cell-label">Marque</div>
+            <div class="cell-value">{{ $sinistre->vehicle->marque }}</div>
+        </div>
+        @if($sinistre->vehicle->modele)
+        <div class="row">
+            <div class="cell-label">Modèle</div>
+            <div class="cell-value">{{ $sinistre->vehicle->modele }}</div>
+        </div>
+        @endif
+        <div class="row">
+            <div class="cell-label">Immatriculation</div>
+            <div class="cell-value">{{ $sinistre->vehicle->immatriculation }}</div>
+        </div>
+        <div class="row">
+            <div class="cell-label">Type</div>
+            <div class="cell-value">{{ ucfirst($sinistre->vehicle->type) }}</div>
+        </div>
+        @if($sinistre->vehicle->annee)
+        <div class="row">
+            <div class="cell-label">Année</div>
+            <div class="cell-value">{{ $sinistre->vehicle->annee }}</div>
+        </div>
+        @endif
+        @if($sinistre->vehicle->couleur)
+        <div class="row">
+            <div class="cell-label">Couleur</div>
+            <div class="cell-value">{{ $sinistre->vehicle->couleur }}</div>
+        </div>
+        @endif
+        <div class="row">
+            <div class="cell-label">N° de châssis</div>
+            <div class="cell-value">{{ $sinistre->vehicle->numero_chassis }}</div>
+        </div>
+    </div>
+</div>
+@endif
 
     <div class="section">
         <div class="title">Détails du sinistre</div>

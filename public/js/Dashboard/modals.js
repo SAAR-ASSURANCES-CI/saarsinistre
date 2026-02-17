@@ -167,79 +167,164 @@ class ModalsManager {
             }
     
             detailsContent.innerHTML = `
-                <div class="grid md:grid-cols-2 gap-6">
-                    <!-- Colonne gauche - Informations générales -->
-                    <div class="space-y-4">
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <h4 class="font-semibold text-gray-900 mb-3">Informations Générales</h4>
-                            <div class="space-y-2 text-sm">
-                                <p><span class="font-medium">Numéro:</span> ${sinistre.numero_sinistre}</p>
-                                <p><span class="font-medium">Police:</span> ${sinistre.numero_police}</p>
-                                <p><span class="font-medium">Date:</span> ${Utils.formatDate(sinistre.date_sinistre)}</p>
-                                ${sinistre.heure_sinistre ? `<p><span class="font-medium">Heure:</span> ${Utils.formatTime(sinistre.heure_sinistre)}</p>` : ''}
-                                <p><span class="font-medium">Lieu:</span> ${sinistre.lieu_sinistre}</p>
-                                <p><span class="font-medium">Statut:</span> ${Utils.getStatusBadge(sinistre.statut)}</p>
-                            </div>
-                        </div>
-    
-                        <div class="bg-blue-50 p-4 rounded-lg">
-                            <h4 class="font-semibold text-gray-900 mb-3">Assuré</h4>
-                            <div class="space-y-2 text-sm">
-                                <p><span class="font-medium">Nom:</span> ${sinistre.nom_assure}</p>
-                                <p><span class="font-medium">Email:</span> ${sinistre.email_assure}</p>
-                                <p><span class="font-medium">Téléphone:</span> ${sinistre.telephone_assure}</p>
-                            </div>
-                        </div>
-                    </div>
-    
-                    <!-- Colonne droite - Gestion -->
-                    <div class="space-y-4">
-                        <div class="bg-green-50 p-4 rounded-lg">
-                            <h4 class="font-semibold text-gray-900 mb-3">Gestion</h4>
-                            <div class="space-y-2 text-sm">
-                                <p><span class="font-medium">Gestionnaire:</span> ${sinistre.gestionnaire ? sinistre.gestionnaire.nom_complet : "Non assigné"}</p>
-                                ${sinistre.date_affectation ? `<p><span class="font-medium">Date affectation:</span> ${Utils.formatDate(sinistre.date_affectation)}</p>` : ''}
-                                <p><span class="font-medium">Jours en cours:</span> ${sinistre.jours_en_cours}</p>
-                                <p><span class="font-medium">En retard:</span> ${sinistre.en_retard ? "⚠️ Oui" : "✅ Non"}</p>
-                                <p><span class="font-medium">Montant estimé:</span> ${Utils.formatCurrency(sinistre.montant_estime)}</p>
-                                ${sinistre.montant_regle ? `<p><span class="font-medium">Montant réglé:</span> ${Utils.formatCurrency(sinistre.montant_regle)}</p>` : ''}
-                                ${sinistre.date_reglement ? `<p><span class="font-medium">Date règlement:</span> ${Utils.formatDate(sinistre.date_reglement)}</p>` : ''}
-                            </div>
-                        </div>
-    
-                        ${sinistre.circonstances ? `
-                            <div class="bg-yellow-50 p-4 rounded-lg">
-                                <h4 class="font-semibold text-gray-900 mb-3">Circonstances</h4>
-                                <p class="text-sm text-gray-700">${sinistre.circonstances}</p>
-                            </div>
-                        ` : ''}
-                    </div>
-                </div>
-    
-                ${sinistreDetailsHTML}
-    
-                ${documentsHTML}
-    
-                <div class="mt-6 bg-purple-50 p-4 rounded-lg">
-                    <h4 class="font-semibold text-gray-900 mb-3">Actions Rapides</h4>
-                    <div class="flex flex-wrap gap-3">
-                        <button onclick="Modals.showAssignModal(${sinistre.id}); Modals.closeModal('details-modal');"
-                                class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-                            Affecter Gestionnaire
-                        </button>
-                        <button onclick="Modals.showStatusModal(${sinistre.id}); Modals.closeModal('details-modal');"
-                                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                            Changer Statut
-                        </button>
-                    </div>
-                </div>
-            `;
+    <!-- LIGNE 1 : Informations Générales | Gestion -->
+    <div class="grid md:grid-cols-2 gap-6 mb-6">
+        <!-- Informations Générales -->
+        <div class="bg-gray-50 p-4 rounded-lg">
+            <h4 class="font-semibold text-gray-900 mb-3">Informations Générales</h4>
+            <div class="space-y-2 text-sm">
+                <p><span class="font-medium">Numéro:</span> ${sinistre.numero_sinistre}</p>
+                <p><span class="font-medium">Police:</span> ${sinistre.numero_police}</p>
+                <p><span class="font-medium">Date:</span> ${Utils.formatDate(sinistre.date_sinistre)}</p>
+                ${sinistre.heure_sinistre ? `<p><span class="font-medium">Heure:</span> ${Utils.formatTime(sinistre.heure_sinistre)}</p>` : ''}
+                <p><span class="font-medium">Lieu:</span> ${sinistre.lieu_sinistre}</p>
+                <p><span class="font-medium">Statut:</span> ${Utils.getStatusBadge(sinistre.statut)}</p>
+            </div>
+        </div>
+
+        <!-- Gestion -->
+        <div class="bg-green-50 p-4 rounded-lg">
+            <h4 class="font-semibold text-gray-900 mb-3">Gestion</h4>
+            <div class="space-y-2 text-sm">
+                <p><span class="font-medium">Gestionnaire:</span> ${sinistre.gestionnaire ? sinistre.gestionnaire.nom_complet : "Non assigné"}</p>
+                ${sinistre.date_affectation ? `<p><span class="font-medium">Date affectation:</span> ${Utils.formatDate(sinistre.date_affectation)}</p>` : ''}
+                <p><span class="font-medium">Jours en cours:</span> ${sinistre.jours_en_cours}</p>
+                <p><span class="font-medium">En retard:</span> ${sinistre.en_retard ? "⚠️ Oui" : "✅ Non"}</p>
+                <p><span class="font-medium">Montant estimé:</span> ${Utils.formatCurrency(sinistre.montant_estime)}</p>
+                ${sinistre.montant_regle ? `<p><span class="font-medium">Montant réglé:</span> ${Utils.formatCurrency(sinistre.montant_regle)}</p>` : ''}
+                ${sinistre.date_reglement ? `<p><span class="font-medium">Date règlement:</span> ${Utils.formatDate(sinistre.date_reglement)}</p>` : ''}
+            </div>
+        </div>
+    </div>
+
+    <!-- LIGNE 2 : Véhicule | Circonstances -->
+    <div class="grid md:grid-cols-2 gap-6 mb-6">
+        <!-- Véhicule -->
+        ${sinistre.vehicle ? `
+        <div class="bg-orange-50 p-4 rounded-lg">
+            <h4 class="font-semibold text-gray-900 mb-3">Véhicule</h4>
+            <table class="w-full text-sm">
+                <tr>
+                    <td class="font-medium py-1 w-1/3">Marque:</td>
+                    <td class="py-1">${sinistre.vehicle.marque || '-'}</td>
+                    <td class="font-medium py-1 w-1/3">Modèle:</td>
+                    <td class="py-1">${sinistre.vehicle.modele || '-'}</td>
+                </tr>
+                <tr>
+                    <td class="font-medium py-1">Année:</td>
+                    <td class="py-1">${sinistre.vehicle.annee || '-'}</td>
+                    <td class="font-medium py-1">Couleur:</td>
+                    <td class="py-1">${sinistre.vehicle.couleur || '-'}</td>
+                </tr>
+                <tr>
+                    <td class="font-medium py-1">Immatriculation:</td>
+                    <td class="py-1">${sinistre.vehicle.immatriculation || '-'}</td>
+                    <td class="font-medium py-1">Type:</td>
+                    <td class="py-1">${sinistre.vehicle.type || '-'}</td>
+                </tr>
+                <tr>
+                    <td class="font-medium py-1">N° Châssis:</td>
+                    <td colspan="3" class="py-1">${sinistre.vehicle.numero_chassis || '-'}</td>
+                </tr>
+            </table>
+        </div>
+        ` : `
+        <div class="bg-gray-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-500 text-center">Aucune information véhicule disponible</p>
+        </div>
+        `}
+
+        <!-- Circonstances -->
+        ${sinistre.circonstances ? `
+        <div class="bg-yellow-50 p-4 rounded-lg">
+            <h4 class="font-semibold text-gray-900 mb-3">Circonstances</h4>
+            <p class="text-sm text-gray-700">${sinistre.circonstances}</p>
+        </div>
+        ` : `
+        <div class="bg-gray-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-500 text-center">Aucune circonstance renseignée</p>
+        </div>
+        `}
+    </div>
+
+    <!-- LIGNE 3 : Assuré | Détails du Sinistre -->
+    <div class="grid md:grid-cols-2 gap-6 mb-6">
+        <!-- Assuré -->
+        <div class="bg-blue-50 p-4 rounded-lg">
+            <h4 class="font-semibold text-gray-900 mb-3">Assuré</h4>
+            <div class="space-y-2 text-sm">
+                <p><span class="font-medium">Nom:</span> ${sinistre.nom_assure}</p>
+                <p><span class="font-medium">Email:</span> ${sinistre.email_assure}</p>
+                <p><span class="font-medium">Téléphone:</span> ${sinistre.telephone_assure}</p>
+            </div>
+        </div>
+
+        <!-- Détails du Sinistre -->
+        <div class="bg-red-50 p-4 rounded-lg">
+            <h4 class="font-semibold text-gray-900 mb-3">Détails du Sinistre</h4>
+            <div class="space-y-2 text-sm">
+                ${sinistre.conducteur_nom ? `<p><span class="font-medium">Conducteur:</span> ${sinistre.conducteur_nom}</p>` : ''}
+                ${sinistre.constat_autorite ? `<p><span class="font-medium">Constat autorité:</span> ${sinistre.constat_autorite ? 'Oui' : 'Non'}</p>` : ''}
+                ${sinistre.officier_nom ? `<p><span class="font-medium">Officier:</span> ${sinistre.officier_nom}</p>` : ''}
+                ${sinistre.commissariat ? `<p><span class="font-medium">Commissariat:</span> ${sinistre.commissariat}</p>` : ''}
+                ${sinistre.dommages_releves ? `<p><span class="font-medium">Dommages relevés:</span> ${sinistre.dommages_releves}</p>` : ''}
+                <p><span class="font-medium">Tiers impliqué:</span> ${sinistre.implique_tiers ? 'Oui' : 'Non'}</p>
+                ${this.renderTiersDetails(sinistre)}
+            </div>
+        </div>
+    </div>
+
+    <!-- LIGNE 4 : Documents (pleine largeur) -->
+    ${documentsHTML}
+
+    <!-- LIGNE 5 : Actions Rapides (pleine largeur) -->
+    <div class="mt-6 bg-purple-50 p-4 rounded-lg">
+        <h4 class="font-semibold text-gray-900 mb-3">Actions Rapides</h4>
+        <div class="flex flex-wrap gap-3">
+            <button onclick="Modals.showAssignModal(${sinistre.id}); Modals.closeModal('details-modal');"
+                    class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                Affecter Gestionnaire
+            </button>
+            <button onclick="Modals.showStatusModal(${sinistre.id}); Modals.closeModal('details-modal');"
+                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                Changer Statut
+            </button>
+        </div>
+    </div>
+`;
     
             this.openModal("details-modal");
         } catch (error) {
             console.error("Erreur lors du chargement des détails:", error);
             Utils.showErrorMessage("Erreur lors du chargement des détails");
         }
+    }
+
+    renderTiersDetails(sinistre) {
+        if (!sinistre.implique_tiers) return '';
+        
+        let html = '';
+        if (sinistre.tiers && sinistre.tiers.length > 0) {
+            html += '<div class="mt-3">';
+            sinistre.tiers.forEach(tiers => {
+                html += `
+                    <div class="bg-white border border-gray-200 rounded p-3 mb-2">
+                        <p class="font-medium text-sm mb-2">Tiers ${tiers.numero_tiers}</p>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            ${tiers.nom_conducteur ? `<p><span class="font-medium">Nom:</span> ${tiers.nom_conducteur}</p>` : ''}
+                            ${tiers.telephone ? `<p><span class="font-medium">Tél:</span> ${tiers.telephone}</p>` : ''}
+                            ${tiers.immatriculation ? `<p><span class="font-medium">Immat:</span> ${tiers.immatriculation}</p>` : ''}
+                            ${tiers.compagnie_assurance ? `<p><span class="font-medium">Assurance:</span> ${tiers.compagnie_assurance}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+        } else if (sinistre.details_tiers) {
+            html += `<p class="text-sm text-gray-700 mt-2">${sinistre.details_tiers}</p>`;
+        }
+        
+        return html;
     }
 
     getDocumentIcon(mimeType) {
@@ -431,11 +516,16 @@ class ModalsManager {
             }
 
             const vehiculeInput = document.getElementById('expertise-vehicule');
-            if (expertise && expertise.vehicule_expertise) {
-                vehiculeInput.value = expertise.vehicule_expertise;
-            } else {
-                vehiculeInput.value = '';
-            }
+if (expertise && expertise.vehicule_expertise) {
+    vehiculeInput.value = expertise.vehicule_expertise;
+} else if (sinistre.vehicle) {
+    const marque = sinistre.vehicle.marque || '';
+    const modele = sinistre.vehicle.modele || '';
+    const immatriculation = sinistre.vehicle.immatriculation || '';
+    vehiculeInput.value = `${marque} ${modele} - ${immatriculation}`.trim();
+} else {
+    vehiculeInput.value = '';
+}
 
             this.clearExpertiseOperations();
             if (expertise && expertise.operations && expertise.operations.length > 0) {
@@ -530,7 +620,6 @@ class ModalsManager {
             return false;
         }
         
-        // Récupérer le lieu d'expertise
         const lieuInput = document.getElementById('expertise-lieu');
         const lieuExpertise = lieuInput.value.trim();
         
@@ -540,11 +629,9 @@ class ModalsManager {
             return false;
         }
         
-        // Récupérer le véhicule expertisé
         const vehiculeInput = document.getElementById('expertise-vehicule');
         const vehiculeExpertise = vehiculeInput.value.trim();
         
-        // Récupérer toutes les opérations
         const operations = [];
         const rows = document.querySelectorAll('#expertise-operations-body tr.operation-row');
         
@@ -603,17 +690,13 @@ async previewExpertise() {
     const success = await this.saveExpertise();
     
     if (!success) {
-        // saveExpertise() a déjà affiché un message d'erreur
         return;
     }
     
-    // 2. Afficher un message de chargement
     Utils.showLoading(true, 'Génération du PDF...');
     
-    // 3. Ouvrir le PDF dans une NOUVELLE FENÊTRE (pas dans une modale)
     const previewUrl = await API.previewExpertisePdf(this.currentSinistreId);
     
-    // Petit délai pour laisser le temps au serveur
     setTimeout(() => {
         Utils.showLoading(false);
         window.open(previewUrl, '_blank');
@@ -626,10 +709,8 @@ async previewExpertise() {
             return;
         }
         
-        // 2. Afficher un message de chargement
         Utils.showLoading(true, 'Génération et téléchargement du PDF...');
         
-        // 3. Télécharger le PDF
         setTimeout(async () => {
             try {
                 await API.downloadExpertisePdf(this.currentSinistreId);
