@@ -12,7 +12,7 @@ class SinistreDocumentService
     public function handleDocuments(Request $request, Sinistre $sinistre): void
     {
         $this->processStandardDocuments($request, $sinistre);
-        $this->processVehiclePhotos($request, $sinistre);
+        $this->processVehiculePhotos($request, $sinistre);
     }
 
     protected function processStandardDocuments(Request $request, Sinistre $sinistre): void
@@ -33,7 +33,7 @@ class SinistreDocumentService
         }
     }
 
-    protected function processVehiclePhotos(Request $request, Sinistre $sinistre): void
+    protected function processVehiculePhotos(Request $request, Sinistre $sinistre): void
     {
         if ($request->hasFile('photos_vehicule')) {
             foreach ($request->file('photos_vehicule') as $index => $photo) {

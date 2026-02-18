@@ -200,31 +200,19 @@ class ModalsManager {
     <!-- LIGNE 2 : Véhicule | Circonstances -->
     <div class="grid md:grid-cols-2 gap-6 mb-6">
         <!-- Véhicule -->
-        ${sinistre.vehicle ? `
+        ${sinistre.vehicule ? `
         <div class="bg-orange-50 p-4 rounded-lg">
             <h4 class="font-semibold text-gray-900 mb-3">Véhicule</h4>
             <table class="w-full text-sm">
                 <tr>
                     <td class="font-medium py-1 w-1/3">Marque:</td>
-                    <td class="py-1">${sinistre.vehicle.marque || '-'}</td>
+                    <td class="py-1">${sinistre.vehicule.marque || '-'}</td>
                     <td class="font-medium py-1 w-1/3">Modèle:</td>
-                    <td class="py-1">${sinistre.vehicle.modele || '-'}</td>
-                </tr>
-                <tr>
-                    <td class="font-medium py-1">Année:</td>
-                    <td class="py-1">${sinistre.vehicle.annee || '-'}</td>
-                    <td class="font-medium py-1">Couleur:</td>
-                    <td class="py-1">${sinistre.vehicle.couleur || '-'}</td>
+                    <td class="py-1">${sinistre.vehicule.modele || '-'}</td>
                 </tr>
                 <tr>
                     <td class="font-medium py-1">Immatriculation:</td>
-                    <td class="py-1">${sinistre.vehicle.immatriculation || '-'}</td>
-                    <td class="font-medium py-1">Type:</td>
-                    <td class="py-1">${sinistre.vehicle.type || '-'}</td>
-                </tr>
-                <tr>
-                    <td class="font-medium py-1">N° Châssis:</td>
-                    <td colspan="3" class="py-1">${sinistre.vehicle.numero_chassis || '-'}</td>
+                    <td colspan="3" class="py-1">${sinistre.vehicule.immatriculation || '-'}</td>
                 </tr>
             </table>
         </div>
@@ -518,10 +506,10 @@ class ModalsManager {
             const vehiculeInput = document.getElementById('expertise-vehicule');
 if (expertise && expertise.vehicule_expertise) {
     vehiculeInput.value = expertise.vehicule_expertise;
-} else if (sinistre.vehicle) {
-    const marque = sinistre.vehicle.marque || '';
-    const modele = sinistre.vehicle.modele || '';
-    const immatriculation = sinistre.vehicle.immatriculation || '';
+} else if (sinistre.vehicule) {
+    const marque = sinistre.vehicule.marque || '';
+    const modele = sinistre.vehicule.modele || '';
+    const immatriculation = sinistre.vehicule.immatriculation || '';
     vehiculeInput.value = `${marque} ${modele} - ${immatriculation}`.trim();
 } else {
     vehiculeInput.value = '';

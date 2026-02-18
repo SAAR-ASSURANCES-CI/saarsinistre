@@ -47,31 +47,30 @@ class DeclarationController extends Controller
             DB::beginTransaction();
 
             $data = $request->validated();
-            
-            // Valider les fichiers uploadés de manière asynchrone
+
             $this->validateAsyncUploads($request, $data);
-            
+
             $user = null;
-            
+
             if (!empty($data['email_assure'])) {
                 $user = User::where('email', $data['email_assure'])
-                           ->where('role', 'assure')
-                           ->first();
+                    ->where('role', 'assure')
+                    ->first();
             }
-        
+
             if (!$user && !empty($data['telephone_assure'])) {
-                
+
                 $sinistresExistant = Sinistre::where('telephone_assure', $data['telephone_assure'])
-                                           ->get();
-                
+                    ->get();
+
                 if ($sinistresExistant->isNotEmpty()) {
-                    // Chercher un sinistre qui a déjà un assure_id
+
                     $sinistreAvecAssure = $sinistresExistant->whereNotNull('assure_id')->first();
-                    
+
                     if ($sinistreAvecAssure) {
-                        // Utiliser le compte existant
+
                         $user = User::find($sinistreAvecAssure->assure_id);
-                        
+
                         Log::info('Compte assuré existant trouvé via téléphone', [
                             'user_id' => $user->id,
                             'nom_assure' => $data['nom_assure'],
@@ -79,12 +78,11 @@ class DeclarationController extends Controller
                             'sinistres_existants' => $sinistresExistant->count()
                         ]);
                     } else {
-                        // Créer un nouveau compte et associer tous les sinistres existants
+
                         $user = $this->accountService->createAssureAccount($data, app(OrangeService::class));
-                        
-                        // Mettre à jour tous les sinistres existants avec le nouvel assure_id
+
                         $this->associerSinistresExistant($sinistresExistant, $user->id);
-                        
+
                         Log::info('Nouveau compte créé et sinistres existants associés', [
                             'user_id' => $user->id,
                             'nom_assure' => $data['nom_assure'],
@@ -97,7 +95,7 @@ class DeclarationController extends Controller
 
             if (!$user) {
                 $user = $this->accountService->createAssureAccount($data, app(OrangeService::class));
-                
+
                 Log::info('Nouveau compte assuré créé', [
                     'user_id' => $user->id,
                     'nom_assure' => $data['nom_assure'],
@@ -112,7 +110,7 @@ class DeclarationController extends Controller
                     'telephone_assure' => $data['telephone_assure'] ?? 'non fourni'
                 ]);
             }
-            
+
             $sinistre = $this->createSinistre($data + ['assure_id' => $user->id]);
             $sinistre->refresh();
 
@@ -121,7 +119,7 @@ class DeclarationController extends Controller
             if (!empty($data['implique_tiers']) && !empty($data['tiers'])) {
                 $this->handleTiers($request, $sinistre, $data['tiers']);
             }
-            
+
             $this->notificationService->triggerSinistreNotifications($sinistre);
 
             $this->cleanupTempFiles($request);
@@ -157,41 +155,54 @@ class DeclarationController extends Controller
             'permis_conduire',
             'photos_vehicule',
             'tiers',
-            'tiers_photos_1', 'tiers_photos_2', 'tiers_photos_3', 'tiers_photos_4', 'tiers_photos_5',
-            'tiers_photos_6', 'tiers_photos_7', 'tiers_photos_8', 'tiers_photos_9', 'tiers_photos_10',
-            'tiers_attestation_1', 'tiers_attestation_2', 'tiers_attestation_3', 'tiers_attestation_4',
-            'tiers_attestation_5', 'tiers_attestation_6', 'tiers_attestation_7', 'tiers_attestation_8',
-            'tiers_attestation_9', 'tiers_attestation_10',
-            'marque', 'modele', 'immatriculation', 'annee', 'couleur', 'numero_chassis', 'type'
+            'tiers_photos_1',
+            'tiers_photos_2',
+            'tiers_photos_3',
+            'tiers_photos_4',
+            'tiers_photos_5',
+            'tiers_photos_6',
+            'tiers_photos_7',
+            'tiers_photos_8',
+            'tiers_photos_9',
+            'tiers_photos_10',
+            'tiers_attestation_1',
+            'tiers_attestation_2',
+            'tiers_attestation_3',
+            'tiers_attestation_4',
+            'tiers_attestation_5',
+            'tiers_attestation_6',
+            'tiers_attestation_7',
+            'tiers_attestation_8',
+            'tiers_attestation_9',
+            'tiers_attestation_10',
+            'marque',
+            'modele',
+            'immatriculation'
         ])->toArray();
-    
+
         $donneesSinistre['constat_autorite'] = (bool)($donneesSinistre['constat_autorite'] ?? false);
         $donneesSinistre['statut'] = 'en_attente';
-    
+
         $sinistre = Sinistre::create($donneesSinistre);
-    
-        $sinistre->vehicle()->create([
+
+        $sinistre->vehicule()->create([
             'marque' => $validated['marque'],
             'modele' => $validated['modele'] ?? null,
             'immatriculation' => $validated['immatriculation'],
-            'annee' => $validated['annee'] ?? null,
-            'couleur' => $validated['couleur'] ?? null,
-            'numero_chassis' => $validated['numero_chassis'],
-            'type' => $validated['type'],
         ]);
-    
+
         return $sinistre;
     }
 
     protected function handleTiers($request, Sinistre $sinistre, array $tiersData): void
     {
         foreach ($tiersData as $numero => $tiersInfo) {
-           
-            $tiersInfo = array_filter($tiersInfo, function($value) {
+
+            $tiersInfo = array_filter($tiersInfo, function ($value) {
                 return !is_null($value) && $value !== '';
             });
-            
-           
+
+
             if (!empty($tiersInfo)) {
                 $tiers = $sinistre->tiers()->create([
                     'numero_tiers' => (int)$numero,
@@ -215,14 +226,14 @@ class DeclarationController extends Controller
 
     protected function handleTiersDocuments($request, $tiers, $numero): void
     {
-       
+
         if ($request->hasFile("tiers_photos_{$numero}")) {
             $photos = $request->file("tiers_photos_{$numero}");
             foreach ($photos as $index => $photo) {
                 if ($photo->isValid()) {
                     $filename = 'tiers_' . $tiers->id . '_photo_' . ($index + 1) . '_' . time() . '.' . $photo->getClientOriginalExtension();
                     $path = $photo->storeAs('tiers/photos', $filename, 'public');
-                    
+
                     $tiers->documents()->create([
                         'type_document' => 'photo_vehicule',
                         'nom_fichier' => $photo->getClientOriginalName(),
@@ -239,7 +250,7 @@ class DeclarationController extends Controller
             if ($attestation->isValid()) {
                 $filename = 'tiers_' . $tiers->id . '_attestation_' . time() . '.' . $attestation->getClientOriginalExtension();
                 $path = $attestation->storeAs('tiers/attestations', $filename, 'public');
-                
+
                 $tiers->documents()->create([
                     'type_document' => 'attestation_assurance',
                     'nom_fichier' => $attestation->getClientOriginalName(),
@@ -311,7 +322,7 @@ class DeclarationController extends Controller
     protected function handleProgressiveUpload($request, Sinistre $sinistre): void
     {
         $uploadedFiles = json_decode($request->input('uploaded_files'), true);
-        
+
         if (!$uploadedFiles) {
             return;
         }
@@ -323,7 +334,7 @@ class DeclarationController extends Controller
             }
 
             $tempPath = $fileInfo['stored_path'];
-            
+
             if (!Storage::disk('public')->exists($tempPath)) {
                 Log::warning("Fichier temporaire introuvable: {$tempPath}");
                 continue;
@@ -331,11 +342,11 @@ class DeclarationController extends Controller
 
             // Déplacer le fichier vers son emplacement final
             $finalPath = $this->moveToFinalLocation($tempPath, $sinistre, $fileInfo['type']);
-            
+
             if ($finalPath) {
                 // Créer l'enregistrement dans la base de données
                 $this->createDocumentRecord($sinistre, $fileInfo, $finalPath);
-                
+
                 Log::info("Fichier traité avec succès", [
                     'sinistre_id' => $sinistre->id,
                     'type' => $fileInfo['type'],
@@ -355,12 +366,12 @@ class DeclarationController extends Controller
             $finalDirectory = "sinistres/{$sinistre->id}";
             $finalPath = "{$finalDirectory}/{$filename}";
 
-            
+
             if (!Storage::disk('public')->exists($finalDirectory)) {
                 Storage::disk('public')->makeDirectory($finalDirectory);
             }
 
-            
+
             if (Storage::disk('public')->move($tempPath, $finalPath)) {
                 return $finalPath;
             }
@@ -386,7 +397,7 @@ class DeclarationController extends Controller
                 'type_mime' => $fileInfo['mime_type'] ?? 'application/octet-stream',
                 'taille_fichier' => $fileInfo['size'] ?? 0,
             ]);
-            
+
             Log::info("Document créé en base de données", [
                 'sinistre_id' => $sinistre->id,
                 'type_document' => $fileInfo['type'],
@@ -430,7 +441,7 @@ class DeclarationController extends Controller
         }
 
         $uploadedFiles = json_decode($request->input('uploaded_files'), true);
-        
+
         if (!$uploadedFiles || !is_array($uploadedFiles)) {
             throw new \Illuminate\Validation\ValidationException(
                 validator([], []),
@@ -459,7 +470,7 @@ class DeclarationController extends Controller
                     break;
                 }
             }
-            
+
             if (!$found) {
                 $errors[$field] = [$label . ' est obligatoire'];
             }
@@ -481,7 +492,7 @@ class DeclarationController extends Controller
         foreach ($sinistres as $sinistre) {
             if (is_null($sinistre->assure_id)) {
                 $sinistre->update(['assure_id' => $assureId]);
-                
+
                 Log::info('Sinistre associé au compte assuré', [
                     'sinistre_id' => $sinistre->id,
                     'numero_sinistre' => $sinistre->numero_sinistre,
@@ -498,10 +509,10 @@ class DeclarationController extends Controller
     {
         try {
             $sessionId = $request->input('session_id');
-            
+
             if ($sessionId) {
                 $tempPath = "temp_uploads/{$sessionId}";
-                
+
                 if (Storage::disk('public')->exists($tempPath)) {
                     Storage::disk('public')->deleteDirectory($tempPath);
                     Log::info("Fichiers temporaires nettoyés pour session: {$sessionId}");
