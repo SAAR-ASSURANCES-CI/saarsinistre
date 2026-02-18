@@ -6,24 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class vehicle extends Model
+class Vehicule extends Model
 {
     use HasFactory;
+
+    protected $table = 'vehicules';
 
     protected $fillable = [
         'sinistre_id',
         'marque',
         'modele',
         'immatriculation',
-        'annee',
-        'couleur',
-        'numero_chassis',
-        'type',
     ];
 
-    protected $casts = [
-        'annee' => 'integer',
-    ];
+    protected $casts = [];
 
     public function sinistre(): BelongsTo
     {

@@ -35,7 +35,7 @@ class StoreDeclarationRequest extends FormRequest
         $maxFileSize = $isMobile ? 10240 : 5120; // 10MB mobile, 5MB desktop
         $maxPhotoSize = $isMobile ? 8192 : 1280; // 8MB mobile, 1.28MB desktop
         $supportedMimes = $isMobile ? 'pdf,jpg,jpeg,png,heic,webp' : 'pdf,jpg,jpeg,png';
-        
+
         return [
             'nom_assure' => 'required|string|max:255',
             'email_assure' => 'nullable|email|max:255',
@@ -45,14 +45,10 @@ class StoreDeclarationRequest extends FormRequest
             'nombre_tiers' => 'nullable|required_if:implique_tiers,true|string|in:1,2,3,4,5,6,7,8,9,10+',
             'details_tiers' => 'nullable|string|max:2000',
 
-'marque' => 'required|string|max:100',
-'modele' => 'nullable|string|max:100',
-'immatriculation' => 'required|string|max:20',
-'annee' => 'nullable|integer|min:1950|max:' . (date('Y') + 1),
-'couleur' => 'nullable|string|max:50',
-'numero_chassis' => 'required|string|min:5|max:25',
-'type' => 'nullable|string|in:voiture,moto,camion,utilitaire,autre',
-            
+            'marque' => 'nullable|string|max:100',
+            'modele' => 'nullable|string|max:100',
+            'immatriculation' => 'nullable|string|max:20',
+
             'tiers' => 'nullable|array',
             'tiers.*.nom_conducteur' => 'nullable|string|max:255',
             'tiers.*.prenom_conducteur' => 'nullable|string|max:255',
@@ -83,9 +79,9 @@ class StoreDeclarationRequest extends FormRequest
             'visite_technique_verso' => "nullable|file|mimes:{$supportedMimes}|max:{$maxPhotoSize}",
             'attestation_assurance' => "nullable|file|mimes:{$supportedMimes}|max:{$maxPhotoSize}",
             'permis_conduire' => "nullable|file|mimes:{$supportedMimes}|max:{$maxPhotoSize}",
-            
+
             'uploaded_files' => 'required|string|json',
-            
+
             'tiers_photos_*' => 'nullable|array',
             'tiers_photos_*.*' => "nullable|file|mimes:{$supportedMimes}|max:{$maxFileSize}",
             'tiers_attestation_*' => "nullable|file|mimes:{$supportedMimes}|max:{$maxFileSize}",
@@ -108,12 +104,9 @@ class StoreDeclarationRequest extends FormRequest
             'numero_police.required' => 'Le numéro de police est obligatoire.',
             'numero_police.max' => 'Le numéro de police ne doit pas dépasser 50 caractères.',
 
-'marque.required' => 'La marque du véhicule est obligatoire.',
-'marque.max' => 'La marque ne doit pas dépasser 100 caractères.',
-'immatriculation.required' => 'L\'immatriculation est obligatoire.',
-'numero_chassis.required' => 'Le numéro de châssis est obligatoire.',
-'annee.min' => 'L\'année doit être supérieure à 1950.',
-'annee.max' => 'L\'année ne peut pas être dans le futur.',
+            'marque.required' => 'La marque du véhicule est obligatoire.',
+            'marque.max' => 'La marque ne doit pas dépasser 100 caractères.',
+            'immatriculation.required' => 'L\'immatriculation est obligatoire.',
 
             'date_sinistre.required' => 'La date du sinistre est obligatoire.',
             'date_sinistre.before_or_equal' => 'La date du sinistre ne peut pas être dans le futur.',
@@ -141,5 +134,4 @@ class StoreDeclarationRequest extends FormRequest
             'photos_vehicule.max' => 'Vous ne pouvez télécharger que 100 photos maximum.',
         ];
     }
-
 }

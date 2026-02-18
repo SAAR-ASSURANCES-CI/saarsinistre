@@ -206,31 +206,15 @@
         <div class="info-grid">
             <div class="info-row">
                 <div class="info-label">Marque :</div>
-                <div class="info-value">{{ $sinistre->vehicle->marque }}</div>
+                <div class="info-value">{{ $sinistre->vehicule->marque }}</div>
             </div>
             <div class="info-row">
                 <div class="info-label">Immatriculation :</div>
-                <div class="info-value">{{ $sinistre->vehicle->immatriculation }}</div>
+                <div class="info-value">{{ $sinistre->vehicule->immatriculation }}</div>
             </div>
-            <div class="info-row">
-                <div class="info-label">Type :</div>
-                <div class="info-value">{{ ucfirst($sinistre->vehicle->type) }}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">N° Châssis :</div>
-                <div class="info-value">{{ $sinistre->vehicle->numero_chassis }}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Année :</div>
-                <div class="info-value">{{ $sinistre->vehicle->annee }}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Couleur :</div>
-                <div class="info-value">{{ $sinistre->vehicle->couleur }}</div>
-            </div>   
             <div class="info-row">
                 <div class="info-label">Modèle :</div>
-                <div class="info-value">{{ $sinistre->vehicle->modele }}</div>
+                <div class="info-value">{{ $sinistre->vehicule->modele }}</div>
             </div>
         </div>
     </div>

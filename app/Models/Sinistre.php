@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
-use App\Models\Vehicle;
+use App\Models\Vehicule;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Model;
 use App\Jobs\SendGestionnaireAssignmentSms;
@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Sinistre extends Model
 {
     use HasFactory;
-    
+
     public $timestamps = true;
 
     protected $fillable = [
@@ -144,7 +144,7 @@ class Sinistre extends Model
             ->where('numero_sinistre', 'LIKE', 'APP-%' . $annee)
             ->orderBy('numero_sinistre', 'desc')
             ->first();
-        
+
         if ($dernierSinistre) {
             preg_match('/APP-(\d+)-' . $annee . '/', $dernierSinistre->numero_sinistre, $matches);
             $compteur = (int)$matches[1] + 1;
@@ -205,7 +205,7 @@ class Sinistre extends Model
     public function assignerGestionnaire($gestionnaireId): void
     {
         $ancienGestionnaireId = $this->gestionnaire_id;
-        
+
         $attributes = [
             'gestionnaire_id' => $gestionnaireId,
             'date_affectation' => now(),
@@ -342,12 +342,12 @@ class Sinistre extends Model
      */
     public function necessiteFeedback(): bool
     {
-        return in_array($this->statut, ['clos', 'regle']) && 
-               !$this->feedbacks()->where('assure_id', $this->assure_id)->exists();
+        return in_array($this->statut, ['clos', 'regle']) &&
+            !$this->feedbacks()->where('assure_id', $this->assure_id)->exists();
     }
 
-    public function vehicle()
-{
-    return $this->hasOne(Vehicle::class);
-}
+    public function vehicule()
+    {
+        return $this->hasOne(Vehicule::class);
+    }
 }
