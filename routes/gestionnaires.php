@@ -85,6 +85,7 @@ Route::middleware(['auth', 'role:admin,gestionnaire,expert', \App\Http\Middlewar
             Route::get('/', [MediaController::class, 'index'])->name('index');
             Route::post('/upload', [MediaController::class, 'store'])->name('store');
             Route::delete('/{document}', [MediaController::class, 'destroy'])->name('destroy');
+            Route::get('/{sinistre}/download', [MediaController::class, 'download'])->name('download');
            
         });
 
@@ -98,7 +99,6 @@ Route::middleware(['auth', 'role:admin,gestionnaire,expert', \App\Http\Middlewar
 
 });
 
-// Route d'accès aux fichiers de storage (en dehors du groupe gestionnaires)
 Route::get('/storage/sinistres/{sinistreId}/{filename}', function ($sinistreId, $filename) {
     $path = "sinistres/{$sinistreId}/{$filename}";
 
@@ -115,7 +115,6 @@ Route::middleware(['auth', 'role:admin,gestionnaire'])->group(function () {
     Route::get('/notifications/unread-messages/count', [NotificationController::class, 'unreadMessagesCount']);
 });
 
-// Route de debug pour vérifier les données de sinistre
 Route::get('/debug/sinistre/{id}', function ($id) {
     $sinistre = \App\Models\Sinistre::find($id);
     if (!$sinistre) {
