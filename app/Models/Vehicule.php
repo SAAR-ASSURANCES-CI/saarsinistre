@@ -10,7 +10,7 @@ class Vehicule extends Model
 {
     use HasFactory;
 
-    protected $table = 'vehicles';
+    protected $table = 'vehicules';
 
     protected $fillable = [
         'sinistre_id',
