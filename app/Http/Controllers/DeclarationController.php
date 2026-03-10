@@ -449,7 +449,6 @@ class DeclarationController extends Controller
             );
         }
 
-        // Créer un mapping des champs requis
         $requiredFields = [
             'carte_grise_recto' => 'La carte grise (recto)',
             'carte_grise_verso' => 'La carte grise (verso)',
