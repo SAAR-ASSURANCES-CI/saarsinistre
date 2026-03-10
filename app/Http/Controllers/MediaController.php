@@ -69,7 +69,7 @@ class MediaController extends Controller
     public function search(Request $request)
     {
         $sinistres = Sinistre::whereHas('documents')
-            ->where('numero_sinistre', 'like', '%' . $request->input('q') . '%')
+            ->where('numero_sinistre', 'like', '%' . $request->input('q', '') . '%')
             ->with(['documents', 'vehicule'])
             ->get();
 
